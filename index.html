@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SyncTools - Random Picker & Team Divider</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #8b5cf6;
+            --accent: #ec4899;
+            --bg: #0f172a;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+            /* Prevent scroll on desktop, allow on mobile if needed via media query */
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* Animated Background */
+        #bg-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 1000px;
+            padding: 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #a5b4fc 0%, #c084fc 50%, #f472b6 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            margin-bottom: 10px;
+            letter-spacing: -2px;
+            animation: fadeInDown 1s ease-out;
+            text-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+        }
+
+        p {
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            max-width: 500px;
+            line-height: 1.6;
+            animation: fadeIn 1.2s ease-out;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            width: 100%;
+            perspective: 1000px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 40px;
+            text-decoration: none;
+            color: white;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent 60%);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 30px 60px -12px rgba(99, 102, 241, 0.4);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 32px;
+            transition: transform 0.4s;
+        }
+
+        .card:hover .icon {
+            transform: rotate(10deg) scale(1.1);
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .card-desc {
+            color: var(--text-muted);
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            body {
+                height: auto;
+                min-height: 100vh;
+                padding: 40px 20px;
+            }
+
+            h1 {
+                font-size: 2.2rem;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="container">
+        <div>
+            <h1>SyncTools</h1>
+            <p>Premium utilities for fairness, fun, and random selection.</p>
+        </div>
+
+        <div class="cards-grid">
+            <a href="wheel_app.html" class="card">
+                <div class="icon">🎡</div>
+                <div class="card-title">Spin The Wheel</div>
+                <div class="card-desc">Random name picker with distinct weights and smooth animations.</div>
+            </a>
+
+            <a href="team_divider.html" class="card">
+                <div class="icon">⚖️</div>
+                <div class="card-title">Team Divider</div>
+                <div class="card-desc">Split groups instantly. Choose between pure random or skill-balanced fairness.
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * Animated Background
+         * Particle Mesh Network
+         */
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        let particles = [];
+
+        // Configuration
+        const particleCount = window.innerWidth < 600 ? 40 : 80;
+        const connectionDistance = 150;
+        const mouseDistance = 200;
+
+        let mouse = { x: null, y: null };
+
+        window.addEventListener('resize', resize);
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.x;
+            mouse.y = e.y;
+        });
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.size = Math.random() * 2 + 1;
+                this.color = 'rgba(165, 180, 252, ' + (Math.random() * 0.5 + 0.1) + ')'; // Indigo tint
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Bounce off edges
+                if (this.x < 0 || this.x > width) this.vx *= -1;
+                if (this.y < 0 || this.y > height) this.vy *= -1;
+
+                // Mouse interaction
+                if (mouse.x != null) {
+                    let dx = mouse.x - this.x;
+                    let dy = mouse.y - this.y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < mouseDistance) {
+                        const forceDirectionX = dx / distance;
+                        const forceDirectionY = dy / distance;
+                        const force = (mouseDistance - distance) / mouseDistance;
+                        // Gently push away
+                        const directionX = forceDirectionX * force * this.size;
+                        const directionY = forceDirectionY * force * this.size;
+                        this.vx -= directionX * 0.05;
+                        this.vy -= directionY * 0.05;
+                    }
+                }
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+        }
+
+        function init() {
+            particles = [];
+            resize();
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+            animate();
+        }
+
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+
+            // Update and draw particles
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+
+                // Connections
+                for (let j = i; j < particles.length; j++) {
+                    let dx = particles[i].x - particles[j].x;
+                    let dy = particles[i].y - particles[j].y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < connectionDistance) {
+                        ctx.beginPath();
+                        let opacity = 1 - (distance / connectionDistance);
+                        ctx.strokeStyle = 'rgba(165, 180, 252, ' + (opacity * 0.2) + ')';
+                        ctx.lineWidth = 1;
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

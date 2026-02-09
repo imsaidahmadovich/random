@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Team Divider</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            /* Violet */
+            --primary-dark: #7c3aed;
+            --accent: #f43f5e;
+            /* Rose */
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --danger: #ef4444;
+            --success: #22c55e;
+            --radius: 16px;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --drag-bg: #e0e7ff;
+        }
+
+        * {
+            box-sizing: border-box;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-image: radial-gradient(#e0e7ff 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+
+        .back-link {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
+            background: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 1000px;
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 600px;
+            position: relative;
+            transition: height 0.3s ease;
+        }
+
+        /* Header / Tabs */
+        .header {
+            display: flex;
+            padding: 8px;
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-radius: 12px;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .tab:hover {
+            background: #f1f5f9;
+        }
+
+        .tab.active {
+            background: #f5f3ff;
+            color: var(--primary);
+        }
+
+        /* Views */
+        .view {
+            flex: 1;
+            padding: 20px;
+            display: none;
+            flex-direction: column;
+            animation: fadeIn 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .view.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(4px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Setup View */
+        .input-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+        }
+
+        .btn {
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            background: var(--primary);
+            color: white;
+            transition: transform 0.1s, opacity 0.2s, box-shadow 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .btn:hover {
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid #e0e7ff;
+            box-shadow: none !important;
+        }
+
+        .btn-danger {
+            background: #fee2e2;
+            color: var(--danger);
+            border: none;
+        }
+
+        .btn-danger:hover {
+            background: #fecaca;
+            box-shadow: none !important;
+        }
+
+        .btn-sm {
+            padding: 8px 12px;
+            font-size: 13px;
+            border-radius: 8px;
+        }
+
+        .list-container {
+            flex: 1;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: #f8fafc;
+            min-height: 300px;
+        }
+
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: white;
+            border-bottom: 1px solid var(--border);
+            animation: slideIn 0.2s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        /* Removed weight badge styles */
+
+        /* NEW SETUP LAYOUT */
+        .setup-container {
+            display: flex;
+            gap: 20px;
+            height: calc(100% - 60px);
+            /* fit in view */
+        }
+
+        .setup-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: #f8fafc;
+            padding: 10px;
+            overflow: hidden;
+        }
+
+        .setup-column h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+
+        .setup-pool {
+            flex: 1;
+            overflow-y: auto;
+            min-height: 100px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        .setup-teams-grid {
+            flex: 1;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .setup-team-bucket {
+            background: white;
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            padding: 8px;
+            min-height: 100px;
+            transition: all 0.2s;
+        }
+
+        .setup-team-bucket.drag-over {
+            border-color: var(--primary);
+            background: #f5f3ff;
+        }
+
+        .setup-team-title {
+            font-weight: 700;
+            font-size: 12px;
+            color: var(--primary);
+            margin-bottom: 6px;
+            text-align: center;
+        }
+
+        .setup-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 10px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            margin-bottom: 4px;
+            cursor: grab;
+            user-select: none;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .setup-item:hover {
+            border-color: var(--primary);
+        }
+
+        .setup-item.dragging {
+            opacity: 0.5;
+            background: var(--drag-bg);
+        }
+
+        /* Divide View */
+        .controls-area {
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .control-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .control-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .control-label {
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        select,
+        .number-input {
+            padding: 8px 12px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            background: white;
+        }
+
+        input[type=range] {
+            width: 150px;
+            accent-color: var(--primary);
+        }
+
+        .teams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .team-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            min-height: 140px;
+        }
+
+        .team-card.drag-over {
+            border: 2px dashed var(--primary);
+            background: #f5f3ff;
+            transform: scale(1.02);
+        }
+
+        .team-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .team-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .team-name {
+            font-weight: 800;
+            color: var(--primary);
+            font-size: 16px;
+            cursor: pointer;
+            border-bottom: 1px dashed transparent;
+        }
+
+        .team-name:hover {
+            border-bottom-color: var(--primary);
+        }
+
+        .team-name-input {
+            font-weight: 800;
+            color: var(--primary);
+            font-size: 16px;
+            border: none;
+            border-bottom: 2px solid var(--primary);
+            outline: none;
+            width: 120px;
+            background: transparent;
+        }
+
+        .team-stats {
+            font-size: 11px;
+            background: #ede9fe;
+            color: var(--primary-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 700;
+        }
+
+        .team-members {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex: 1;
+            /* Grow to fill */
+            min-height: 50px;
+        }
+
+        .member-item {
+            padding: 8px 10px;
+            margin-bottom: 4px;
+            font-size: 14px;
+            color: var(--text);
+            display: flex;
+            justify-content: space-between;
+            background: #f8fafc;
+            border-radius: 6px;
+            cursor: grab;
+            user-select: none;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .member-item:active {
+            cursor: grabbing;
+        }
+
+        .member-item.dragging {
+            opacity: 0.5;
+            background: var(--drag-bg);
+            transform: scale(0.95);
+        }
+
+        .member-weight {
+            color: var(--text-muted);
+            font-size: 12px;
+            pointer-events: none;
+        }
+
+        .team-actions {
+            margin-top: 10px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 4px;
+        }
+
+        .btn-tiny {
+            padding: 4px 6px;
+            font-size: 10px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            background: white;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .btn-tiny:hover {
+            background: #f1f5f9;
+            color: var(--danger);
+            border-color: #cbd5e1;
+        }
+
+        .empty-teams {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 40px 20px;
+            font-size: 15px;
+        }
+
+        .floating-add {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+            cursor: pointer;
+            z-index: 100;
+            display: none;
+            /* Shown in Divide View */
+            font-size: 24px;
+            border: none;
+            transition: transform 0.2s;
+        }
+
+        .floating-add:hover {
+            transform: scale(1.1);
+        }
+
+        .view.active .floating-add {
+            display: flex;
+        }
+
+        /* PRESENTATION MODE STYLES */
+        body.presentation-mode .header,
+        body.presentation-mode .controls-area,
+        body.presentation-mode .floating-add,
+        body.presentation-mode .team-actions,
+        body.presentation-mode .back-link {
+            display: none !important;
+        }
+
+        body.presentation-mode .team-name {
+            pointer-events: none;
+            /* No renaming in preso mode */
+        }
+
+        /* Big Spin Button Overlay */
+        #presentationControls {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            gap: 10px;
+            z-index: 200;
+        }
+
+        body.presentation-mode #presentationControls {
+            display: flex;
+        }
+
+        .btn-presentation {
+            padding: 16px 32px;
+            font-size: 20px;
+            font-weight: 800;
+            border-radius: 50px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            min-width: 160px;
+
+            .btn-presentation {
+                padding: 16px 32px;
+                font-size: 20px;
+                font-weight: 800;
+                border-radius: 50px;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                min-width: 160px;
+            }
+
+            /* DECOY WHEEL OVERLAY */
+            #decoyOverlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(15, 23, 42, 0.95);
+                z-index: 300;
+                display: none;
+                /* Flex when active */
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                transition: opacity 0.5s;
+            }
+
+            .wheel-container {
+                position: relative;
+                width: 320px;
+                height: 320px;
+                margin-bottom: 2rem;
+            }
+
+            #decoyCanvas {
+                width: 100%;
+                height: 100%;
+                filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.4));
+            }
+
+            .decoy-pointer {
+                position: absolute;
+                top: -15px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 38px;
+                height: 45px;
+                z-index: 310;
+            }
+
+            .decoy-pointer::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                border-left: 19px solid transparent;
+                border-right: 19px solid transparent;
+                border-top: 40px solid var(--accent);
+            }
+
+            .decoy-status {
+                font-size: 24px;
+                font-weight: 800;
+                color: white;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                animation: pulse 1s infinite;
+            }
+
+            @keyframes pulse {
+                0% {
+                    opacity: 0.6;
+                }
+
+                50% {
+                    opacity: 1;
+                }
+
+                100% {
+                    opacity: 0.6;
+                }
+            }
+    </style>
+</head>
+
+<body>
+
+    <a href="index.html" class="back-link">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Home
+    </a>
+
+    <div class="app-container">
+        <div class="header">
+            <div class="tab active" onclick="switchTab('setup')">Setup</div>
+            <div class="tab" onclick="switchTab('divide')">Divide Teams</div>
+        </div>
+
+        <!-- SETUP VIEW -->
+        <div class="view active" id="view-setup">
+            <!-- Mode Toggle -->
+            <div style="background: white; padding: 10px; border-radius: 12px; margin-bottom: 20px; text-align:center;">
+                <div style="display:flex; background:#e0e7ff; padding:4px; border-radius:8px; display:inline-flex;">
+                    <button class="btn btn-sm" id="btn-mode-random" onclick="setSetupMode('random')"
+                        style="width:100px;">Random</button>
+                    <button class="btn btn-sm btn-ghost" id="btn-mode-edit" onclick="setSetupMode('edit')"
+                        style="width:100px;">Edit</button>
+                </div>
+                <div style="margin-top:8px; color:var(--text-muted); font-size:13px;" id="mode-desc">
+                    Machine picks everything.
+                </div>
+            </div>
+
+            <!-- Top Controls: Input + Team Count -->
+            <div
+                style="background: white; padding: 10px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                <div class="input-group" style="margin-bottom: 10px;">
+                    <input type="text" id="itemName" placeholder="Enter name..." onkeypress="handleEnter(event)">
+                    <button class="btn" onclick="addItem()">Add</button>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div style="display:flex; align-items:center; gap: 10px;">
+                        <span style="font-size:13px; font-weight:600; color:var(--text-muted)">Teams:</span>
+                        <input type="range" id="setupTeamCount" min="2" max="10" value="2"
+                            oninput="updateSetupTeamCount(this.value)">
+                        <span id="setupTeamDisplay"
+                            style="font-weight:700; font-size:14px; color:var(--primary)">2</span>
+                    </div>
+                    <button class="btn btn-sm btn-ghost btn-danger" onclick="clearAll()">Clear All</button>
+                </div>
+            </div>
+
+            <div class="setup-container">
+                <!-- Left: Unassigned Pool -->
+                <div class="setup-column">
+                    <h3>Names List</h3>
+                    <div class="setup-pool" id="setupList" ondragover="handleDragOverSetup(event)"
+                        ondrop="handleDropSetup(event, null)">
+                        <!-- Items go here -->
+                    </div>
+                </div>
+
+                <!-- Right: Team Buckets (Only in Edit Mode) -->
+                <div class="setup-column" id="setupBucketsColumn" style="display:none;">
+                    <h3>Team Buckets</h3>
+                    <div class="setup-teams-grid" id="setupBuckets">
+                        <!-- Buckets -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DIVIDE VIEW -->
+        <div class="view" id="view-divide">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="font-size: 14px; color: var(--text-muted); margin-bottom: 5px;">Dividing into</div>
+                <div style="font-size: 24px; font-weight: 800; color: var(--primary);"><span
+                        id="divideTeamDisplay">2</span> TEAMS</div>
+            </div>
+
+            <!-- MAIN ACTION -->
+            <div style="display: flex; justify-content: center; margin-bottom: 30px;">
+                <button class="btn"
+                    style="padding: 20px 40px; font-size: 24px; border-radius: 50px; box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);"
+                    onclick="startSpinSequence()">
+                    SPIN TO DIVIDE
+                </button>
+            </div>
+
+            <div id="teamsOutput" class="teams-grid" style="display:none; opacity:0; transition: opacity 0.5s;">
+                <!-- Results go here -->
+            </div>
+        </div>
+
+        <!-- Hidden Presentation Controls (Legacy removal) -->
+        <div id="presentationControls" style="display:none;"></div>
+
+        <!-- Decoy Wheel Overlay -->
+        <div id="decoyOverlay">
+            <div class="wheel-container">
+                <canvas id="decoyCanvas" width="640" height="640"></canvas>
+                <div class="decoy-pointer"></div>
+            </div>
+            <div class="decoy-status" id="decoyStatusText">SHUFFLING...</div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * APP LOGIC
+         */
+        let items = []; // { id, name, assignedTeamIndex }
+        let currentTeams = [];
+        let targetTeamCount = 2; // Global state for team count
+        let setupMode = 'random'; // 'random' or 'edit'
+
+        // Decoy Wheel State
+        let decoyCtx = null;
+        let wheelRotation = 0;
+        let isWheelSpinning = false;
+        const DECOY_SEGMENTS = ["", "", "", ""]; // 4 Segments
+        // Rainbow: Red, Green, Blue, Yellow (Standard 4-color)
+        const COLORS = ['#ef4444', '#22c55e', '#3b82f6', '#eab308'];
+
+        // Initialization
+        window.onload = () => {
+            loadData();
+            setSetupMode(setupMode); // Apply visual state
+            renderSetup();
+        };
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('view-' + tab).classList.add('active');
+
+            // Manage floating button visibility explicitly if needed, but CSS handles it via .view.active selector
+        }
+
+        function handleEnter(e) { if (e.key === 'Enter') addItem(); }
+
+        function updateSetupTeamCount(val) {
+            targetTeamCount = parseInt(val);
+            document.getElementById('setupTeamDisplay').innerText = val;
+            document.getElementById('divideTeamDisplay').innerText = val;
+            renderSetup(); // Re-render buckets
+        }
+
+        // DATA MANAGEMENT
+        function addItem() {
+            const nameInput = document.getElementById('itemName');
+            const name = nameInput.value.trim();
+
+            if (!name) return;
+
+            items.push({ id: Date.now(), name, assignedTeamIndex: null });
+            nameInput.value = '';
+            nameInput.focus();
+
+            saveData();
+            renderSetup();
+        }
+
+        function removeItem(id) {
+            items = items.filter(i => i.id !== id);
+            saveData();
+            renderSetup();
+        }
+
+        function clearAll() {
+            if (confirm('Clear all items?')) {
+                items = [];
+                saveData();
+                renderSetup();
+            }
+        }
+
+        function saveData() {
+            sessionStorage.setItem('teamItems', JSON.stringify(items));
+            sessionStorage.setItem('teamCount', targetTeamCount);
+            sessionStorage.setItem('setupMode', setupMode);
+        }
+
+        function loadData() {
+            const savedItems = sessionStorage.getItem('teamItems');
+            if (savedItems) items = JSON.parse(savedItems);
+
+            const savedCount = sessionStorage.getItem('teamCount');
+            if (savedCount) {
+                targetTeamCount = parseInt(savedCount);
+                // Update Inputs
+                const setupInput = document.getElementById('setupTeamCount');
+                if (setupInput) setupInput.value = targetTeamCount;
+            }
+
+            const savedMode = sessionStorage.getItem('setupMode');
+            if (savedMode) setupMode = savedMode;
+
+            // Ensure legacy data works
+            items.forEach(i => {
+                // Delete weight if exists
+                delete i.weight;
+                if (i.assignedTeamIndex === undefined) i.assignedTeamIndex = null;
+            });
+
+            // Sync display
+            const display = document.getElementById('setupTeamDisplay');
+            if (display) display.innerText = targetTeamCount;
+
+            const divideDisplay = document.getElementById('divideTeamDisplay');
+            if (divideDisplay) divideDisplay.innerText = targetTeamCount;
+        }
+
+        function setSetupMode(mode) {
+            setupMode = mode;
+            sessionStorage.setItem('teamItems', JSON.stringify(items));
+            sessionStorage.setItem('teamCount', targetTeamCount);
+            sessionStorage.setItem('setupMode', setupMode);
+
+            // Update Buttons
+            document.getElementById('btn-mode-random').classList.toggle('btn-ghost', mode !== 'random');
+            document.getElementById('btn-mode-edit').classList.toggle('btn-ghost', mode !== 'edit');
+
+            // Update Desc
+            const desc = document.getElementById('mode-desc');
+            if (mode === 'random') desc.innerText = "Machine picks everything.";
+            else desc.innerText = "Drag & Drop to rig teams.";
+
+            // Update UI
+            const buckets = document.getElementById('setupBucketsColumn');
+            if (mode === 'edit') {
+                buckets.style.display = 'flex';
+            } else {
+                buckets.style.display = 'none';
+            }
+            renderSetup(); // Re-render to update draggable attribute
+        }
+
+        // RENDERING
+        function renderSetup() {
+            renderPool();
+            renderBuckets();
+        }
+
+        function renderPool() {
+            const container = document.getElementById('setupList');
+            const poolItems = items.filter(i => i.assignedTeamIndex === null);
+
+            if (poolItems.length === 0 && items.length > 0) {
+                container.innerHTML = '<div style="color:var(--text-muted); padding:10px; font-size:12px; text-align:center;">All assigned!</div>';
+            } else if (items.length === 0) {
+                container.innerHTML = '<div style="color:var(--text-muted); padding:10px; font-size:12px; text-align:center;">Add people above...</div>';
+            } else {
+                container.innerHTML = poolItems.map(item => createSetupItemHTML(item)).join('');
+            }
+        }
+
+        function renderBuckets() {
+            const container = document.getElementById('setupBuckets');
+            container.innerHTML = '';
+
+            for (let i = 0; i < targetTeamCount; i++) {
+                const teamItems = items.filter(item => item.assignedTeamIndex === i);
+
+                const bucket = document.createElement('div');
+                bucket.className = 'setup-team-bucket';
+                bucket.setAttribute('ondragover', 'handleDragOverSetup(event)');
+                bucket.setAttribute('ondrop', `handleDropSetup(event, ${i})`);
+
+                const title = document.createElement('div');
+                title.className = 'setup-team-title';
+                title.innerText = `Team ${i + 1}`;
+                bucket.appendChild(title);
+
+                const content = document.createElement('div');
+                if (teamItems.length > 0) {
+                    content.innerHTML = teamItems.map(item => createSetupItemHTML(item)).join('');
+                } else {
+                    content.innerHTML = '<div style="font-size:11px; color:#cbd5e1; text-align:center;">Drop here</div>';
+                }
+                bucket.appendChild(content);
+
+                container.appendChild(bucket);
+            }
+        }
+
+        function createSetupItemHTML(item) {
+            return `
+                 <div class="setup-item" draggable="${setupMode === 'edit'}" ondragstart="handleDragStartSetup(event, ${item.id})">
+                     <span style="font-weight:600; font-size:13px;">${escapeHtml(item.name)}</span>
+                     <div style="display:flex; align-items:center; gap:4px;">
+                         <button class="btn btn-sm btn-ghost btn-danger" onclick="removeItem(${item.id})" style="padding: 2px 6px; font-size:10px;">✕</button>
+                     </div>
+                 </div>
+             `;
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        // TEAM GENERATION LOGIC
+        function startSpinSequence() {
+            if (items.length < 2) {
+                alert("You need at least 2 people to form teams!");
+                return;
+            }
+
+            // 1. Generate Result Secretly
+            generateTeamsInternal();
+
+            // 2. Hide Output
+            const output = document.getElementById('teamsOutput');
+            output.style.display = 'none';
+            output.style.opacity = '0';
+
+            // 3. Start Spin
+            spinDecoyWheel();
+        }
+
+        function generateTeamsInternal() {
+            const numTeams = targetTeamCount;
+
+            // 1. Initialize empty teams
+            currentTeams = Array.from({ length: numTeams }, (_, i) => ({
+                id: Date.now() + i,
+                name: `Team ${i + 1}`,
+                members: []
+            }));
+
+            // 2. Identify Manual Assignments vs Pool
+            let pool = [];
+
+            if (setupMode === 'random') {
+                // IGNORE assignments, put everyone in pool
+                pool = [...items];
+            } else {
+                // EDIT MODE: Respect Assignments
+                items.forEach(item => {
+                    if (item.assignedTeamIndex !== null && item.assignedTeamIndex < numTeams) {
+                        // Respect manual assignment
+                        currentTeams[item.assignedTeamIndex].members.push(item);
+                    } else {
+                        // Add to pool for auto-distribution
+                        pool.push(item);
+                    }
+                });
+            }
+
+            // Shuffle Pool
+            for (let i = pool.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [pool[i], pool[j]] = [pool[j], pool[i]];
+            }
+
+            // Distribute remaining
+            pool.forEach((member, idx) => {
+                // Find team with fewest members to keep balance by count
+                // Or just round robin
+
+                // Simple Round Robin filling to keep counts even
+                // We need to account for existing members count
+                // Soft balance
+                currentTeams.sort((a, b) => a.members.length - b.members.length);
+                currentTeams[0].members.push(member);
+            });
+
+            // Sort back by Name for display consistency
+            currentTeams.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+
+            renderTeams();
+        }
+
+        function resetTeams() {
+            if (confirm("Clear current teams output?")) {
+                currentTeams = [];
+                renderTeams();
+            }
+        }
+
+        function renderTeams() {
+            const container = document.getElementById('teamsOutput');
+            container.innerHTML = '';
+
+            if (currentTeams.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            currentTeams.forEach((team, i) => {
+                let membersHtml = team.members.map((m, mIdx) => `
+                        <li class="member-item">
+                            <span>${escapeHtml(m.name)}</span>
+                        </li>
+                    `).join('');
+
+                let card = document.createElement('div');
+                card.className = 'team-card';
+
+                card.innerHTML = `
+                     <div class="team-header">
+                         <span class="team-name" onclick="renameTeam(${i})">${escapeHtml(team.name)}</span>
+                     </div>
+                     <ul class="team-members" id="team-list-${i}">
+                         ${membersHtml}
+                     </ul>
+                 `;
+                container.appendChild(card);
+            });
+
+            if (currentTeams.length === 0) {
+                container.innerHTML = '';
+            }
+        }
+
+        /* FULL CONTROL FUNCTIONS */
+        function addEmptyTeam() {
+            const id = currentTeams.length + 1;
+            currentTeams.push({
+                id: Date.now(),
+                name: `Team ${id}`,
+                members: []
+            });
+            renderTeams();
+        }
+
+        function removeTeam(index) {
+            if (confirm(`Remove ${currentTeams[index].name}? Members will be lost from this view (but remain in Setup).`)) {
+                currentTeams.splice(index, 1);
+                renderTeams();
+            }
+        }
+
+        function renameTeam(index) {
+            const team = currentTeams[index];
+            const newName = prompt("Rename Team:", team.name);
+            if (newName && newName.trim() !== "") {
+                team.name = newName.trim();
+                renderTeams();
+            }
+        }
+
+        /* DECOY WHEEL LOGIC */
+        function initDecoyWheel() {
+            const canvas = document.getElementById('decoyCanvas');
+            decoyCtx = canvas.getContext('2d');
+            drawDecoyWheel();
+        }
+
+        function drawDecoyWheel() {
+            if (!decoyCtx) return;
+            const size = 640;
+            const center = size / 2;
+            const radius = size / 2 - 20;
+
+            decoyCtx.clearRect(0, 0, size, size);
+
+            const sliceAngle = (2 * Math.PI) / DECOY_SEGMENTS.length;
+
+            DECOY_SEGMENTS.forEach((text, i) => {
+                const startAngle = wheelRotation + (i * sliceAngle);
+                const endAngle = startAngle + sliceAngle;
+
+                // Wedge
+                decoyCtx.beginPath();
+                decoyCtx.moveTo(center, center);
+                decoyCtx.arc(center, center, radius, startAngle, endAngle);
+                decoyCtx.closePath();
+                decoyCtx.fillStyle = COLORS[i % COLORS.length];
+                decoyCtx.fill();
+                decoyCtx.strokeStyle = 'white';
+                decoyCtx.lineWidth = 4;
+                decoyCtx.stroke();
+
+                // Text (REMOVED for Blank Wheel effect)
+                /*
+                decoyCtx.save();
+                decoyCtx.translate(center, center);
+                decoyCtx.rotate(startAngle + sliceAngle / 2);
+                decoyCtx.textAlign = 'right';
+                decoyCtx.fillStyle = 'white';
+                decoyCtx.font = 'bold 40px Outfit, sans-serif';
+                decoyCtx.fillText(text, radius - 40, 10);
+                decoyCtx.restore();
+                */
+            });
+
+            // Center Hub
+            decoyCtx.beginPath();
+            decoyCtx.arc(center, center, 50, 0, 2 * Math.PI);
+            decoyCtx.fillStyle = 'white';
+            decoyCtx.fill();
+        }
+
+        function spinDecoyWheel() {
+            if (isWheelSpinning) return;
+            isWheelSpinning = true;
+
+            const overlay = document.getElementById('decoyOverlay');
+            overlay.style.display = 'flex';
+            overlay.style.opacity = '0';
+            requestAnimationFrame(() => overlay.style.opacity = '1');
+
+            initDecoyWheel();
+
+            // Spin Animation Physics
+            let velocity = 0.5; // rads per frame
+            let friction = 0.99;
+            let duration = 3000;
+            const startTime = Date.now();
+
+            function animate() {
+                if (!isWheelSpinning) return;
+
+                wheelRotation += velocity;
+                drawDecoyWheel();
+
+                const elapsed = Date.now() - startTime;
+
+                // Fake status text updates
+                if (elapsed % 500 < 50) {
+                    const statuses = ["SHUFFLING...", "ANALYZING...", "DIVIDING...", "PICKING..."];
+                    document.getElementById('decoyStatusText').innerText = statuses[Math.floor(Math.random() * statuses.length)];
+                }
+
+                if (elapsed < 2000) {
+                    // Accelerate/Maintain
+                } else {
+                    // Decelerate
+                    velocity *= 0.96;
+                }
+
+                if (elapsed > 4000 && velocity < 0.01) {
+                    finishSpin();
+                } else {
+                    requestAnimationFrame(animate);
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        function finishSpin() {
+            isWheelSpinning = false;
+            const overlay = document.getElementById('decoyOverlay');
+            overlay.style.opacity = '0';
+
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                // REVEAL TEAMS
+                const output = document.getElementById('teamsOutput');
+                output.style.display = 'grid';
+                requestAnimationFrame(() => output.style.opacity = '1');
+
+                // Change Spin Button
+                const btn = document.getElementById('spinBtn');
+                // btn.innerText = "DONE!";
+                // setTimeout(() => btn.innerText = "SPIN AGAIN", 2000);
+            }, 500);
+        }
+
+        /* DRAG AND DROP - SETUP VIEW */
+        let setupDragId = null;
+
+        function handleDragStartSetup(e, itemId) {
+            if (setupMode !== 'edit') {
+                e.preventDefault(); // Prevent dragging if not in edit mode
+                return;
+            }
+            setupDragId = itemId;
+            e.target.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragOverSetup(e) {
+            e.preventDefault();
+            const bucket = e.currentTarget.closest('.setup-team-bucket') || e.currentTarget.closest('.setup-pool');
+            if (bucket) bucket.classList.add('drag-over');
+            e.dataTransfer.dropEffect = 'move';
+        }
+
+        // Helper to clear drag highlights
+        function clearSetupHighlights() {
+            document.querySelectorAll('.setup-team-bucket, .setup-pool').forEach(el => el.classList.remove('drag-over'));
+        }
+
+        function handleDropSetup(e, targetIndex) {
+            e.preventDefault();
+            clearSetupHighlights();
+
+            const item = items.find(i => i.id === setupDragId);
+            if (item) {
+                // If targetIndex is null, it goes to pool
+                if (targetIndex === null) {
+                    item.assignedTeamIndex = null;
+                } else {
+                    item.assignedTeamIndex = targetIndex;
+                }
+                saveData();
+                renderSetup();
+            }
+            setupDragId = null;
+        }
+
+        /* DRAG AND DROP - TEAMS VIEW (Existing) */
+        function handleDragStart(e, teamIndex, memberIndex) {
+            dragSource = { teamIndex, memberIndex };
+            e.target.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            // Optional: set custom drag image
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+            document.querySelectorAll('.team-card').forEach(c => c.classList.remove('drag-over'));
+            dragSource = null;
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault(); // Necessary to allow dropping
+            e.currentTarget.classList.add('drag-over');
+            e.dataTransfer.dropEffect = 'move';
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDrop(e, targetTeamIndex) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+
+            if (!dragSource || dragSource.teamIndex === targetTeamIndex) return;
+
+            // Move Logic
+            const sourceTeam = currentTeams[dragSource.teamIndex];
+            const targetTeam = currentTeams[targetTeamIndex];
+
+            const [member] = sourceTeam.members.splice(dragSource.memberIndex, 1);
+            targetTeam.members.push(member);
+
+            // Recalculate Weights
+            renderTeams();
+        }
+    </script>
+</body>
+
+</html>
