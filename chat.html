@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GhostChat // Secure</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="welcome-screen">
+        <h1>GhostChat</h1>
+        <p>Messages vanish when the session ends.</p>
+        <button onclick="startChat()" class="glow-btn">Initialize Secure Chat</button>
+    </div>
+
+    <div id="chat-container" class="hidden">
+        <div class="chat-header">
+            <span class="status-dot"></span>
+            <span>Secure Session Active</span>
+        </div>
+        <div id="chat-box"></div>
+        <div class="input-area">
+            <input type="text" id="msg-input" placeholder="Type a message..." autocomplete="off">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
