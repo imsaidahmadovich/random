@@ -4,37 +4,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GhostChat // Sync Enabled</title>
-    <script src="/socket.io/socket.io.js"></script>
+    <title>GhostChat // Secure Sync</title>
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
     <style>
-        /* Your "Very Good Dark Design" */
         :root {
-            --bg: #08080a;
-            --accent: #00f2ff;
-            --glass: rgba(255, 255, 255, 0.03);
+            --bg: #050505;
+            --panel: rgba(15, 15, 20, 0.7);
+            --accent: #7000ff;
+            --accent-glow: rgba(112, 0, 255, 0.4);
+            --text: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, sans-serif;
         }
 
         body {
-            background: var(--bg);
-            color: #fff;
-            font-family: 'Inter', sans-serif;
-            display: flex;
+            background-color: var(--bg);
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(112, 0, 255, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(0, 242, 255, 0.05) 0%, transparent 40%);
+            color: var(--text);
             height: 100vh;
-            margin: 0;
+            display: flex;
             justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* --- Landing Screen --- */
+        #landing {
+            text-align: center;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .logo {
+            font-size: 3.5rem;
+            font-weight: 900;
+            letter-spacing: -2px;
+            margin-bottom: 10px;
+            background: linear-gradient(to bottom, #fff, #666);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .glow-btn {
+            padding: 16px 40px;
+            background: var(--accent);
+            border: none;
+            color: white;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .glow-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 40px var(--accent);
+        }
+
+        /* --- Chat Interface --- */
+        #chat-container {
+            display: none;
+            width: 90%;
+            max-width: 450px;
+            height: 85vh;
+            background: var(--panel);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            flex-direction: column;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
+            animation: slideUp 0.6s ease-out;
+        }
+
+        .header {
+            padding: 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
             align-items: center;
         }
 
-        #chat-ui {
-            display: none;
-            width: 450px;
-            height: 80vh;
-            background: #111114;
-            border: 1px solid #222;
-            border-radius: 24px;
-            flex-direction: column;
-            overflow: hidden;
-            box-shadow: 0 50px 100px rgba(0, 0, 0, 0.8);
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: #00ff88;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            box-shadow: 0 0 10px #00ff88;
         }
 
         #messages {
@@ -43,83 +107,79 @@
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            scroll-behavior: smooth;
+            gap: 12px;
         }
 
         .msg {
-            padding: 12px 16px;
-            border-radius: 16px;
+            padding: 12px 18px;
+            border-radius: 20px;
             max-width: 80%;
-            animation: pop 0.3s ease;
             font-size: 0.95rem;
+            line-height: 1.4;
+            animation: msgIn 0.3s ease;
         }
 
-        .others {
-            background: var(--glass);
-            align-self: flex-start;
-            border: 1px solid #333;
-        }
-
-        .me {
+        .msg.me {
             background: var(--accent);
-            color: #000;
             align-self: flex-end;
-            font-weight: 500;
-            box-shadow: 0 4px 15px rgba(0, 242, 255, 0.3);
+            border-bottom-right-radius: 4px;
         }
 
-        .input-bar {
+        .msg.them {
+            background: rgba(255, 255, 255, 0.08);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .input-area {
             padding: 20px;
             display: flex;
-            gap: 10px;
-            background: rgba(0, 0, 0, 0.4);
+            gap: 12px;
         }
 
         input {
             flex: 1;
-            background: #1a1a1e;
-            border: 1px solid #333;
-            padding: 12px;
-            border-radius: 12px;
-            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 14px 20px;
+            border-radius: 15px;
+            color: white;
             outline: none;
+            transition: 0.3s;
         }
 
         input:focus {
             border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.08);
         }
 
-        @keyframes pop {
+        /* --- Animations --- */
+        @keyframes slideUp {
             from {
                 opacity: 0;
-                transform: scale(0.9) translateY(10px);
+                transform: translateY(40px);
             }
 
             to {
                 opacity: 1;
-                transform: scale(1) translateY(0);
+                transform: translateY(0);
             }
         }
 
-        /* Landing Page Style */
-        #landing {
-            text-align: center;
+        @keyframes msgIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
 
-        .glow-btn {
-            padding: 15px 30px;
-            background: var(--accent);
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-
-        .glow-btn:hover {
-            box-shadow: 0 0 20px var(--accent);
-            transform: translateY(-2px);
+        .hidden {
+            display: none !important;
         }
     </style>
 </head>
@@ -127,59 +187,87 @@
 <body>
 
     <div id="landing">
-        <h1 style="letter-spacing: 4px;">GHOST CHAT</h1>
-        <button class="glow-btn" onclick="enterChat()">INITIALIZE SYNC</button>
+        <div class="logo">GHOST</div>
+        <p style="color: #666; margin-bottom: 30px;">Syncronized volatile session.</p>
+        <button class="glow-btn" onclick="initChat()">START SYNC</button>
     </div>
 
-    <div id="chat-ui">
+    <div id="chat-container">
+        <div class="header">
+            <div><span class="live-dot"></span> <small>LIVE SESSION</small></div>
+            <button onclick="location.reload()" style="background:none; border:none; color:#666; cursor:pointer;">Burn
+                Chat</button>
+        </div>
         <div id="messages"></div>
-        <div class="input-bar">
-            <input type="text" id="input" placeholder="Secure message...">
-            <button onclick="send()" class="glow-btn" style="padding: 10px 20px;">Send</button>
+        <div class="input-area">
+            <input type="text" id="msgInput" placeholder="Message..." autocomplete="off">
+            <button class="glow-btn" style="padding: 10px 25px;" onclick="send()">Send</button>
         </div>
     </div>
 
     <script>
-        const socket = io(); // Connects to the server
-        const chatUI = document.getElementById('chat-ui');
+        // --- PUSHER CONFIG ---
+        // Replace these with your Pusher App Credentials
+        const PUSHER_KEY = 'YOUR_APP_KEY';
+        const PUSHER_CLUSTER = 'YOUR_CLUSTER';
+
+        const pusher = new Pusher(PUSHER_KEY, { cluster: PUSHER_CLUSTER, forceTLS: true });
+        const channel = pusher.subscribe('private-ghost-chat');
+        // Note: For client-to-client without a server, use 'cache-ghost-chat' or set up a simple auth.
+        // For this demo to work INSTANTLY on Vercel without a backend, let's use a public channel:
+        const pubChannel = pusher.subscribe('public-chat');
+
         const landing = document.getElementById('landing');
+        const chatContainer = document.getElementById('chat-container');
         const msgBox = document.getElementById('messages');
-        const input = document.getElementById('input');
+        const input = document.getElementById('msgInput');
+        const myId = Math.random().toString(36).substring(7);
 
-        let myId = Math.random().toString(36).substring(7); // Simple temp ID
-
-        function enterChat() {
-            landing.style.display = 'none';
-            chatUI.style.display = 'flex';
+        function initChat() {
+            landing.style.opacity = '0';
+            setTimeout(() => {
+                landing.classList.add('hidden');
+                chatContainer.style.display = 'flex';
+            }, 500);
         }
 
+        // Listen for messages from others
+        pubChannel.bind('message-event', function (data) {
+            if (data.senderId !== myId) {
+                renderMessage(data.text, 'them');
+            }
+        });
+
         function send() {
-            const val = input.value.trim();
-            if (!val) return;
-            // Send to server
-            socket.emit('new message', { text: val, sender: myId });
+            const text = input.value.trim();
+            if (!text) return;
+
+            // In a real Vercel app, you'd fetch an API route here to trigger Pusher.
+            // But since you want it easy, we will trigger it via a simple Vercel Serverless Function.
+            // For now, let's render it locally:
+            renderMessage(text, 'me');
+
+            // Triggering the sync
+            triggerSync(text);
+
             input.value = '';
         }
 
-        // Listen for messages from ANYONE (including yourself)
-        socket.on('broadcast message', (data) => {
+        async function triggerSync(text) {
+            // You will create a simple 'api/send' function on Vercel (see below)
+            await fetch('/api/send', {
+                method: 'POST',
+                body: JSON.stringify({ text, senderId: myId })
+            });
+        }
+
+        function renderMessage(text, type) {
             const div = document.createElement('div');
-            div.className = `msg ${data.sender === myId ? 'me' : 'others'}`;
-            div.textContent = data.text;
+            div.className = `msg ${type}`;
+            div.textContent = text;
             msgBox.appendChild(div);
             msgBox.scrollTop = msgBox.scrollHeight;
-        });
-
-        // Load history when joining
-        socket.on('load history', (history) => {
-            history.forEach(data => {
-                const div = document.createElement('div');
-                div.className = `msg ${data.sender === myId ? 'me' : 'others'}`;
-                div.textContent = data.text;
-                msgBox.appendChild(div);
-            });
-            msgBox.scrollTop = msgBox.scrollHeight;
-        });
+        }
 
         input.addEventListener('keypress', e => { if (e.key === 'Enter') send(); });
     </script>
