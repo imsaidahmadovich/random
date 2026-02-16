@@ -1,99 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ghost // Decentralized Chat</title>
-    <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+    <title>Ghost // Supabase Sync</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --bg: #030303;
-            --accent: #bc13fe; /* Neon Purple */
-            --glass: rgba(255, 255, 255, 0.03);
+            --bg: #08080a;
+            --accent: #00d4ff;
+            --panel: rgba(255, 255, 255, 0.03);
             --text: #ffffff;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
 
         body {
             background-color: var(--bg);
-            background-image: radial-gradient(circle at 50% -20%, #2a0a3d 0%, #030303 80%);
+            background-image: radial-gradient(circle at top right, #1a1a2e, #08080a);
             color: var(--text);
             height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
         }
 
-        /* --- Landing Screen --- */
+        /* --- Landing --- */
         #landing {
             text-align: center;
-            z-index: 10;
-            transition: 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .title {
-            font-size: 4rem;
-            font-weight: 900;
-            letter-spacing: -3px;
+        .logo {
+            font-size: 3rem;
+            font-weight: 800;
+            letter-spacing: -2px;
             margin-bottom: 20px;
-            text-transform: uppercase;
-            background: linear-gradient(to bottom, #fff, #444);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
         }
 
-        .enter-btn {
-            padding: 18px 45px;
-            background: transparent;
-            border: 1px solid var(--accent);
-            color: var(--accent);
-            font-weight: bold;
+        .btn {
+            padding: 15px 35px;
+            background: var(--accent);
+            border: none;
             border-radius: 50px;
+            font-weight: bold;
             cursor: pointer;
             transition: 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 2px;
         }
 
-        .enter-btn:hover {
-            background: var(--accent);
-            color: white;
-            box-shadow: 0 0 30px var(--accent);
-            transform: translateY(-5px);
-        }
-
-        /* --- Chat Interface --- */
+        /* --- Chat UI --- */
         #chat-ui {
             display: none;
-            width: 100%;
-            max-width: 400px;
-            height: 80vh;
-            background: var(--glass);
-            backdrop-filter: blur(20px);
+            width: 400px;
+            height: 75vh;
+            background: var(--panel);
+            backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 30px;
+            border-radius: 24px;
             flex-direction: column;
-            box-shadow: 0 40px 100px rgba(0,0,0,0.8);
-            animation: slideIn 0.6s ease-out;
+            box-shadow: 0 50px 100px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.5s ease;
         }
 
         .header {
-            padding: 25px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             display: flex;
             justify-content: space-between;
             align-items: center;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background: #00ff88;
-            border-radius: 50%;
-            display: inline-block;
-            box-shadow: 0 0 10px #00ff88;
         }
 
         #messages {
@@ -102,21 +81,29 @@
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 10px;
         }
 
         .msg {
-            padding: 12px 18px;
-            border-radius: 20px;
+            padding: 12px 16px;
+            border-radius: 18px;
             max-width: 80%;
             font-size: 0.9rem;
-            line-height: 1.4;
             animation: pop 0.3s ease forwards;
-            word-wrap: break-word;
         }
 
-        .me { background: var(--accent); align-self: flex-end; border-bottom-right-radius: 4px; color: white; }
-        .them { background: rgba(255,255,255,0.08); align-self: flex-start; border-bottom-left-radius: 4px; }
+        .me {
+            background: var(--accent);
+            color: #000;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .them {
+            background: rgba(255, 255, 255, 0.1);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
 
         .input-area {
             padding: 20px;
@@ -126,93 +113,107 @@
 
         input {
             flex: 1;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 15px;
-            border-radius: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            border-radius: 12px;
             color: white;
             outline: none;
         }
 
-        /* --- Animations --- */
-        @keyframes slideIn { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes pop { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
 
-        .fade-out { opacity: 0; transform: scale(0.9); pointer-events: none; }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes pop {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
+
 <body>
 
     <div id="landing">
-        <h1 class="title">GHOST</h1>
-        <button class="enter-btn" onclick="init()">Connect to Void</button>
+        <div class="logo">GHOST<span style="color:var(--accent)">_</span></div>
+        <button class="btn" onclick="startChat()">Enter Secure Chat</button>
     </div>
 
     <div id="chat-ui">
         <div class="header">
-            <span><span class="status-dot"></span> <small>LIVE MESH</small></span>
-            <small style="opacity: 0.5; cursor: pointer;" onclick="location.reload()">TERMINATE</small>
+            <span style="font-size: 0.7rem; letter-spacing: 2px;">● REALTIME_SYNC</span>
+            <button onclick="burnChat()"
+                style="background:none; border:none; color:#ff4d4d; cursor:pointer; font-size: 0.7rem;">BURN
+                CHAT</button>
         </div>
         <div id="messages"></div>
         <div class="input-area">
-            <input type="text" id="userInput" placeholder="Whisper something..." autocomplete="off">
-            <button class="enter-btn" style="padding: 10px 20px; font-size: 0.7rem;" onclick="send()">Send</button>
+            <input type="text" id="userInput" placeholder="Message..." autocomplete="off">
+            <button class="btn" style="padding: 10px 15px;" onclick="send()">Send</button>
         </div>
     </div>
 
     <script>
-        // Initialize Gun.js with public relay peers
-        const gun = Gun([
-            'https://gun-manhattan.herokuapp.com/gun',
-            'https://liberty-city.herokuapp.com/gun'
-        ]);
-        
-        // Creating a random room name so it's private to those with the link
-        // You can change 'global-ghost-room-99' to whatever you want
-        const room = gun.get('global-ghost-room-99'); 
+        // --- CONFIG ---
+        const SB_URL = "https://smcbwwlqbuntycellxgs.supabase.co";
+        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtY2J3d2xxYnVudHljZWxseGdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMTQxMTAsImV4cCI6MjA4Njc5MDExMH0.th-AwLVrY0pjIDX-C7yjKPZa7kX108IP9ZqHYB_5zp0";
+        const supabase = libsupabase.createClient(SB_URL, SB_KEY);
 
-        const landing = document.getElementById('landing');
-        const chatUI = document.getElementById('chat-ui');
+        const myId = Math.random().toString(36).substring(7);
         const msgBox = document.getElementById('messages');
         const input = document.getElementById('userInput');
-        const myId = Math.random().toString(36).substring(7);
 
-        function init() {
-            landing.classList.add('fade-out');
-            setTimeout(() => {
-                landing.style.display = 'none';
-                chatUI.style.display = 'flex';
-            }, 600);
+        async function startChat() {
+            document.getElementById('landing').style.display = 'none';
+            document.getElementById('chat-ui').style.display = 'flex';
+
+            // Load existing messages
+            const { data } = await supabase.from('messages').select('*').order('created_at', { ascending: true });
+            if (data) data.forEach(m => renderMsg(m.content, m.sender_id === myId));
+
+            // Subscribe to Realtime changes
+            supabase.channel('room1')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+                    if (payload.new.sender_id !== myId) renderMsg(payload.new.content, false);
+                })
+                .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'messages' }, () => {
+                    msgBox.innerHTML = ""; // Clear UI if someone burns the chat
+                })
+                .subscribe();
         }
 
-        // --- THE MAGIC SYNC ---
-        // This listens for any new data in the room
-        room.map().on((data, id) => {
-            if (data && data.text) {
-                // Check if message is already displayed to prevent duplicates
-                if (!document.getElementById(id)) {
-                    renderMessage(data.text, data.sender === myId, id);
-                }
-            }
-        });
-
-        function send() {
+        async function send() {
             const text = input.value.trim();
             if (!text) return;
 
-            // Save to Gun.js (Broadcasting to everyone)
-            room.set({
-                text: text,
-                sender: myId,
-                time: Date.now()
-            });
-
+            renderMsg(text, true);
             input.value = '';
+
+            await supabase.from('messages').insert([{ content: text, sender_id: myId }]);
         }
 
-        function renderMessage(text, isMe, id) {
+        async function burnChat() {
+            // Deletes everything in the messages table
+            await supabase.from('messages').delete().neq('sender_id', 'null');
+        }
+
+        function renderMsg(text, isMe) {
             const div = document.createElement('div');
-            div.id = id; // Unique ID from Gun.js
             div.className = `msg ${isMe ? 'me' : 'them'}`;
             div.textContent = text;
             msgBox.appendChild(div);
@@ -222,4 +223,5 @@
         input.addEventListener('keypress', e => { if (e.key === 'Enter') send(); });
     </script>
 </body>
+
 </html>
