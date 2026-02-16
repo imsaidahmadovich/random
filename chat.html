@@ -1,103 +1,98 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GhostChat // Secure Sync</title>
-    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+    <title>Ghost // Decentralized Chat</title>
+    <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
     <style>
         :root {
-            --bg: #050505;
-            --panel: rgba(15, 15, 20, 0.7);
-            --accent: #7000ff;
-            --accent-glow: rgba(112, 0, 255, 0.4);
+            --bg: #030303;
+            --accent: #bc13fe; /* Neon Purple */
+            --glass: rgba(255, 255, 255, 0.03);
             --text: #ffffff;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', system-ui, sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
         body {
             background-color: var(--bg);
-            background-image:
-                radial-gradient(circle at 10% 20%, rgba(112, 0, 255, 0.1) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(0, 242, 255, 0.05) 0%, transparent 40%);
+            background-image: radial-gradient(circle at 50% -20%, #2a0a3d 0%, #030303 80%);
             color: var(--text);
             height: 100vh;
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             overflow: hidden;
         }
 
         /* --- Landing Screen --- */
         #landing {
             text-align: center;
-            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 10;
+            transition: 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .logo {
-            font-size: 3.5rem;
+        .title {
+            font-size: 4rem;
             font-weight: 900;
-            letter-spacing: -2px;
-            margin-bottom: 10px;
-            background: linear-gradient(to bottom, #fff, #666);
+            letter-spacing: -3px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            background: linear-gradient(to bottom, #fff, #444);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        .glow-btn {
-            padding: 16px 40px;
-            background: var(--accent);
-            border: none;
-            color: white;
-            font-weight: 600;
+        .enter-btn {
+            padding: 18px 45px;
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            font-weight: bold;
             border-radius: 50px;
             cursor: pointer;
             transition: 0.3s;
-            box-shadow: 0 0 20px var(--accent-glow);
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
 
-        .glow-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 0 40px var(--accent);
+        .enter-btn:hover {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 0 30px var(--accent);
+            transform: translateY(-5px);
         }
 
         /* --- Chat Interface --- */
-        #chat-container {
+        #chat-ui {
             display: none;
-            width: 90%;
-            max-width: 450px;
-            height: 85vh;
-            background: var(--panel);
+            width: 100%;
+            max-width: 400px;
+            height: 80vh;
+            background: var(--glass);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 30px;
             flex-direction: column;
-            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
-            animation: slideUp 0.6s ease-out;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+            animation: slideIn 0.6s ease-out;
         }
 
         .header {
             padding: 25px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .live-dot {
+        .status-dot {
             width: 8px;
             height: 8px;
             background: #00ff88;
             border-radius: 50%;
             display: inline-block;
-            margin-right: 8px;
             box-shadow: 0 0 10px #00ff88;
         }
 
@@ -107,134 +102,97 @@
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 15px;
         }
 
         .msg {
             padding: 12px 18px;
             border-radius: 20px;
             max-width: 80%;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             line-height: 1.4;
-            animation: msgIn 0.3s ease;
+            animation: pop 0.3s ease forwards;
+            word-wrap: break-word;
         }
 
-        .msg.me {
-            background: var(--accent);
-            align-self: flex-end;
-            border-bottom-right-radius: 4px;
-        }
-
-        .msg.them {
-            background: rgba(255, 255, 255, 0.08);
-            align-self: flex-start;
-            border-bottom-left-radius: 4px;
-        }
+        .me { background: var(--accent); align-self: flex-end; border-bottom-right-radius: 4px; color: white; }
+        .them { background: rgba(255,255,255,0.08); align-self: flex-start; border-bottom-left-radius: 4px; }
 
         .input-area {
             padding: 20px;
             display: flex;
-            gap: 12px;
+            gap: 10px;
         }
 
         input {
             flex: 1;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 14px 20px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 15px;
             border-radius: 15px;
             color: white;
             outline: none;
-            transition: 0.3s;
-        }
-
-        input:focus {
-            border-color: var(--accent);
-            background: rgba(255, 255, 255, 0.08);
         }
 
         /* --- Animations --- */
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(40px);
-            }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pop { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
 
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes msgIn {
-            from {
-                opacity: 0;
-                transform: scale(0.9);
-            }
-
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        .hidden {
-            display: none !important;
-        }
+        .fade-out { opacity: 0; transform: scale(0.9); pointer-events: none; }
     </style>
 </head>
-
 <body>
 
     <div id="landing">
-        <div class="logo">GHOST</div>
-        <p style="color: #666; margin-bottom: 30px;">Syncronized volatile session.</p>
-        <button class="glow-btn" onclick="initChat()">START SYNC</button>
+        <h1 class="title">GHOST</h1>
+        <button class="enter-btn" onclick="init()">Connect to Void</button>
     </div>
 
-    <div id="chat-container">
+    <div id="chat-ui">
         <div class="header">
-            <div><span class="live-dot"></span> <small>LIVE SESSION</small></div>
-            <button onclick="location.reload()" style="background:none; border:none; color:#666; cursor:pointer;">Burn
-                Chat</button>
+            <span><span class="status-dot"></span> <small>LIVE MESH</small></span>
+            <small style="opacity: 0.5; cursor: pointer;" onclick="location.reload()">TERMINATE</small>
         </div>
         <div id="messages"></div>
         <div class="input-area">
-            <input type="text" id="msgInput" placeholder="Message..." autocomplete="off">
-            <button class="glow-btn" style="padding: 10px 25px;" onclick="send()">Send</button>
+            <input type="text" id="userInput" placeholder="Whisper something..." autocomplete="off">
+            <button class="enter-btn" style="padding: 10px 20px; font-size: 0.7rem;" onclick="send()">Send</button>
         </div>
     </div>
 
     <script>
-        // --- PUSHER CONFIG ---
-        // Replace these with your Pusher App Credentials
-        const PUSHER_KEY = '2115022a83bccae41f444bc75ae';
-        const PUSHER_CLUSTER = 'ap2';
-
-        const pusher = new Pusher(PUSHER_KEY, { cluster: PUSHER_CLUSTER, forceTLS: true });
-        const channel = pusher.subscribe('private-ghost-chat');
-        // Note: For client-to-client without a server, use 'cache-ghost-chat' or set up a simple auth.
-        // For this demo to work INSTANTLY on Vercel without a backend, let's use a public channel:
-        const pubChannel = pusher.subscribe('public-chat');
+        // Initialize Gun.js with public relay peers
+        const gun = Gun([
+            'https://gun-manhattan.herokuapp.com/gun',
+            'https://liberty-city.herokuapp.com/gun'
+        ]);
+        
+        // Creating a random room name so it's private to those with the link
+        // You can change 'global-ghost-room-99' to whatever you want
+        const room = gun.get('global-ghost-room-99'); 
 
         const landing = document.getElementById('landing');
-        const chatContainer = document.getElementById('chat-container');
+        const chatUI = document.getElementById('chat-ui');
         const msgBox = document.getElementById('messages');
-        const input = document.getElementById('msgInput');
+        const input = document.getElementById('userInput');
         const myId = Math.random().toString(36).substring(7);
 
-        function initChat() {
-            landing.style.opacity = '0';
+        function init() {
+            landing.classList.add('fade-out');
             setTimeout(() => {
-                landing.classList.add('hidden');
-                chatContainer.style.display = 'flex';
-            }, 500);
+                landing.style.display = 'none';
+                chatUI.style.display = 'flex';
+            }, 600);
         }
 
-        // Listen for messages from others
-        pubChannel.bind('message-event', function (data) {
-            if (data.senderId !== myId) {
-                renderMessage(data.text, 'them');
+        // --- THE MAGIC SYNC ---
+        // This listens for any new data in the room
+        room.map().on((data, id) => {
+            if (data && data.text) {
+                // Check if message is already displayed to prevent duplicates
+                if (!document.getElementById(id)) {
+                    renderMessage(data.text, data.sender === myId, id);
+                }
             }
         });
 
@@ -242,28 +200,20 @@
             const text = input.value.trim();
             if (!text) return;
 
-            // In a real Vercel app, you'd fetch an API route here to trigger Pusher.
-            // But since you want it easy, we will trigger it via a simple Vercel Serverless Function.
-            // For now, let's render it locally:
-            renderMessage(text, 'me');
-
-            // Triggering the sync
-            triggerSync(text);
+            // Save to Gun.js (Broadcasting to everyone)
+            room.set({
+                text: text,
+                sender: myId,
+                time: Date.now()
+            });
 
             input.value = '';
         }
 
-        async function triggerSync(text) {
-            // You will create a simple 'api/send' function on Vercel (see below)
-            await fetch('/api/send', {
-                method: 'POST',
-                body: JSON.stringify({ text, senderId: myId })
-            });
-        }
-
-        function renderMessage(text, type) {
+        function renderMessage(text, isMe, id) {
             const div = document.createElement('div');
-            div.className = `msg ${type}`;
+            div.id = id; // Unique ID from Gun.js
+            div.className = `msg ${isMe ? 'me' : 'them'}`;
             div.textContent = text;
             msgBox.appendChild(div);
             msgBox.scrollTop = msgBox.scrollHeight;
@@ -272,5 +222,4 @@
         input.addEventListener('keypress', e => { if (e.key === 'Enter') send(); });
     </script>
 </body>
-
 </html>
