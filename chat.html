@@ -4,54 +4,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ghost // Secure</title>
+    <title>Ghost Sync // Secure Messaging</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0a0a0c;
-            --glass: rgba(255, 255, 255, 0.03);
+            --primary: #6366f1;
+            --secondary: #8b5cf6;
             --accent: #00f2ff;
-            --text: #e0e0e0;
+            --bg: #0f172a;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            background-color: var(--bg);
-            background-image: radial-gradient(circle at top right, #1a1a2e, #0a0a0c);
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
             color: var(--text);
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
             overflow: hidden;
+            position: relative;
+        }
+
+        /* Animated Background */
+        #bg-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
         }
 
         #chat-container {
             width: 100%;
             max-width: 450px;
             height: 85vh;
-            background: var(--glass);
+            background: var(--card-bg);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 28px;
+            border-radius: 32px;
             display: flex;
             flex-direction: column;
             box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
             margin: 20px;
+            position: relative;
+            z-index: 10;
+            animation: containerAppear 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes containerAppear {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
 
         .header {
-            padding: 20px 25px;
+            padding: 25px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background: rgba(255, 255, 255, 0.01);
+            border-radius: 32px 32px 0 0;
         }
 
         .header h2 {
-            font-size: 0.9rem;
+            font-size: 1rem;
+            font-weight: 900;
             letter-spacing: 2px;
-            color: var(--accent);
+            background: linear-gradient(135deg, #a5b4fc 0%, #c084fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             margin: 0;
         }
 
@@ -61,92 +103,158 @@
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            scrollbar-width: thin;
+            gap: 15px;
+            scrollbar-width: none;
+        }
+
+        #messages::-webkit-scrollbar {
+            display: none;
         }
 
         /* Message Bubbles */
         .msg {
-            padding: 12px 18px;
-            border-radius: 20px;
-            max-width: 80%;
+            padding: 14px 20px;
+            border-radius: 22px;
+            max-width: 85%;
             font-size: 0.95rem;
-            line-height: 1.4;
-            animation: fadeIn 0.3s ease;
+            line-height: 1.5;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
         .me {
-            background: var(--accent);
-            color: #000;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #fff;
             align-self: flex-end;
             border-bottom-right-radius: 4px;
-            font-weight: 500;
         }
 
         .them {
-            background: rgba(255, 255, 255, 0.07);
+            background: rgba(255, 255, 255, 0.08);
             color: #fff;
             align-self: flex-start;
             border-bottom-left-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .input-area {
-            padding: 25px;
+            padding: 20px 25px;
             display: flex;
             gap: 12px;
             background: rgba(0, 0, 0, 0.2);
+            border-radius: 0 0 32px 32px;
         }
 
         input {
             flex: 1;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 14px 20px;
-            border-radius: 15px;
+            padding: 16px 22px;
+            border-radius: 20px;
             color: white;
             outline: none;
-            transition: 0.2s;
+            transition: 0.3s;
+            font-family: inherit;
         }
 
         input:focus {
-            border-color: var(--accent);
-            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
         }
 
         .send-btn {
-            background: var(--accent);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             border: none;
-            color: #000;
-            padding: 0 20px;
-            border-radius: 12px;
-            font-weight: bold;
+            color: #fff;
+            padding: 0 24px;
+            border-radius: 18px;
+            font-weight: 700;
             cursor: pointer;
-            transition: 0.2s;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.8rem;
         }
 
         .send-btn:hover {
             transform: scale(1.05);
-            filter: brightness(1.1);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
         }
 
         .logout-btn {
             position: fixed;
             top: 20px;
             right: 20px;
-            padding: 8px 16px;
-            background: var(--glass);
+            padding: 10px 20px;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            color: var(--text);
+            border-radius: 16px;
+            color: var(--text-muted);
             font-size: 0.8rem;
             cursor: pointer;
             z-index: 100;
-            transition: all 0.3s;
+            transition: 0.3s;
+            font-weight: 700;
         }
 
         .logout-btn:hover {
             background: rgba(255, 255, 255, 0.1);
-            color: var(--accent);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        /* Message Loading Animation */
+        .loader-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            flex-direction: column;
+            gap: 15px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+        }
+
+        .dot-pulse {
+            position: relative;
+            left: -9999px;
+            width: 8px;
+            height: 8px;
+            border-radius: 5px;
+            background-color: var(--primary);
+            box-shadow: 9999px 0 0 0 var(--primary);
+            animation: dotPulse 1.5s infinite linear;
+        }
+
+        @keyframes dotPulse {
+            0% {
+                box-shadow: 9999px 0 0 -5px var(--primary);
+            }
+
+            30% {
+                box-shadow: 9999px 0 0 2px var(--primary);
+            }
+
+            60%,
+            100% {
+                box-shadow: 9999px 0 0 -5px var(--primary);
+            }
+        }
+
+        .msg-row {
+            opacity: 0;
+            transform: translateY(10px);
+            animation: slideIn 0.4s forwards cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .admin-toggle {
@@ -157,35 +265,20 @@
             color: var(--text-muted);
             cursor: pointer;
             transition: 0.3s;
-            padding: 4px 8px;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.03);
+            padding: 6px 12px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .admin-toggle:hover {
-            background: rgba(255, 255, 255, 0.08);
-            color: var(--accent);
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--primary);
         }
 
         .admin-toggle input {
-            cursor: pointer;
+            accent-color: var(--primary);
             width: auto;
-            margin: 0;
-            padding: 0;
-            accent-color: var(--accent);
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
 
         .delete-btn {
@@ -193,12 +286,13 @@
             border: 1px solid rgba(255, 68, 68, 0.2);
             color: #ff4444;
             font-size: 0.65rem;
-            padding: 2px 6px;
-            border-radius: 6px;
+            padding: 4px 8px;
+            border-radius: 8px;
             cursor: pointer;
             opacity: 0;
             transition: 0.2s;
-            margin-top: 2px;
+            margin-top: 5px;
+            font-weight: 700;
         }
 
         .msg-row:hover .delete-btn {
@@ -213,8 +307,9 @@
 </head>
 
 <body>
-
     <button class="logout-btn" onclick="handleLogout()">Logout</button>
+    <canvas id="bg-canvas"></canvas>
+
     <div id="chat-container">
         <div class="header">
             <div>
@@ -224,29 +319,36 @@
                 </label>
             </div>
             <div
-                style="width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 10px var(--accent);">
+                style="width: 10px; height: 10px; background: var(--primary); border-radius: 50%; box-shadow: 0 0 15px var(--primary);">
             </div>
         </div>
 
-        <div id="messages"></div>
+        <div id="messages">
+            <div class="loader-container">
+                <div class="dot-pulse"></div>
+                <span>INITIALIZING SECURE PROTOCOL...</span>
+            </div>
+        </div>
 
         <div class="input-area">
             <input type="text" id="userInput" placeholder="Type a message..." autocomplete="off">
-            <button class="send-btn" onclick="sendMessage()">SEND</button>
+            <button class="send-btn" onclick="sendMessage()">Send</button>
         </div>
     </div>
 
     <script type="module">
         import { auth, onAuthStateChanged, logout } from "./auth.js";
-        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, deleteDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         window.handleLogout = logout;
 
         const db = getFirestore();
         const messagesCol = collection(db, "messages");
         let currentUser = null;
+        let isAdminMode = false;
+        let lastMessages = [];
+        let isInitialLoad = true;
 
-        // Listen for Auth State
         onAuthStateChanged(auth, (user) => {
             if (!user) {
                 window.location.href = "login.html";
@@ -256,17 +358,27 @@
             }
         });
 
-        let isAdminMode = false;
-        let lastMessages = [];
-
-        // Admin Mode Toggle
-        document.getElementById('adminModeCheckbox').addEventListener('change', (e) => {
+        document.getElementById('adminModeCheckbox').addEventListener('change', async (e) => {
             if (e.target.checked) {
                 const pass = prompt("Enter Admin Password:");
-                if (pass === "admin123") {
-                    isAdminMode = true;
-                } else {
-                    alert("Incorrect password.");
+                try {
+                    const adminDoc = await getDoc(doc(db, "settings", "admin"));
+                    if (!adminDoc.exists()) {
+                        alert("Security error: Admin configuration not found.");
+                        e.target.checked = false;
+                        isAdminMode = false;
+                        return;
+                    }
+                    if (pass === adminDoc.data().password) {
+                        isAdminMode = true;
+                        alert("Access granted.");
+                    } else {
+                        alert("Access denied.");
+                        e.target.checked = false;
+                        isAdminMode = false;
+                    }
+                } catch (error) {
+                    alert("System error.");
                     e.target.checked = false;
                     isAdminMode = false;
                 }
@@ -289,25 +401,41 @@
 
         function renderAllMessages() {
             const msgBox = document.getElementById('messages');
+            if (lastMessages.length === 0) {
+                msgBox.innerHTML = '<div style="text-align:center; color:rgba(255,255,255,0.2); font-size:0.8rem; margin-top:20px;">NO DATA PACKETS FOUND</div>';
+                return;
+            }
+
             msgBox.innerHTML = "";
-            lastMessages.forEach((msg) => {
-                renderMsg(msg.text, msg.senderEmail === currentUser.email, msg.senderName, msg.id);
+            lastMessages.forEach((msg, index) => {
+                if (isInitialLoad) {
+                    setTimeout(() => {
+                        renderMsg(msg.text, msg.senderEmail === currentUser.email, msg.senderName, msg.id, true);
+                        msgBox.scrollTop = msgBox.scrollHeight;
+                    }, index * 40);
+                } else {
+                    renderMsg(msg.text, msg.senderEmail === currentUser.email, msg.senderName, msg.id, false);
+                }
             });
-            msgBox.scrollTop = msgBox.scrollHeight;
+
+            if (isInitialLoad) {
+                setTimeout(() => { isInitialLoad = false; }, lastMessages.length * 40);
+            } else {
+                msgBox.scrollTop = msgBox.scrollHeight;
+            }
         }
 
         window.deleteMessage = async function (id) {
             if (!isAdminMode) return;
-            if (confirm("Delete this message?")) {
+            if (confirm("Execute deletion protocol?")) {
                 try {
                     await deleteDoc(doc(db, "messages", id));
                 } catch (error) {
-                    console.error("Delete failed:", error);
+                    console.error("Failure:", error);
                 }
             }
         }
 
-        // The Send Function
         window.sendMessage = async function () {
             const input = document.getElementById('userInput');
             const text = input.value.trim();
@@ -323,35 +451,41 @@
             });
         }
 
-        // ADDED: ENTER KEY SUPPORT
         document.getElementById('userInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
+            if (e.key === 'Enter') sendMessage();
         });
 
-        function renderMsg(text, isMe, name, id) {
+        function renderMsg(text, isMe, name, id, animate) {
             const container = document.createElement('div');
             container.className = 'msg-row';
+            if (!animate) {
+                container.style.animation = 'none';
+                container.style.opacity = '1';
+                container.style.transform = 'none';
+            }
+
             container.style.display = 'flex';
             container.style.flexDirection = 'column';
             container.style.alignItems = isMe ? 'flex-end' : 'flex-start';
-            container.style.gap = '4px';
+            container.style.gap = '6px';
+            container.style.marginBottom = '8px';
 
             const nameSpan = document.createElement('span');
             nameSpan.style.fontSize = '0.7rem';
-            nameSpan.style.color = 'rgba(255,255,255,0.4)';
-            nameSpan.style.padding = '0 8px';
+            nameSpan.style.color = 'rgba(255,255,255,0.3)';
+            nameSpan.style.padding = '0 10px';
+            nameSpan.style.fontWeight = '700';
 
             if (isMe) {
-                nameSpan.textContent = "You";
+                nameSpan.textContent = "AUTH_USER";
             } else {
-                nameSpan.textContent = isAdminMode ? (name || 'Anonymous') : 'Anonymous';
+                nameSpan.textContent = isAdminMode ? (name || 'GUEST') : 'GUEST';
             }
 
             const div = document.createElement('div');
             div.className = `msg ${isMe ? 'me' : 'them'}`;
             div.textContent = text;
+            div.style.maxWidth = '100%';
 
             container.appendChild(nameSpan);
             container.appendChild(div);
@@ -359,13 +493,40 @@
             if (isAdminMode) {
                 const delBtn = document.createElement('button');
                 delBtn.className = 'delete-btn';
-                delBtn.textContent = 'DELETE';
+                delBtn.textContent = 'ERASE';
                 delBtn.onclick = () => deleteMessage(id);
                 container.appendChild(delBtn);
             }
 
             document.getElementById('messages').appendChild(container);
         }
+
+        /** particle background logic **/
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height, particles = [];
+        function resize() { width = window.innerWidth; height = window.innerHeight; canvas.width = width; canvas.height = height; }
+        window.addEventListener('resize', resize);
+        class Particle {
+            constructor() { this.x = Math.random() * width; this.y = Math.random() * height; this.vx = (Math.random() - 0.5) * 0.3; this.vy = (Math.random() - 0.5) * 0.3; this.size = Math.random() * 2 + 0.5; }
+            update() { this.x += this.vx; this.y += this.vy; if (this.x < 0 || this.x > width) this.vx *= -1; if (this.y < 0 || this.y > height) this.vy *= -1; }
+            draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fillStyle = 'rgba(99, 102, 241, 0.2)'; ctx.fill(); }
+        }
+        function init() { resize(); for (let i = 0; i < 60; i++) particles.push(new Particle()); animate(); }
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            particles.forEach((p1, i) => {
+                particles.slice(i + 1).forEach(p2 => {
+                    let d = Math.hypot(p1.x - p2.x, p1.y - p2.y);
+                    if (d < 120) {
+                        ctx.beginPath(); ctx.strokeStyle = `rgba(99, 102, 241, ${0.1 * (1 - d / 120)})`; ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+                    }
+                });
+            });
+            requestAnimationFrame(animate);
+        }
+        init();
     </script>
 </body>
 
