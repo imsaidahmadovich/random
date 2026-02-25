@@ -7,21 +7,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Space+Grotesk:wght@700&display=swap"
+    rel="stylesheet">
   <style>
     :root {
-      --primary: #6366f1;
-      --primary-dark: #4f46e5;
-      --accent: #ec4899;
+      --primary: #7c3aed;
+      --primary-dark: #6d28d9;
+      --accent: #f43f5e;
+      --bg: #05070f;
+      --surface: rgba(255, 255, 255, 0.04);
+      --surface2: rgba(255, 255, 255, 0.08);
+      --text: #f1f5f9;
+      --text-muted: #64748b;
+      --border: rgba(255, 255, 255, 0.1);
+      --danger: #ef4444;
+      --success: #22c55e;
+      --radius: 20px;
+    }
+
+    body[data-theme="light"] {
       --bg: #f8fafc;
       --surface: #ffffff;
+      --surface2: #f1f5f9;
       --text: #0f172a;
       --text-muted: #64748b;
       --border: #e2e8f0;
-      --danger: #ef4444;
-      --success: #22c55e;
-      --radius: 16px;
-      --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
 
     * {
@@ -41,16 +52,15 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background-image: radial-gradient(#e0e7ff 1px, transparent 1px);
-      background-size: 24px 24px;
+      transition: background-color 0.4s, color 0.4s;
     }
 
-    /* Compact mode when inside an iframe (dashboard) */
+    /* Iframe / Compact Mode */
     body.in-iframe {
       padding: 0;
-      min-height: 0;
-      height: 100vh;
+      min-height: 100vh;
       overflow: hidden;
+      background: transparent;
     }
 
     body.in-iframe .back-link {
@@ -58,63 +68,39 @@
     }
 
     body.in-iframe .app-container {
-      min-height: 0;
-      height: 100vh;
       max-width: 100%;
+      width: 100%;
+      height: 100vh;
+      min-height: 0;
       border-radius: 0;
       box-shadow: none;
+      border: none;
+      background: var(--bg);
     }
 
-    body.in-iframe .wheel-wrapper {
-      width: min(320px, calc(100vw - 40px));
-      height: min(320px, calc(100vw - 40px));
-      margin: 4px auto;
-    }
-
-    body.in-iframe .view {
+    body.in-iframe .app-main {
       padding: 10px;
-    }
-
-    body.in-iframe .header {
-      padding: 4px;
-    }
-
-    body.in-iframe .tab {
-      padding: 8px;
-      font-size: 13px;
-    }
-
-    body.in-iframe #spinBtn {
-      padding: 10px 28px;
-      font-size: 16px;
     }
 
     .app-container {
       width: 100%;
       max-width: 1000px;
       background: var(--surface);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
       border-radius: var(--radius);
-      box-shadow: var(--shadow);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
       overflow: hidden;
       display: flex;
       flex-direction: column;
       min-height: 600px;
       position: relative;
-      transition: height 0.3s ease;
     }
-  </style>
-  <script>
-    // Detect iframe embedding for compact mode
-    if (window.self !== window.top) {
-      document.addEventListener('DOMContentLoaded', () => document.body.classList.add('in-iframe'));
-    }
-  </script>
-  <style>
-    /* Header / Tabs */
-    .header {
+
+    .header-tabs {
       display: flex;
-      padding: 8px;
-      background: #fff;
+      padding: 6px;
+      background: var(--surface2);
       border-bottom: 1px solid var(--border);
     }
 
@@ -125,37 +111,39 @@
       cursor: pointer;
       font-weight: 600;
       color: var(--text-muted);
-      border-radius: 12px;
+      border-radius: 14px;
       transition: all 0.2s;
       font-size: 14px;
     }
 
-    .tab:hover {
-      background: #f1f5f9;
-    }
-
     .tab.active {
-      background: #eef2ff;
-      color: var(--primary);
+      background: var(--primary);
+      color: white;
     }
 
-    /* Views */
-    .view {
+    .app-main {
       flex: 1;
-      padding: 20px;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .view {
       display: none;
       flex-direction: column;
-      animation: fadeIn 0.3s ease;
+      animation: viewFade 0.4s ease;
+      height: 100%;
     }
 
     .view.active {
       display: flex;
     }
 
-    @keyframes fadeIn {
+    @keyframes viewFade {
       from {
         opacity: 0;
-        transform: translateY(4px);
+        transform: translateY(10px);
       }
 
       to {
@@ -165,133 +153,128 @@
     }
 
     /* Setup View */
-    .input-group {
+    .setup-header {
       display: flex;
-      gap: 8px;
-      margin-bottom: 16px;
+      gap: 10px;
+      margin-bottom: 20px;
     }
 
-    input {
+    .st-input {
       flex: 1;
-      padding: 12px 16px;
-      border: 2px solid var(--border);
+      background: var(--surface2);
+      border: 1px solid var(--border);
       border-radius: 12px;
-      font-size: 16px;
+      padding: 12px 16px;
+      color: var(--text);
       font-family: inherit;
-      transition: border-color 0.2s;
+      font-size: 15px;
     }
 
-    input:focus {
+    .st-input:focus {
       border-color: var(--primary);
     }
 
-    .btn {
-      border: none;
-      padding: 12px 20px;
-      border-radius: 12px;
-      font-weight: 600;
-      font-size: 15px;
-      cursor: pointer;
+    .btn-add {
       background: var(--primary);
       color: white;
-      transition: transform 0.1s, opacity 0.2s;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
+      border: none;
+      border-radius: 12px;
+      padding: 0 20px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
     }
 
-    .btn:active {
-      transform: scale(0.96);
-    }
-
-    .btn-ghost {
-      background: transparent;
-      color: var(--primary);
-      border: 1px solid #e0e7ff;
-    }
-
-    .btn-danger {
-      background: #fee2e2;
-      color: var(--danger);
-    }
-
-    .btn-sm {
-      padding: 8px 12px;
-      font-size: 13px;
-      border-radius: 8px;
+    .btn-add:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.1);
     }
 
     .list-container {
       flex: 1;
       overflow-y: auto;
       border: 1px solid var(--border);
-      border-radius: 12px;
-      background: #f8fafc;
+      border-radius: 16px;
+      background: rgba(0, 0, 0, 0.1);
+      padding: 5px;
     }
 
-    .list-item {
+    .item-card {
       display: flex;
+      align-items: center;
       justify-content: space-between;
-      align-items: center;
       padding: 12px 16px;
-      background: white;
-      border-bottom: 1px solid var(--border);
-      animation: slideIn 0.2s ease-out;
+      background: var(--surface2);
+      border-radius: 12px;
+      margin-bottom: 5px;
+      border: 1px solid transparent;
     }
 
-    @keyframes slideIn {
-      from {
-        opacity: 0;
-        transform: translateX(-10px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
+    .item-card:hover {
+      border-color: var(--border);
     }
 
-    .list-item:last-child {
-      border-bottom: none;
-    }
-
-    .item-info {
+    .item-name {
+      font-weight: 600;
+      font-size: 14px;
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-weight: 500;
+      gap: 10px;
     }
 
-    .weight-badge {
-      background: #eef2ff;
-      color: var(--primary);
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .item-weight {
       font-size: 11px;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-weight: 700;
-      opacity: 0.8;
+      opacity: 0.5;
+      font-weight: 400;
+      margin-left: 5px;
     }
 
-    .actions {
-      display: flex;
-      gap: 6px;
+    .btn-del {
+      background: transparent;
+      color: var(--rose);
+      border: none;
+      cursor: pointer;
+      opacity: 0.5;
+      transition: opacity 0.2s;
+      font-size: 18px;
+    }
+
+    .btn-del:hover {
+      opacity: 1;
     }
 
     /* Wheel View */
+    .wheel-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
     .wheel-wrapper {
       position: relative;
-      width: min(480px, calc(100vw - 80px));
-      height: min(480px, calc(100vw - 80px));
+      width: min(480px, 80vw);
+      height: min(480px, 80vw);
       margin: 10px auto;
     }
 
-    canvas {
+    body.in-iframe .wheel-wrapper {
+      width: min(340px, 70vh);
+      height: min(340px, 70vh);
+    }
+
+    #wheelCanvas {
       width: 100%;
       height: 100%;
-      display: block;
-      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
-      transform-origin: center;
+      filter: drop-shadow(0 0 20px rgba(0, 0, 0, 0.3));
     }
 
     .pointer {
@@ -299,219 +282,127 @@
       top: -15px;
       left: 50%;
       transform: translateX(-50%);
-      width: 38px;
-      height: 45px;
+      width: 40px;
+      height: 50px;
+      background: var(--accent);
+      clip-path: polygon(50% 100%, 0 0, 100% 0);
       z-index: 10;
-      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
-    }
-
-    .pointer::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      border-left: 19px solid transparent;
-      border-right: 19px solid transparent;
-      border-top: 40px solid var(--accent);
-    }
-
-    .pointer-dot {
-      position: absolute;
-      top: -5px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 12px;
-      height: 12px;
-      background: white;
-      border-radius: 50%;
-      z-index: 11;
-    }
-
-    .winner-announce {
-      text-align: center;
-      margin-top: 10px;
-      min-height: 50px;
-      perspective: 500px;
-    }
-
-    .winner-text {
-      font-size: 24px;
-      font-weight: 800;
-      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      opacity: 0;
-      transform: scale(0.8) translateY(10px);
-      transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-
-    .winner-text.show {
-      opacity: 1;
-      transform: scale(1) translateY(0);
-    }
-
-    .wheel-controls {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      margin-top: 20px;
+      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
     }
 
     .spin-btn {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      margin-top: 20px;
+      background: linear-gradient(135deg, var(--primary), #4f46e5);
       color: white;
-      font-weight: 800;
-      font-size: 18px;
-      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
-      border: 4px solid white;
-      z-index: 20;
+      border: none;
+      padding: 15px 50px;
+      border-radius: 50px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: all 0.3s;
+      box-shadow: 0 10px 20px rgba(124, 58, 237, 0.3);
     }
 
-    .spin-btn:active {
-      transform: scale(0.95);
-      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+    .spin-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 30px rgba(124, 58, 237, 0.4);
     }
 
     .spin-btn:disabled {
-      background: #cbd5e1;
-      cursor: not-allowed;
+      opacity: 0.5;
+      transform: none;
       box-shadow: none;
-      border-color: #f1f5f9;
-    }
-
-    /* Confetti */
-    #confetti-canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 50;
+      cursor: not-allowed;
     }
 
     /* Modal */
     .modal-overlay {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(15, 23, 42, 0.6);
-      backdrop-filter: blur(4px);
-      z-index: 100;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
       display: none;
       align-items: center;
       justify-content: center;
-      opacity: 0;
-      transition: opacity 0.3s;
+      z-index: 100;
     }
 
-    .modal-overlay.open {
+    .modal-overlay.active {
       display: flex;
-      opacity: 1;
     }
 
     .modal {
-      background: white;
-      padding: 30px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
       border-radius: 24px;
-      width: 85%;
-      max-width: 320px;
+      padding: 40px;
+      width: 90%;
+      max-width: 400px;
       text-align: center;
-      transform: scale(0.9);
-      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+      animation: modalScale 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
-    .modal-overlay.open .modal {
-      transform: scale(1);
+    @keyframes modalScale {
+      from {
+        transform: scale(0.8);
+        opacity: 0;
+      }
     }
 
     .modal-title {
-      font-size: 14px;
-      color: var(--text-muted);
+      font-size: 12px;
       text-transform: uppercase;
-      letter-spacing: 1px;
-      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--text-muted);
       margin-bottom: 10px;
+      font-weight: 700;
     }
 
-    .modal-winner {
-      font-size: 32px;
+    .winner-name {
+      font-size: 36px;
       font-weight: 800;
-      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      margin-bottom: 30px;
+      background: linear-gradient(135deg, #fff, #94a3b8);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      margin-bottom: 24px;
-      word-break: break-word;
     }
 
-    .modal-actions {
+    .modal-btns {
       display: flex;
       gap: 10px;
-      justify-content: center;
     }
 
-    .btn-outline {
-      background: transparent;
-      border: 2px solid var(--border);
-      color: var(--text);
-    }
-
-    .empty-state {
-      text-align: center;
-      color: var(--text-muted);
-      padding: 40px 20px;
-      font-size: 15px;
-    }
-
-    /* Toggle Switch */
-    .toggle-container {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 14px;
-      color: var(--text-muted);
+    .m-btn {
+      flex: 1;
+      padding: 12px;
+      border-radius: 12px;
+      border: none;
+      font-weight: 700;
       cursor: pointer;
-      user-select: none;
+      transition: all 0.2s;
+      font-family: inherit;
     }
 
-    .toggle-switch {
-      width: 36px;
-      height: 20px;
-      background: #cbd5e1;
-      border-radius: 20px;
-      position: relative;
-      transition: 0.3s;
+    .m-btn-sec {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
     }
 
-    .toggle-knob {
-      width: 16px;
-      height: 16px;
-      background: white;
-      border-radius: 50%;
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      transition: 0.3s;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    .m-btn-pri {
+      background: var(--primary);
+      color: white;
     }
 
-    input[type=checkbox]:checked+.toggle-switch {
-      background: var(--success);
-    }
-
-    input[type=checkbox]:checked+.toggle-switch .toggle-knob {
-      transform: translateX(16px);
+    /* Confetti */
+    #confetti {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 200;
     }
 
     .back-link {
@@ -523,516 +414,261 @@
       font-weight: 600;
       display: flex;
       align-items: center;
-      gap: 6px;
-      transition: color 0.2s;
-      background: white;
-      padding: 8px 16px;
-      border-radius: 20px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      gap: 8px;
       z-index: 1000;
+      background: var(--surface);
+      padding: 8px 16px;
+      border-radius: 30px;
+      border: 1px solid var(--border);
     }
 
-    .back-link:hover {
-      color: var(--primary);
+    body.in-iframe .back-link {
+      display: none !important;
     }
   </style>
 </head>
 
 <body>
+  <canvas id="confetti"></canvas>
 
-  <a href="index.html" class="back-link">
-    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-    </svg>
-    Home
-  </a>
+  <a href="index.html" class="back-link">← Back to Taso</a>
 
   <div class="app-container">
-    <canvas id="confetti-canvas"></canvas>
-
-    <div class="header">
-      <div class="tab active" onclick="switchTab('setup')">Setup</div>
-      <div class="tab" onclick="switchTab('wheel')">Wheel</div>
+    <div class="header-tabs">
+      <div class="tab active" data-tab="setup" onclick="switchTab('setup')">Setup List</div>
+      <div class="tab" data-tab="wheel" onclick="switchTab('wheel')">Spin Wheel</div>
     </div>
 
-    <!-- SETUP VIEW -->
-    <div class="view active" id="view-setup">
-      <div class="input-group">
-        <input type="text" id="itemName" placeholder="Enter name or choice..." onkeypress="handleEnter(event)">
-        <input type="number" id="itemWeight" placeholder="1" style="width: 70px; text-align: center;" min="1" value="1">
-        <button class="btn" onclick="addItem()">
-          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-          </svg>
-        </button>
-      </div>
-
-      <div style="display: flex; justify-content: space-between; margin-bottom: 12px; align-items: center">
-        <div class="toggle-container" onclick="document.getElementById('optAutoRemove').click()"
-          title="Enable for legacy auto-removal.">
-          <input type="checkbox" id="optAutoRemove" style="display:none" checked onchange="saveOptions()">
-          <!-- Keeping toggle for users who want it, but Modal flow doesn't strictly use it by default now since user has choices. 
-              However, let's keep it 'checked' but handle logic: if checked, maybe auto-remove after X seconds? 
-              User asked for popup. So I will ignore auto-remove logic in finishSpin and let user choose in popup. 
-              Or I can hide this toggle to avoid confusion. I'll hide it for cleanliness. -->
+    <div class="app-main">
+      <!-- SETUP VIEW -->
+      <div class="view active" id="view-setup">
+        <div class="setup-header">
+          <input type="text" class="st-input" id="itemIn" placeholder="Enter choice..."
+            onkeypress="if(event.key==='Enter')addItem()">
+          <input type="number" class="st-input" id="weightIn" value="1" min="1" style="width: 70px;">
+          <button class="btn-add" onclick="addItem()">Add</button>
         </div>
-        <div style="font-size:13px; color:var(--text-muted);">Weighted Probability • Equal Area</div>
-        <button class="btn btn-sm btn-ghost btn-danger" onclick="clearAll()">Clear All</button>
-      </div>
-
-      <div class="list-container" id="setupList">
-        <!-- Items go here -->
-      </div>
-    </div>
-
-    <!-- WHEEL VIEW -->
-    <div class="view" id="view-wheel">
-      <div class="wheel-wrapper">
-        <canvas id="wheel" width="640" height="640"></canvas>
-        <div class="pointer">
-          <div class="pointer-dot"></div>
+        <div class="list-container" id="listCont"></div>
+        <div style="margin-top: 15px; text-align: right;">
+          <button onclick="if(confirm('Clear all?')){items=[];save();render();}"
+            style="background:transparent;border:none;color:var(--rose);cursor:pointer;font-size:12px;font-weight:700;">RESET
+            ALL</button>
         </div>
       </div>
 
-      <div class="wheel-controls">
-        <button class="spin-btn" id="spinBtn" onclick="spin()">SPIN</button>
+      <!-- WHEEL VIEW -->
+      <div class="view" id="view-wheel">
+        <div class="wheel-container">
+          <div class="wheel-wrapper">
+            <div class="pointer"></div>
+            <canvas id="wheelCanvas" width="800" height="800"></canvas>
+          </div>
+          <button class="spin-btn" id="spinBtn" onclick="spin()">SPIN WHEEL</button>
+          <button onclick="switchTab('setup')"
+            style="background:transparent;border:none;color:var(--text-muted);margin-top:20px;cursor:pointer;font-size:13px;">Edit
+            choices</button>
+        </div>
       </div>
 
-      <div style="text-align: center; margin-top: 16px;">
-        <button class="btn btn-sm btn-ghost" id="restoreBtn" onclick="restoreRemoved()" style="display: none;">Restore
-          Removed Items</button>
-      </div>
-    </div>
-
-    <!-- MODAL -->
-    <div class="modal-overlay" id="resultModal">
-      <div class="modal">
-        <div class="modal-title">Winner Selected!</div>
-        <div class="modal-winner" id="modalWinnerName">Name</div>
-        <div class="modal-actions">
-          <button class="btn btn-outline" onclick="closeModal()">Close</button>
-          <button class="btn btn-danger" onclick="removeWinner()">Remove</button>
+      <!-- MODAL -->
+      <div class="modal-overlay" id="modal">
+        <div class="modal">
+          <div class="modal-title">The Winner is</div>
+          <div class="winner-name" id="winnerName">Choice Name</div>
+          <div class="modal-btns">
+            <button class="m-btn m-btn-sec" onclick="closeModal()">Keep Item</button>
+            <button class="m-btn m-btn-pri" onclick="removeAndClose()">Remove & Close</button>
+          </div>
         </div>
       </div>
     </div>
-
   </div>
 
   <script>
-    /**
-     * APP LOGIC
-     */
-    const COLORS = [
-      '#f87171', '#fb923c', '#facc15', '#4ade80', '#2dd4bf', '#60a5fa', '#818cf8', '#c084fc', '#f472b6'
-    ];
-
-    let items = []; // { id, name, weight }
-    let removedItems = [];
+    const COLORS = ["#7c3aed", "#3b82f6", "#10b981", "#f59e0b", "#f43f5e", "#8b5cf6", "#ec4899", "#06b6d4", "#14b8a6"];
+    let items = [];
     let isSpinning = false;
-    let currentRotation = 0;
-    let audioCtx = null;
-    let currentWinnerIdx = -1;
+    let rotation = 0;
+    let winnerIdx = -1;
 
-    // Initialization
+    // Theme Sync
+    window.addEventListener('message', e => {
+      if (e.data.type === 'taso-theme') document.body.setAttribute('data-theme', e.data.theme);
+    });
+    // Check local initial theme
+    const savedTheme = localStorage.getItem('taso-theme');
+    if (savedTheme) document.body.setAttribute('data-theme', savedTheme);
+
+    if (window.self !== window.top) document.body.classList.add('in-iframe');
+
     window.onload = () => {
-      loadData();
-      renderList();
-      drawWheel();
-      requestAnimationFrame(loopConfetti); // Start confetti loop (passive)
+      const saved = sessionStorage.getItem('taso-wheel-items');
+      if (saved) items = JSON.parse(saved);
+      render();
+      draw();
     };
 
-    function switchTab(tab) {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-      event.target.classList.add('active');
-      document.getElementById('view-' + tab).classList.add('active');
+    function save() { sessionStorage.setItem('taso-wheel-items', JSON.stringify(items)); }
 
-      if (tab === 'wheel') {
-        drawWheel();
-        if (removedItems.length > 0) document.getElementById('restoreBtn').style.display = 'inline-flex';
-        else document.getElementById('restoreBtn').style.display = 'none';
-      }
+    function switchTab(t) {
+      document.querySelectorAll('.tab').forEach(el => el.classList.toggle('active', el.dataset.tab === t));
+      document.querySelectorAll('.view').forEach(el => el.classList.toggle('active', el.id === `view-${t}`));
+      if (t === 'wheel') draw();
     }
 
-    function handleEnter(e) { if (e.key === 'Enter') addItem(); }
-
-    // DATA MANAGEMENT
     function addItem() {
-      const nameInput = document.getElementById('itemName');
-      const weightInput = document.getElementById('itemWeight');
-      const name = nameInput.value.trim();
-      const weight = parseInt(weightInput.value) || 1;
-
+      const name = document.getElementById('itemIn').value.trim();
+      const weight = parseInt(document.getElementById('weightIn').value) || 1;
       if (!name) return;
-
       items.push({ id: Date.now(), name, weight });
-      nameInput.value = '';
-      weightInput.value = '1';
-      nameInput.focus();
-
-      saveData();
-      renderList();
+      document.getElementById('itemIn').value = '';
+      document.getElementById('itemIn').focus();
+      save(); render();
     }
 
-    function removeItem(id) {
-      items = items.filter(i => i.id !== id);
-      saveData();
-      renderList();
+    function render() {
+      const cont = document.getElementById('listCont');
+      if (items.length === 0) { cont.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);font-size:14px;">Add choices to spin the wheel!</div>'; return; }
+      cont.innerHTML = items.map((it, i) => `
+        <div class="item-card">
+          <div class="item-name"><div class="dot" style="background:${COLORS[i % COLORS.length]}"></div>${it.name}<span class="item-weight">${it.weight > 1 ? `(${it.weight}x)` : ''}</span></div>
+          <button class="btn-del" onclick="items=items.filter(x=>x.id!==${it.id});save();render();">✕</button>
+        </div>
+      `).join('');
     }
 
-    function clearAll() {
-      if (confirm('Clear all items?')) {
-        items = [];
-        removedItems = [];
-        saveData();
-        renderList();
-      }
-    }
-
-    function restoreRemoved() {
-      items = [...items, ...removedItems];
-      removedItems = [];
-      saveData();
-      renderList();
-      document.getElementById('restoreBtn').style.display = 'none';
-      alert('Items restored!');
-    }
-
-    function saveData() {
-      sessionStorage.setItem('wheelItems', JSON.stringify(items));
-      sessionStorage.setItem('wheelRemoved', JSON.stringify(removedItems));
-    }
-
-    function saveOptions() {
-      // Option kept for internal consistency if needed, but UI is hidden
-    }
-
-    function loadData() {
-      const saved = sessionStorage.getItem('wheelItems');
-      const savedRemoved = sessionStorage.getItem('wheelRemoved');
-
-      if (saved) items = JSON.parse(saved);
-      if (savedRemoved) removedItems = JSON.parse(savedRemoved);
-    }
-
-    // RENDERING
-    function renderList() {
-      const container = document.getElementById('setupList');
-      if (items.length === 0) {
-        container.innerHTML = '<div class="empty-state">No items yet. Add some above!</div>';
-        return;
-      }
-
-      const totalWeight = getTotalWeight();
-
-      container.innerHTML = items.map((item, index) => {
-        const pct = Math.round((item.weight / totalWeight) * 100);
-        return `
-    <div class="list-item">
-      <div class="item-info">
-        <span style="width: 12px; height: 12px; border-radius: 50%; background: ${COLORS[index % COLORS.length]}; display: inline-block;"></span>
-        ${escapeHtml(item.name)}
-        <span class="weight-badge">${item.weight} (${pct}%)</span>
-      </div>
-      <button class="btn btn-sm btn-ghost btn-danger" onclick="removeItem(${item.id})" style="padding: 4px 8px;">✕</button>
-    </div>
-  `}).join('');
-    }
-
-    function escapeHtml(text) {
-      return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-    }
-
-    // WHEEL LOGIC
-    const canvas = document.getElementById('wheel');
+    const canvas = document.getElementById('wheelCanvas');
     const ctx = canvas.getContext('2d');
-    const size = 640; // High DPI internal
-    const center = size / 2;
-    const radius = size / 2 - 20;
 
-    function getTotalWeight() { return items.reduce((acc, i) => acc + i.weight, 0); }
-
-    function drawWheel(rotationOffset = 0) {
+    function draw() {
+      const size = 800;
+      const center = size / 2;
+      const radius = size / 2 - 10;
       ctx.clearRect(0, 0, size, size);
 
       if (items.length === 0) {
-        ctx.font = '30px Outfit';
-        ctx.fillStyle = '#94a3b8';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('Add items to spin', center, center);
-        return;
+        ctx.fillStyle = "#64748b"; ctx.font = "bold 30px Outfit"; ctx.textAlign = "center";
+        ctx.fillText("Empty Wheel", center, center); return;
       }
 
-      // Draw slices: EQUAL SIZE VISUALLY
-      // But color based on index
-      let currentAngle = rotationOffset;
-      const sliceAngle = (2 * Math.PI) / items.length;
+      const totalWeight = items.reduce((a, b) => a + b.weight, 0);
+      let cumulativeArc = 0;
 
-      items.forEach((item, i) => {
-        const endAngle = currentAngle + sliceAngle;
+      items.forEach((it, i) => {
+        const itemArc = (it.weight / totalWeight) * (2 * Math.PI);
+        const start = cumulativeArc + rotation;
+        const end = start + itemArc;
 
-        // Wedge
         ctx.beginPath();
         ctx.moveTo(center, center);
-        ctx.arc(center, center, radius, currentAngle, endAngle);
-        ctx.closePath();
+        ctx.arc(center, center, radius, start, end);
         ctx.fillStyle = COLORS[i % COLORS.length];
         ctx.fill();
-        ctx.strokeStyle = '#fff';
-        ctx.lineWidth = 4;
-        ctx.stroke();
 
         // Text
         ctx.save();
         ctx.translate(center, center);
-        ctx.rotate(currentAngle + sliceAngle / 2);
-        ctx.textAlign = 'right';
-        ctx.fillStyle = '#fff';
-        ctx.font = 'bold 28px Outfit, sans-serif';
-        ctx.shadowColor = 'rgba(0,0,0,0.3)';
-        ctx.shadowBlur = 4;
-        ctx.fillText(item.name, radius - 40, 10);
+        ctx.rotate(start + itemArc / 2);
+        ctx.textAlign = "right";
+        ctx.fillStyle = "white";
+        ctx.font = "bold 28px Outfit";
+        ctx.fillText(it.name.length > 15 ? it.name.substring(0, 12) + "..." : it.name, radius - 40, 10);
         ctx.restore();
 
-        currentAngle = endAngle;
+        cumulativeArc += itemArc;
       });
 
-      // Center Hub
-      ctx.beginPath();
-      ctx.arc(center, center, 50, 0, 2 * Math.PI);
-      ctx.fillStyle = 'white';
-      ctx.fill();
-      ctx.shadowColor = 'rgba(0,0,0,0.1)';
-      ctx.shadowBlur = 10;
-      ctx.stroke();
+      // Hub
+      ctx.beginPath(); ctx.arc(center, center, 40, 0, 2 * Math.PI);
+      ctx.fillStyle = "#0a0e1a"; ctx.strokeStyle = "white"; ctx.lineWidth = 4;
+      ctx.fill(); ctx.stroke();
     }
 
-    // ANIMATION & SPINNING
     function spin() {
-      try {
-        if (isSpinning || items.length === 0) return;
+      if (isSpinning || items.length === 0) return;
+      isSpinning = true;
+      document.getElementById('spinBtn').disabled = true;
 
-        isSpinning = true;
-        document.getElementById('spinBtn').disabled = true;
+      const totalWeight = items.reduce((a, b) => a + b.weight, 0);
+      let rand = Math.random() * totalWeight;
+      let winIdx = 0;
+      let cumulativeWeight = 0;
 
-        try { document.getElementById('winnerText').classList.remove('show'); } catch (e) { }
-
-        initAudio();
-
-        // 1. CHOOSE WINNER
-        const totalWeight = getTotalWeight();
-        let r = Math.random() * totalWeight;
-        let winnerIndex = -1;
-        for (let i = 0; i < items.length; i++) {
-          r -= items[i].weight;
-          if (r <= 0) { winnerIndex = i; break; }
+      for (let i = 0; i < items.length; i++) {
+        if (rand < cumulativeWeight + items[i].weight) {
+          winIdx = i;
+          break;
         }
-        if (winnerIndex === -1) winnerIndex = items.length - 1;
-
-        currentWinnerIdx = winnerIndex;
-
-        // 2. GEOMETRY & TARGETING
-        // Normalize
-        currentRotation = currentRotation % (2 * Math.PI);
-        if (isNaN(currentRotation)) currentRotation = 0;
-
-        const sliceArc = (2 * Math.PI) / items.length;
-        // Winner center angle relative to 0
-        const winnerCenterFromStart = (winnerIndex * sliceArc) + (sliceArc / 2);
-
-        // We want target to be at -PI/2 (Top). Add random offset to stop anywhere in the slice.
-        const randomOffset = (Math.random() * 0.9 - 0.45) * sliceArc;
-        const targetBase = -Math.PI / 2 - (winnerCenterFromStart + randomOffset);
-
-        // Calculate delta (must be positive)
-        let delta = (targetBase - currentRotation);
-        while (delta <= 0) delta += 2 * Math.PI;
-
-        // Add extra spins (7-9 full rotations + alignment) for more drama
-        delta += (7 + Math.floor(Math.random() * 3)) * 2 * Math.PI;
-        const finalAngle = currentRotation + delta;
-        // Longer, smoother spin (5-6 seconds)
-        const duration = 5000 + Math.random() * 1000;
-
-        // 3. ANIMATION LOOP
-        const start = performance.now();
-        const startAngle = currentRotation;
-        let lastTick = -1;
-
-        function animate(now) {
-          const elapsed = now - start;
-          const pct = Math.min(1, elapsed / duration);
-          // Ease out quintic for ultra-smooth deceleration
-          const ease = 1 - Math.pow(1 - pct, 5);
-
-          currentRotation = startAngle + (delta * ease);
-          drawWheel(currentRotation);
-
-          // Audio
-          // Angle at top
-          let angleAtTop = (-Math.PI / 2 - currentRotation) % (2 * Math.PI);
-          while (angleAtTop < 0) angleAtTop += 2 * Math.PI;
-
-          const idx = Math.floor(angleAtTop / sliceArc) % items.length;
-          if (idx !== lastTick) {
-            // tick sound only at high speed
-            if (pct < 0.95) playTick();
-            lastTick = idx;
-          }
-
-          if (pct < 1) {
-            requestAnimationFrame(animate);
-          } else {
-            // Finish
-            currentRotation = finalAngle;
-            drawWheel(currentRotation);
-
-            isSpinning = false;
-            document.getElementById('spinBtn').disabled = false;
-            finishSpin(winnerIndex);
-          }
-        }
-        requestAnimationFrame(animate);
-
-      } catch (err) {
-        alert("Error spinning: " + err.message);
-        isSpinning = false;
-        document.getElementById('spinBtn').disabled = false;
+        cumulativeWeight += items[i].weight;
       }
+      winnerIdx = winIdx;
+
+      // Calculate target angle based on weighted arcs
+      let targetCumulativeArc = 0;
+      for (let i = 0; i < winIdx; i++) {
+        targetCumulativeArc += (items[i].weight / totalWeight) * (2 * Math.PI);
+      }
+      const winnerArc = (items[winIdx].weight / totalWeight) * (2 * Math.PI);
+
+      // The pointer is at 1.5 * Math.PI (top). To land the center of winnerArc at top:
+      // (rotation + targetCumulativeArc + winnerArc/2) % 2PI should be 1.5 * PI
+      // But let's simplify: targetAngle is where the slice center should be relative to rotation 0.
+      const targetAngle = 1.5 * Math.PI - (targetCumulativeArc + winnerArc / 2);
+
+      const spins = 5 + Math.random() * 5;
+      const finalRotation = rotation + (spins * 2 * Math.PI) + (targetAngle - (rotation % (2 * Math.PI)));
+
+      const start = performance.now();
+      const dur = 5000;
+      const startRot = rotation;
+
+      function animate(now) {
+        let elapsed = now - start;
+        let p = Math.min(1, elapsed / dur);
+        let ease = 1 - Math.pow(1 - p, 4); // Quartic ease-out
+        rotation = startRot + (finalRotation - startRot) * ease;
+        draw();
+        if (p < 1) requestAnimationFrame(animate);
+        else finishSpin();
+      }
+      requestAnimationFrame(animate);
     }
 
-    function finishSpin(index) {
-      const winner = items[index];
-      document.getElementById('modalWinnerName').textContent = winner.name;
-
-      playWin();
+    function finishSpin() {
+      isSpinning = false;
+      document.getElementById('spinBtn').disabled = false;
+      document.getElementById('winnerName').textContent = items[winnerIdx].name;
+      document.getElementById('modal').classList.add('active');
       fireConfetti();
-
-      // Show Modal
-      setTimeout(() => {
-        document.getElementById('resultModal').classList.add('open');
-      }, 500);
     }
 
-    // MODAL ACTIONS
-    function closeModal() {
-      document.getElementById('resultModal').classList.remove('open');
+    function closeModal() { document.getElementById('modal').classList.remove('active'); }
+    function removeAndClose() {
+      items.splice(winnerIdx, 1);
+      save(); render(); closeModal();
     }
 
-    function removeWinner() {
-      if (currentWinnerIdx > -1) {
-        const winner = items[currentWinnerIdx];
-        removedItems.push(winner);
-        removeItem(winner.id);
-      }
-      closeModal();
-    }
-
-    // AUDIO
-    function initAudio() {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      }
-    }
-
-    function playTick() {
-      if (!audioCtx) return;
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.05);
-
-      gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
-
-      osc.start();
-      osc.stop(audioCtx.currentTime + 0.05);
-    }
-
-    function playWin() {
-      if (!audioCtx) return;
-      const now = audioCtx.currentTime;
-
-      // Major Chord Tada
-      [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-
-        osc.frequency.value = freq;
-        const start = now + i * 0.05;
-        gain.gain.setValueAtTime(0.0, start);
-        gain.gain.linearRampToValueAtTime(0.1, start + 0.05);
-        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.8);
-
-        osc.start(start);
-        osc.stop(start + 0.8);
-      });
-    }
-
-    // CONFETTI SYSTEM (Simple Particle System)
-    const particles = [];
-    const confettiColors = ['#f472b6', '#3b82f6', '#facc15', '#22c55e', '#ef4444'];
-
+    // CONFETTI
+    const confCanvas = document.getElementById('confetti');
+    const cctx = confCanvas.getContext('2d');
+    let conf = [];
     function fireConfetti() {
+      confCanvas.width = window.innerWidth; confCanvas.height = window.innerHeight;
       for (let i = 0; i < 100; i++) {
-        particles.push({
-          x: window.innerWidth / 2,
-          y: window.innerHeight / 2,
-          vx: (Math.random() - 0.5) * 15,
-          vy: (Math.random() - 1) * 15,
-          size: Math.random() * 8 + 4,
-          color: confettiColors[Math.floor(Math.random() * confettiColors.length)],
-          life: 1,
-          rotation: Math.random() * 360,
-          rotationSpeed: (Math.random() - 0.5) * 10
-        });
+        conf.push({ x: window.innerWidth / 2, y: window.innerHeight / 2, vx: (Math.random() - 0.5) * 15, vy: (Math.random() - 1) * 15, s: Math.random() * 8 + 4, c: COLORS[Math.floor(Math.random() * COLORS.length)], l: 1 });
       }
+      if (conf.length === 100) reqConf();
     }
-
-    function loopConfetti() {
-      const cCanvas = document.getElementById('confetti-canvas');
-      const cCtx = cCanvas.getContext('2d');
-
-      // Resize
-      if (cCanvas.width !== window.innerWidth || cCanvas.height !== window.innerHeight) {
-        cCanvas.width = window.innerWidth;
-        cCanvas.height = window.innerHeight;
+    function reqConf() {
+      cctx.clearRect(0, 0, confCanvas.width, confCanvas.height);
+      for (let i = conf.length - 1; i >= 0; i--) {
+        let p = conf[i]; p.x += p.vx; p.y += p.vy; p.vy += 0.3; p.l -= 0.01;
+        if (p.l <= 0) { conf.splice(i, 1); continue; }
+        cctx.fillStyle = p.c; cctx.globalAlpha = p.l;
+        cctx.fillRect(p.x, p.y, p.s, p.s);
       }
-
-      cCtx.clearRect(0, 0, cCanvas.width, cCanvas.height);
-
-      for (let i = particles.length - 1; i >= 0; i--) {
-        let p = particles[i];
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vy += 0.3; // Gravity
-        p.life -= 0.015;
-        p.rotation += p.rotationSpeed;
-
-        if (p.life <= 0) {
-          particles.splice(i, 1);
-          continue;
-        }
-
-        cCtx.save();
-        cCtx.translate(p.x, p.y);
-        cCtx.rotate(p.rotation * Math.PI / 180);
-        cCtx.fillStyle = p.color;
-        cCtx.globalAlpha = p.life;
-        cCtx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
-        cCtx.restore();
-      }
-
-      requestAnimationFrame(loopConfetti);
+      if (conf.length > 0) requestAnimationFrame(reqConf);
     }
-
   </script>
 </body>
 

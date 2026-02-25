@@ -939,9 +939,8 @@
         }
     </style>
     <script type="module">
-        import { checkAuth, logout, auth } from "./auth.js";
-        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        checkAuth();
+        import { checkAuth, logout, auth, onAuthStateChanged } from "./auth.js";
+        checkAuth(false);
         window.handleLogout = logout;
         onAuthStateChanged(auth, (user) => {
             if (user) {

@@ -3,6 +3,10 @@ import {
     getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut,
     createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import {
+    getFirestore, doc, getDoc, setDoc, serverTimestamp,
+    collection, addDoc, query, orderBy, onSnapshot, deleteDoc, limit
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyD1leyURVpzS25EJmvLoyjs2Fw9UEBu4qk",
@@ -15,15 +19,18 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
 export {
-    auth, provider, signInWithPopup, onAuthStateChanged, signOut,
-    createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile
+    auth, db, provider, signInWithPopup, onAuthStateChanged, signOut,
+    createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile,
+    doc, getDoc, setDoc, serverTimestamp,
+    collection, addDoc, query, orderBy, onSnapshot, deleteDoc, limit
 };
 
 export function checkAuth(redirectIfNotAuth = true) {
-    onAuthStateChanged(auth, (user) => {
+    return onAuthStateChanged(auth, (user) => {
         if (!user && redirectIfNotAuth) {
             window.location.href = "login.html";
         }

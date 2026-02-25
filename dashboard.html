@@ -930,20 +930,13 @@
         }
     </style>
     <script type="module">
-        import { checkAuth, logout, auth } from "./auth.js";
-        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        const fbApp = getApp(); // reuse the app already initialized by auth.js
-        const db = getFirestore(fbApp);
+        import {
+            auth, db, checkAuth, logout, onAuthStateChanged,
+            doc, getDoc, setDoc
+        } from "./auth.js";
 
         checkAuth();
         window.handleLogout = logout;
-        window.db = db;
-        window.firestoreDoc = doc;
-        window.firestoreGetDoc = getDoc;
-        window.firestoreSetDoc = setDoc;
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -1168,11 +1161,19 @@
                     <div class="settings-title">👤 Profile</div>
                     <div class="profile-form" id="profileForm">
                         <div class="profile-pic-wrap">
-                            <div class="profile-pic-preview" id="profilePicPreview">U</div>
+                            <div class="profile-pic-preview" id="profilePicPreview"
+                                onclick="document.getElementById('pfpFile').click()" style="cursor:pointer;"
+                                title="Click to upload">U</div>
                             <div class="form-group" style="flex:1;">
-                                <label class="form-label">Profile Picture URL</label>
-                                <input type="url" class="form-input" id="profPhotoUrl"
-                                    placeholder="https://example.com/avatar.png" oninput="previewPFP()">
+                                <label class="form-label">Profile Picture</label>
+                                <div style="display:flex; gap:10px;">
+                                    <input type="url" class="form-input" id="profPhotoUrl"
+                                        placeholder="Paste image URL..." oninput="previewPFP()">
+                                    <button class="m-btn m-btn-sec" onclick="document.getElementById('pfpFile').click()"
+                                        style="white-space:nowrap; padding:0 15px; background:var(--surface2); border:1px solid var(--border); border-radius:10px; color:var(--text); cursor:pointer; font-size:12px; font-weight:600;">Choose
+                                        File</button>
+                                </div>
+                                <input type="file" id="pfpFile" hidden accept="image/*" onchange="handlePfpFile(event)">
                             </div>
                         </div>
                         <div class="form-group">
@@ -1299,8 +1300,30 @@
             const av = document.getElementById('userAv');
             if (url) {
                 preview.innerHTML = `<img src="${url}" alt="PFP" onerror="this.parentElement.textContent='?'">`;
-                av.innerHTML = `<img src="${url}" alt="" onerror="this.parentElement.textContent='U'">`;
+                if (av) av.innerHTML = `<img src="${url}" alt="" onerror="this.parentElement.textContent='U'">`;
             }
+        }
+
+        function handlePfpFile(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function (ev) {
+                const img = new Image();
+                img.onload = function () {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 128; canvas.height = 128;
+                    const ctx = canvas.getContext('2d');
+                    const min = Math.min(img.width, img.height);
+                    const sx = (img.width - min) / 2, sy = (img.height - min) / 2;
+                    ctx.drawImage(img, sx, sy, min, min, 0, 0, 128, 128);
+                    const base64 = canvas.toDataURL('image/jpeg', 0.8);
+                    document.getElementById('profPhotoUrl').value = base64;
+                    previewPFP();
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
         }
 
         async function saveProfile() {

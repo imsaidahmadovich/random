@@ -40,12 +40,30 @@
             padding: 0;
         }
 
+        body.in-iframe nav {
+            display: none !important;
+        }
+
+        body.in-iframe main {
+            padding-top: 20px;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
             overflow-x: hidden;
+            transition: background 0.4s, color 0.4s;
+        }
+
+        body[data-theme="light"] {
+            --bg: #f8fafc;
+            --surface: rgba(255, 255, 255, 0.8);
+            --border: #e2e8f0;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --btn-num: #f1f5f9;
         }
 
         #orb-bg {
@@ -539,11 +557,30 @@
                 max-width: 420px
             }
         }
+
+        /* IFRAME INTEGRATION */
+        body.in-iframe nav {
+            display: none !important;
+        }
+
+        body.in-iframe main {
+            padding-top: 20px;
+        }
     </style>
     <script type="module">
         import { checkAuth, logout } from "./auth.js";
         checkAuth();
         window.handleLogout = logout;
+
+        // Theme sync
+        window.addEventListener('message', e => {
+            if (e.data.type === 'taso-theme') document.body.setAttribute('data-theme', e.data.theme);
+        });
+        const savedTheme = localStorage.getItem('taso-theme');
+        if (savedTheme) document.body.setAttribute('data-theme', savedTheme);
+
+        // Iframe detection
+        if (window.self !== window.top) document.body.classList.add('in-iframe');
     </script>
 </head>
 
@@ -673,8 +710,8 @@
         }
 
         function updateDisplay(val) {
-            displayEl.textContent = val;
-            displayEl.classList.toggle('small', val.toString().length > 10);
+            displayEl.textContent = formatExpr(val);
+            displayEl.classList.toggle('small', val.toString().length > 12);
             displayEl.classList.toggle('display-error', false);
         }
 
@@ -682,44 +719,39 @@
             if (justCalc) { expr = ''; justCalc = false; }
             if (n === '.' && expr.split(/[\+\-\*\/\(\^]/).pop().includes('.')) return;
             expr += n;
-            exprEl.textContent = formatExpr(expr);
-            updateDisplay(expr.split(/[\+\-\*\/\(\^%]/).pop() || expr);
+            updateDisplay(expr);
         }
 
         function inputOp(op) {
             justCalc = false;
-            if (!expr && op === '-') { expr = '-'; exprEl.textContent = '-'; updateDisplay('-'); return; }
+            if (!expr && op === '-') { expr = '-'; updateDisplay('-'); return; }
             if (!expr) return;
             const last = expr[expr.length - 1];
             if (['+', '-', '*', '/', '^', '%'].includes(last)) expr = expr.slice(0, -1);
             expr += op;
-            exprEl.textContent = formatExpr(expr);
-            updateDisplay(op === '*' ? '×' : op === '/' ? '÷' : op);
+            updateDisplay(expr);
         }
 
         function inputFn(fn) {
-            if (justCalc && fn !== '(' && fn !== ')' && fn !== '^') {
-                expr = 'ans'; lastResult && (expr = lastResult);
+            if (justCalc && !['(', ')', '^'].includes(fn)) {
+                expr = lastResult || '';
                 justCalc = false;
             }
-            if (fn === 'pi') { expr += 'Math.PI'; exprEl.textContent = formatExpr(expr); updateDisplay('π'); return; }
-            if (fn === 'e') { expr += 'Math.E'; exprEl.textContent = formatExpr(expr); updateDisplay('e'); return; }
+            if (fn === 'pi') { expr += 'Math.PI'; updateDisplay(expr); return; }
+            if (fn === 'e') { expr += 'Math.E'; updateDisplay(expr); return; }
             expr += fn;
-            exprEl.textContent = formatExpr(expr);
-            updateDisplay(fn.replace('(', ''));
+            updateDisplay(expr);
         }
 
         function clearAll() { expr = ''; exprEl.textContent = ''; updateDisplay('0'); justCalc = false; }
         function backspace() {
             expr = expr.slice(0, -1);
-            exprEl.textContent = formatExpr(expr);
             updateDisplay(expr || '0');
         }
         function toggleSign() {
             if (!expr) return;
             if (expr.startsWith('-')) expr = expr.slice(1);
             else expr = '-' + expr;
-            exprEl.textContent = formatExpr(expr);
             updateDisplay(expr);
         }
 
