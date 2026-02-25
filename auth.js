@@ -1,5 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import {
+    getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut,
+    createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyD1leyURVpzS25EJmvLoyjs2Fw9UEBu4qk",
@@ -14,7 +17,10 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-export { auth, provider, signInWithPopup, onAuthStateChanged, signOut };
+export {
+    auth, provider, signInWithPopup, onAuthStateChanged, signOut,
+    createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile
+};
 
 export function checkAuth(redirectIfNotAuth = true) {
     onAuthStateChanged(auth, (user) => {

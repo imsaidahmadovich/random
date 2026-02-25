@@ -12,10 +12,13 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap"
         rel="stylesheet">
     <style>
+        /* ═══════════ THEME VARIABLES ═══════════ */
         :root {
             --bg: #05070f;
+            --bg2: #0a0e1a;
             --surface: rgba(255, 255, 255, 0.04);
             --surface2: rgba(255, 255, 255, 0.06);
+            --surface3: rgba(255, 255, 255, 0.08);
             --border: rgba(255, 255, 255, 0.08);
             --text: #f1f5f9;
             --text-muted: #64748b;
@@ -27,8 +30,24 @@
             --emerald: #10b981;
             --amber: #f59e0b;
             --sidebar-w: 260px;
-            --sidebar-collapsed: 0px;
             --topbar-h: 52px;
+            --input-bg: rgba(255, 255, 255, 0.06);
+            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* ═══════════ LIGHT THEME ═══════════ */
+        body[data-theme="light"] {
+            --bg: #f0f2f5;
+            --bg2: #e8eaef;
+            --surface: rgba(255, 255, 255, 0.85);
+            --surface2: rgba(255, 255, 255, 0.95);
+            --surface3: rgba(0, 0, 0, 0.04);
+            --border: rgba(0, 0, 0, 0.1);
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --text-subtle: #475569;
+            --input-bg: rgba(0, 0, 0, 0.04);
+            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         }
 
         *,
@@ -49,6 +68,7 @@
             font-family: 'Inter', sans-serif;
             background: var(--bg);
             color: var(--text);
+            transition: background 0.4s, color 0.4s;
         }
 
         /* ── BACKGROUND ── */
@@ -65,6 +85,7 @@
             border-radius: 50%;
             filter: blur(130px);
             opacity: 0.1;
+            transition: opacity 0.4s;
         }
 
         .orb1 {
@@ -83,6 +104,10 @@
             right: -100px;
         }
 
+        body[data-theme="light"] .orb {
+            opacity: 0.05;
+        }
+
         body::before {
             content: '';
             position: fixed;
@@ -91,6 +116,10 @@
             pointer-events: none;
             background-image: linear-gradient(rgba(255, 255, 255, 0.012) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.012) 1px, transparent 1px);
             background-size: 60px 60px;
+        }
+
+        body[data-theme="light"]::before {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
         }
 
         /* ── TOP BAR ── */
@@ -105,9 +134,10 @@
             align-items: center;
             justify-content: space-between;
             padding: 0 20px;
-            background: rgba(5, 7, 15, 0.92);
+            background: var(--bg2);
             backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--border);
+            transition: background 0.4s;
         }
 
         .topbar-left {
@@ -154,24 +184,31 @@
         .topbar-right {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
-        .user-pill {
+        .profile-pill {
             display: flex;
             align-items: center;
             gap: 8px;
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 50px;
-            padding: 4px 14px 4px 6px;
+            padding: 4px 14px 4px 4px;
             font-size: 0.78rem;
             color: var(--text-subtle);
+            cursor: pointer;
+            transition: all 0.25s;
+            text-decoration: none;
         }
 
-        .user-av {
-            width: 26px;
-            height: 26px;
+        .profile-pill:hover {
+            border-color: rgba(124, 58, 237, 0.3);
+        }
+
+        .profile-av {
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             display: flex;
@@ -180,6 +217,13 @@
             font-size: 0.65rem;
             font-weight: 700;
             color: white;
+            overflow: hidden;
+        }
+
+        .profile-av img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .logout-btn {
@@ -215,14 +259,16 @@
         .sidebar {
             width: var(--sidebar-w);
             flex-shrink: 0;
-            background: rgba(5, 7, 15, 0.7);
+            background: var(--bg2);
             border-right: 1px solid var(--border);
             display: flex;
             flex-direction: column;
-            transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-                transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-            overflow: hidden;
+            transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), background 0.4s;
+            overflow-x: hidden;
+            overflow-y: auto;
             z-index: 100;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.06) transparent;
         }
 
         .sidebar.collapsed {
@@ -281,11 +327,69 @@
             margin: 8px 14px;
         }
 
-        .sidebar-footer {
+        /* Community (prominent) */
+        .sidebar-community {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 18px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 700;
+            white-space: nowrap;
+            background: linear-gradient(135deg, rgba(244, 63, 94, 0.12), rgba(244, 63, 94, 0.04));
+            color: #fb7185;
+            border-left: 3px solid var(--rose);
+            transition: all 0.25s;
+            text-decoration: none;
+            margin: 6px 10px;
+            border-radius: 12px;
+        }
+
+        .sidebar-community:hover {
+            background: linear-gradient(135deg, rgba(244, 63, 94, 0.2), rgba(244, 63, 94, 0.08));
+        }
+
+        .sidebar-community.active {
+            background: linear-gradient(135deg, rgba(244, 63, 94, 0.25), rgba(244, 63, 94, 0.1));
+            box-shadow: 0 0 20px rgba(244, 63, 94, 0.15);
+        }
+
+        .community-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--rose);
+            animation: comPulse 2s infinite;
+            margin-left: auto;
+        }
+
+        @keyframes comPulse {
+
+            0%,
+            100% {
+                opacity: 0.4;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        /* Settings */
+        .sidebar-settings {
             margin-top: auto;
-            padding: 14px 18px;
             border-top: 1px solid var(--border);
-            font-size: 0.68rem;
+            padding: 0;
+        }
+
+        .sidebar-settings .sidebar-item {
+            padding: 14px 18px;
+        }
+
+        .sidebar-footer {
+            padding: 10px 18px;
+            font-size: 0.62rem;
             color: var(--text-muted);
             white-space: nowrap;
         }
@@ -297,16 +401,20 @@
             flex-direction: column;
             overflow: hidden;
             position: relative;
-            transition: margin-left 0.35s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        /* ── HOME VIEW ── */
-        .home-view {
+        /* ── VIEWS ── */
+        .dash-view {
             flex: 1;
             overflow-y: auto;
             padding: 32px;
+            display: none;
             scrollbar-width: thin;
             scrollbar-color: rgba(255, 255, 255, 0.06) transparent;
+        }
+
+        .dash-view.active {
+            display: block;
         }
 
         .home-greeting {
@@ -323,15 +431,13 @@
             margin-bottom: 32px;
         }
 
-        /* Quote Banner */
+        /* Quote */
         .quote-banner {
             background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(6, 182, 212, 0.08));
             border: 1px solid rgba(124, 58, 237, 0.2);
             border-radius: 20px;
             padding: 28px 32px;
             margin-bottom: 32px;
-            position: relative;
-            overflow: hidden;
             min-height: 100px;
             transition: opacity 0.5s;
         }
@@ -340,7 +446,6 @@
             font-size: 1.05rem;
             font-style: italic;
             line-height: 1.7;
-            color: var(--text);
             margin-bottom: 10px;
         }
 
@@ -351,7 +456,7 @@
             color: var(--primary-light);
         }
 
-        /* Widgets Grid */
+        /* Widgets */
         .widgets-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -365,6 +470,7 @@
             padding: 24px;
             transition: all 0.3s;
             animation: widgetIn 0.5s ease-out both;
+            box-shadow: var(--card-shadow);
         }
 
         .widget:hover {
@@ -414,14 +520,9 @@
             color: var(--primary-light);
             text-decoration: none;
             cursor: pointer;
-            transition: color 0.2s;
         }
 
-        .widget-link:hover {
-            color: var(--text);
-        }
-
-        /* Habit Widget */
+        /* Habit mini */
         .habit-summary {
             display: flex;
             flex-direction: column;
@@ -434,7 +535,7 @@
             gap: 10px;
             padding: 10px 12px;
             border-radius: 12px;
-            background: rgba(255, 255, 255, 0.03);
+            background: var(--surface3);
             border: 1px solid var(--border);
         }
 
@@ -457,7 +558,7 @@
             width: 7px;
             height: 7px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.06);
+            background: var(--surface3);
         }
 
         .hd.done {
@@ -470,13 +571,7 @@
             white-space: nowrap;
         }
 
-        /* Mood Widget */
-        .mood-summary {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
+        /* Mood mini */
         .mood-week-bars {
             display: flex;
             gap: 6px;
@@ -496,7 +591,6 @@
             width: 100%;
             border-radius: 6px 6px 3px 3px;
             min-height: 3px;
-            transition: height 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .mood-day-label {
@@ -509,17 +603,11 @@
             font-size: 0.75rem;
         }
 
-        /* Notes Widget */
-        .notes-summary {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
+        /* Notes mini */
         .note-mini {
             padding: 10px 12px;
             border-radius: 12px;
-            background: rgba(255, 255, 255, 0.03);
+            background: var(--surface3);
             border: 1px solid var(--border);
             cursor: pointer;
             transition: all 0.2s;
@@ -556,6 +644,242 @@
             font-size: 2.5rem;
             margin-bottom: 8px;
             opacity: 0.3;
+        }
+
+        /* ══════ SETTINGS VIEW ══════ */
+        .settings-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .settings-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .setting-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .setting-row:last-child {
+            border-bottom: none;
+        }
+
+        .setting-label {
+            font-size: 0.88rem;
+            font-weight: 600;
+        }
+
+        .setting-desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* Toggle switch */
+        .toggle {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-track {
+            position: absolute;
+            inset: 0;
+            border-radius: 50px;
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .toggle-track::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--text-subtle);
+            top: 2px;
+            left: 2px;
+            transition: all 0.3s;
+        }
+
+        .toggle input:checked+.toggle-track {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .toggle input:checked+.toggle-track::after {
+            transform: translateX(20px);
+            background: white;
+        }
+
+        /* Theme selector */
+        .theme-options {
+            display: flex;
+            gap: 12px;
+        }
+
+        .theme-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            cursor: pointer;
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            transition: all 0.25s;
+        }
+
+        .theme-btn:hover {
+            border-color: var(--primary-light);
+        }
+
+        .theme-btn.active {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+        }
+
+        .theme-dark {
+            background: #1a1a2e;
+        }
+
+        .theme-light {
+            background: #f0f2f5;
+        }
+
+        /* Profile form */
+        .profile-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--text-subtle);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .form-input {
+            padding: 11px 14px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--input-bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.25s;
+        }
+
+        .form-input:focus {
+            border-color: rgba(124, 58, 237, 0.5);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.08);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        textarea.form-input {
+            resize: vertical;
+            min-height: 70px;
+        }
+
+        .profile-pic-wrap {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+
+        .profile-pic-preview {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: white;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .profile-pic-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .save-btn {
+            padding: 12px 28px;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, var(--primary), #4f46e5);
+            color: white;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            align-self: flex-start;
+        }
+
+        .save-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
+        }
+
+        .save-btn:disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .save-status {
+            font-size: 0.78rem;
+            color: var(--emerald);
+            margin-left: 12px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .save-status.show {
+            opacity: 1;
         }
 
         /* ── TOOL IFRAME ── */
@@ -600,7 +924,7 @@
                 display: block;
             }
 
-            .user-pill {
+            .profile-pill span {
                 display: none;
             }
         }
@@ -608,25 +932,66 @@
     <script type="module">
         import { checkAuth, logout, auth } from "./auth.js";
         import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const fbApp = getApp(); // reuse the app already initialized by auth.js
+        const db = getFirestore(fbApp);
+
         checkAuth();
         window.handleLogout = logout;
-        onAuthStateChanged(auth, (user) => {
+        window.db = db;
+        window.firestoreDoc = doc;
+        window.firestoreGetDoc = getDoc;
+        window.firestoreSetDoc = setDoc;
+
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
-                const av = document.getElementById('userAv');
-                const un = document.getElementById('userName');
-                if (av) av.textContent = (user.displayName || user.email || 'U')[0].toUpperCase();
-                if (un) un.textContent = user.displayName || user.email || 'User';
+                window.currentUserId = user.uid;
+                window.currentUserEmail = user.email;
+                const initial = (user.displayName || user.email || 'U')[0].toUpperCase();
+
+                // Topbar
+                document.getElementById('userAv').textContent = initial;
+                document.getElementById('userName').textContent = user.displayName || user.email || 'User';
+                document.getElementById('profilePicPreview').textContent = initial;
+
                 // Greeting
                 const h = new Date().getHours();
                 const greet = h < 12 ? 'Good Morning' : h < 17 ? 'Good Afternoon' : 'Good Evening';
                 const gEl = document.getElementById('greeting');
                 if (gEl) gEl.textContent = `${greet}, ${(user.displayName || 'there').split(' ')[0]}! 👋`;
+
+                // Pre-fill email
+                document.getElementById('profEmail').value = user.email || '';
+
+                // Load profile from Firestore
+                try {
+                    const snap = await getDoc(doc(db, 'profiles', user.uid));
+                    if (snap.exists()) {
+                        const d = snap.data();
+                        if (d.username) document.getElementById('profUsername').value = d.username;
+                        if (d.bio) document.getElementById('profBio').value = d.bio;
+                        if (d.telegram) document.getElementById('profTelegram').value = d.telegram;
+                        if (d.instagram) document.getElementById('profInstagram').value = d.instagram;
+                        if (d.photoURL) {
+                            document.getElementById('profPhotoUrl').value = d.photoURL;
+                            document.getElementById('profilePicPreview').innerHTML = `<img src="${d.photoURL}" alt="PFP">`;
+                            document.getElementById('userAv').innerHTML = `<img src="${d.photoURL}" alt="">`;
+                        }
+                        if (d.anonymous) document.getElementById('anonToggle').checked = true;
+                    }
+                } catch (e) { console.log('Profile load:', e); }
+
+                // Load settings from localStorage
+                const savedAnon = localStorage.getItem('taso-anonymous');
+                if (savedAnon === 'true') document.getElementById('anonToggle').checked = true;
             }
         });
     </script>
 </head>
 
-<body>
+<body data-theme="dark">
     <div id="orb-bg">
         <div class="orb orb1"></div>
         <div class="orb orb2"></div>
@@ -635,26 +1000,33 @@
     <!-- TOP BAR -->
     <div class="topbar">
         <div class="topbar-left">
-            <button class="hamburger" id="menuBtn" onclick="toggleSidebar()" title="Toggle Menu">☰</button>
+            <button class="hamburger" onclick="toggleSidebar()" title="Toggle Menu">☰</button>
             <a href="index.html" class="topbar-logo">Taso<span>.</span></a>
         </div>
         <div class="topbar-right">
-            <div class="user-pill">
-                <div class="user-av" id="userAv">U</div>
+            <div class="profile-pill" onclick="openView('settings')">
+                <div class="profile-av" id="userAv">U</div>
                 <span id="userName">Loading…</span>
             </div>
             <button class="logout-btn" onclick="handleLogout()">Sign Out</button>
         </div>
     </div>
 
-    <!-- SIDEBAR OVERLAY (MOBILE) -->
+    <!-- SIDEBAR OVERLAY -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
     <div class="layout">
         <!-- SIDEBAR -->
         <div class="sidebar" id="sidebar">
+            <!-- Community at TOP -->
+            <div class="sidebar-community" data-tool="community.html" onclick="openTool('community.html', this)">
+                <span class="sidebar-icon">💬</span> Community Chat
+                <span class="community-dot"></span>
+            </div>
+
+            <div class="sidebar-divider"></div>
             <div class="sidebar-section-title">Dashboard</div>
-            <div class="sidebar-item active" data-tool="home" onclick="openTool('home', this)">
+            <div class="sidebar-item active" data-view="home" onclick="openView('home', this)">
                 <span class="sidebar-icon">🏠</span> Home
             </div>
 
@@ -692,37 +1064,38 @@
             </div>
 
             <div class="sidebar-divider"></div>
-            <div class="sidebar-section-title">Fun & Collab</div>
+            <div class="sidebar-section-title">Fun</div>
             <div class="sidebar-item" data-tool="wheel_app.html" onclick="openTool('wheel_app.html', this)">
                 <span class="sidebar-icon">🎡</span> Spin the Wheel
             </div>
             <div class="sidebar-item" data-tool="team_divider.html" onclick="openTool('team_divider.html', this)">
                 <span class="sidebar-icon">⚖️</span> Team Divider
             </div>
-            <div class="sidebar-item" data-tool="community.html" onclick="openTool('community.html', this)">
-                <span class="sidebar-icon">💬</span> Community
-            </div>
 
+            <!-- Settings at BOTTOM -->
+            <div class="sidebar-settings">
+                <div class="sidebar-item" data-view="settings" onclick="openView('settings', this)">
+                    <span class="sidebar-icon">⚙️</span> Settings
+                </div>
+            </div>
             <div class="sidebar-footer">© 2026 Taso. Made with ❤️</div>
         </div>
 
         <!-- MAIN CONTENT -->
         <div class="main-content" id="mainContent">
-            <!-- HOME VIEW -->
-            <div class="home-view" id="homeView">
+
+            <!-- ═══ HOME VIEW ═══ -->
+            <div class="dash-view active" id="homeView">
                 <div class="home-greeting" id="greeting">Good day! 👋</div>
                 <div class="home-sub">Here's your personal dashboard overview.</div>
 
-                <!-- Rotating Quote -->
                 <div class="quote-banner" id="quoteBanner">
-                    <div class="quote-text" id="quoteText">"The only way to do great work is to love what you do."</div>
-                    <div class="quote-author" id="quoteAuthor">— Steve Jobs</div>
+                    <div class="quote-text" id="quoteText"></div>
+                    <div class="quote-author" id="quoteAuthor"></div>
                 </div>
 
-                <!-- Widgets -->
                 <div class="widgets-grid">
-                    <!-- Habit Widget -->
-                    <div class="widget" style="animation-delay: 0s;">
+                    <div class="widget">
                         <div class="widget-head">
                             <div class="widget-title">🌱 Habits Today</div>
                             <span class="widget-link"
@@ -731,27 +1104,106 @@
                         </div>
                         <div class="habit-summary" id="habitWidget"></div>
                     </div>
-
-                    <!-- Mood Widget -->
-                    <div class="widget" style="animation-delay: 0.08s;">
+                    <div class="widget">
                         <div class="widget-head">
                             <div class="widget-title">💭 Mood This Week</div>
                             <span class="widget-link"
                                 onclick="openTool('mood.html', document.querySelector('[data-tool=\'mood.html\']'))">Open
                                 →</span>
                         </div>
-                        <div class="mood-summary" id="moodWidget"></div>
+                        <div id="moodWidget"></div>
                     </div>
-
-                    <!-- Notes Widget -->
-                    <div class="widget" style="animation-delay: 0.16s;">
+                    <div class="widget">
                         <div class="widget-head">
                             <div class="widget-title">📝 Recent Notes</div>
                             <span class="widget-link"
                                 onclick="openTool('notes.html', document.querySelector('[data-tool=\'notes.html\']'))">Open
                                 →</span>
                         </div>
-                        <div class="notes-summary" id="notesWidget"></div>
+                        <div id="notesWidget"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ SETTINGS VIEW ═══ -->
+            <div class="dash-view" id="settingsView">
+                <div class="home-greeting">⚙️ Settings</div>
+                <div class="home-sub">Customize your Taso experience.</div>
+
+                <!-- APPEARANCE -->
+                <div class="settings-section">
+                    <div class="settings-title">🎨 Appearance</div>
+                    <div class="setting-row">
+                        <div>
+                            <div class="setting-label">Theme</div>
+                            <div class="setting-desc">Choose dark or light mode for the dashboard and all tools.</div>
+                        </div>
+                        <div class="theme-options">
+                            <div class="theme-btn theme-dark active" id="btnDark" onclick="setTheme('dark')"
+                                title="Dark">🌙</div>
+                            <div class="theme-btn theme-light" id="btnLight" onclick="setTheme('light')" title="Light">
+                                ☀️</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COMMUNITY -->
+                <div class="settings-section">
+                    <div class="settings-title">💬 Community</div>
+                    <div class="setting-row">
+                        <div>
+                            <div class="setting-label">Anonymous Messaging</div>
+                            <div class="setting-desc">Send messages without showing your name. Admins can still see your
+                                identity.</div>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="anonToggle" onchange="saveAnonymousPref()">
+                            <div class="toggle-track"></div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- PROFILE -->
+                <div class="settings-section">
+                    <div class="settings-title">👤 Profile</div>
+                    <div class="profile-form" id="profileForm">
+                        <div class="profile-pic-wrap">
+                            <div class="profile-pic-preview" id="profilePicPreview">U</div>
+                            <div class="form-group" style="flex:1;">
+                                <label class="form-label">Profile Picture URL</label>
+                                <input type="url" class="form-input" id="profPhotoUrl"
+                                    placeholder="https://example.com/avatar.png" oninput="previewPFP()">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-input" id="profEmail" readonly
+                                style="opacity:0.6;cursor:not-allowed;">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Unique Username</label>
+                            <input type="text" class="form-input" id="profUsername" placeholder="e.g. coolguy42"
+                                maxlength="32">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Bio</label>
+                            <textarea class="form-input" id="profBio" placeholder="Tell us about yourself..."
+                                maxlength="200"></textarea>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+                            <div class="form-group">
+                                <label class="form-label">Telegram</label>
+                                <input type="text" class="form-input" id="profTelegram" placeholder="@username">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Instagram</label>
+                                <input type="text" class="form-input" id="profInstagram" placeholder="@username">
+                            </div>
+                        </div>
+                        <div style="display:flex;align-items:center;">
+                            <button class="save-btn" onclick="saveProfile()">💾 Save Profile</button>
+                            <span class="save-status" id="saveStatus">✓ Saved!</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -764,49 +1216,118 @@
     </div>
 
     <script>
-        // ─── SIDEBAR TOGGLE ───
+        // ─── SIDEBAR ───
         let sidebarOpen = true;
         function toggleSidebar() {
             sidebarOpen = !sidebarOpen;
             document.getElementById('sidebar').classList.toggle('collapsed', !sidebarOpen);
             document.getElementById('sidebarOverlay').classList.toggle('show', sidebarOpen && window.innerWidth <= 768);
         }
-
-        // Close sidebar on mobile overlay click
         window.addEventListener('resize', () => {
-            if (window.innerWidth > 768) {
-                document.getElementById('sidebarOverlay').classList.remove('show');
-            }
+            if (window.innerWidth > 768) document.getElementById('sidebarOverlay').classList.remove('show');
         });
 
-        // ─── TOOL NAVIGATION ───
-        let currentTool = 'home';
+        // ─── NAVIGATION ───
+        function clearActive() {
+            document.querySelectorAll('.sidebar-item, .sidebar-community').forEach(i => i.classList.remove('active'));
+            document.querySelectorAll('.dash-view').forEach(v => v.classList.remove('active'));
+            document.getElementById('toolFrame').classList.remove('active');
+            document.getElementById('toolFrame').src = '';
+        }
+
+        function openView(view, el) {
+            clearActive();
+            if (el) el.classList.add('active');
+            else {
+                // find matching sidebar item
+                const item = document.querySelector(`[data-view="${view}"]`);
+                if (item) item.classList.add('active');
+            }
+            if (view === 'home') {
+                document.getElementById('homeView').classList.add('active');
+                refreshWidgets();
+            } else if (view === 'settings') {
+                document.getElementById('settingsView').classList.add('active');
+            }
+            if (window.innerWidth <= 768 && sidebarOpen) toggleSidebar();
+        }
 
         function openTool(tool, el) {
-            currentTool = tool;
-
-            // Update active sidebar item
-            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+            clearActive();
             if (el) el.classList.add('active');
+            document.getElementById('toolFrame').src = tool;
+            document.getElementById('toolFrame').classList.add('active');
+            if (window.innerWidth <= 768 && sidebarOpen) toggleSidebar();
+        }
 
-            const homeView = document.getElementById('homeView');
-            const toolFrame = document.getElementById('toolFrame');
+        // ─── THEME ───
+        function setTheme(theme) {
+            document.body.setAttribute('data-theme', theme);
+            localStorage.setItem('taso-theme', theme);
+            document.getElementById('btnDark').classList.toggle('active', theme === 'dark');
+            document.getElementById('btnLight').classList.toggle('active', theme === 'light');
 
-            if (tool === 'home') {
-                homeView.style.display = '';
-                toolFrame.classList.remove('active');
-                toolFrame.src = '';
-                refreshWidgets();
-            } else {
-                homeView.style.display = 'none';
-                toolFrame.src = tool;
-                toolFrame.classList.add('active');
+            // Notify iframe
+            try {
+                const frame = document.getElementById('toolFrame');
+                if (frame && frame.contentWindow) {
+                    frame.contentWindow.postMessage({ type: 'taso-theme', theme }, '*');
+                }
+            } catch (e) { }
+        }
+
+        // Load saved theme
+        (function () {
+            const t = localStorage.getItem('taso-theme') || 'dark';
+            setTheme(t);
+        })();
+
+        // ─── ANONYMOUS PREF ───
+        function saveAnonymousPref() {
+            const val = document.getElementById('anonToggle').checked;
+            localStorage.setItem('taso-anonymous', val);
+            // Also save to Firestore if logged in
+            if (window.currentUserId && window.db) {
+                window.firestoreSetDoc(window.firestoreDoc(window.db, 'profiles', window.currentUserId), { anonymous: val }, { merge: true });
             }
+        }
 
-            // Close sidebar on mobile
-            if (window.innerWidth <= 768 && sidebarOpen) {
-                toggleSidebar();
+        // ─── PROFILE ───
+        function previewPFP() {
+            const url = document.getElementById('profPhotoUrl').value.trim();
+            const preview = document.getElementById('profilePicPreview');
+            const av = document.getElementById('userAv');
+            if (url) {
+                preview.innerHTML = `<img src="${url}" alt="PFP" onerror="this.parentElement.textContent='?'">`;
+                av.innerHTML = `<img src="${url}" alt="" onerror="this.parentElement.textContent='U'">`;
             }
+        }
+
+        async function saveProfile() {
+            if (!window.currentUserId || !window.db) { alert('Not logged in'); return; }
+            const btn = document.querySelector('.save-btn');
+            btn.disabled = true; btn.textContent = '⏳ Saving...';
+
+            const data = {
+                email: window.currentUserEmail || '',
+                username: document.getElementById('profUsername').value.trim(),
+                bio: document.getElementById('profBio').value.trim(),
+                telegram: document.getElementById('profTelegram').value.trim(),
+                instagram: document.getElementById('profInstagram').value.trim(),
+                photoURL: document.getElementById('profPhotoUrl').value.trim(),
+                anonymous: document.getElementById('anonToggle').checked,
+                updatedAt: new Date().toISOString()
+            };
+
+            try {
+                await window.firestoreSetDoc(window.firestoreDoc(window.db, 'profiles', window.currentUserId), data, { merge: true });
+                const status = document.getElementById('saveStatus');
+                status.classList.add('show');
+                setTimeout(() => status.classList.remove('show'), 3000);
+            } catch (e) {
+                alert('Error saving: ' + e.message);
+            }
+            btn.disabled = false; btn.textContent = '💾 Save Profile';
         }
 
         // ─── QUOTES ───
@@ -817,7 +1338,6 @@
             { text: "It does not matter how slowly you go as long as you do not stop.", author: "Confucius" },
             { text: "The future belongs to those who believe in the beauty of their dreams.", author: "Eleanor Roosevelt" },
             { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill" },
-            { text: "What lies behind us and what lies before us are tiny matters compared to what lies within us.", author: "Ralph Waldo Emerson" },
             { text: "Do what you can, with what you have, where you are.", author: "Theodore Roosevelt" },
             { text: "The best time to plant a tree was 20 years ago. The second best time is now.", author: "Chinese Proverb" },
             { text: "Your time is limited, don't waste it living someone else's life.", author: "Steve Jobs" },
@@ -826,30 +1346,24 @@
             { text: "Happiness is not something ready made. It comes from your own actions.", author: "Dalai Lama" },
             { text: "Strive not to be a success, but rather to be of value.", author: "Albert Einstein" },
             { text: "The only impossible journey is the one you never begin.", author: "Tony Robbins" },
-            { text: "Life is what happens when you're busy making other plans.", author: "John Lennon" },
             { text: "Be yourself; everyone else is already taken.", author: "Oscar Wilde" },
             { text: "Education is the most powerful weapon which you can use to change the world.", author: "Nelson Mandela" },
             { text: "Turn your wounds into wisdom.", author: "Oprah Winfrey" },
             { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
         ];
-
         let quoteIdx = Math.floor(Math.random() * QUOTES.length);
-        function rotateQuote() {
-            const banner = document.getElementById('quoteBanner');
-            banner.style.opacity = '0';
-            setTimeout(() => {
-                quoteIdx = (quoteIdx + 1) % QUOTES.length;
-                document.getElementById('quoteText').textContent = `"${QUOTES[quoteIdx].text}"`;
-                document.getElementById('quoteAuthor').textContent = `— ${QUOTES[quoteIdx].author}`;
-                banner.style.opacity = '1';
-            }, 500);
+        function showQuote() {
+            document.getElementById('quoteText').textContent = `"${QUOTES[quoteIdx].text}"`;
+            document.getElementById('quoteAuthor').textContent = `— ${QUOTES[quoteIdx].author}`;
         }
+        function rotateQuote() {
+            const b = document.getElementById('quoteBanner'); b.style.opacity = '0';
+            setTimeout(() => { quoteIdx = (quoteIdx + 1) % QUOTES.length; showQuote(); b.style.opacity = '1'; }, 500);
+        }
+        showQuote();
         setInterval(rotateQuote, 8000);
-        // Set initial
-        document.getElementById('quoteText').textContent = `"${QUOTES[quoteIdx].text}"`;
-        document.getElementById('quoteAuthor').textContent = `— ${QUOTES[quoteIdx].author}`;
 
-        // ─── WIDGET DATA ───
+        // ─── WIDGETS ───
         const MOODS_META = [
             { emoji: '😄', name: 'Amazing', color: '#10b981', score: 5 },
             { emoji: '🙂', name: 'Good', color: '#06b6d4', score: 4 },
@@ -858,38 +1372,20 @@
             { emoji: '😢', name: 'Rough', color: '#8b5cf6', score: 1 }
         ];
 
-        function refreshWidgets() {
-            renderHabitWidget();
-            renderMoodWidget();
-            renderNotesWidget();
-        }
-
         function todayStr() { return new Date().toISOString().slice(0, 10); }
 
-        // ── Habit Widget ──
+        function refreshWidgets() { renderHabitWidget(); renderMoodWidget(); renderNotesWidget(); }
+
         function renderHabitWidget() {
             const el = document.getElementById('habitWidget');
             try {
                 const data = JSON.parse(localStorage.getItem('taso-habits-v2') || '{"habits":[],"completions":{}}');
-                if (!data.habits || !data.habits.length) {
-                    el.innerHTML = '<div class="empty-widget"><div class="ew-icon">🌱</div>No habits yet. Start tracking!</div>';
-                    return;
-                }
+                if (!data.habits || !data.habits.length) { el.innerHTML = '<div class="empty-widget"><div class="ew-icon">🌱</div>No habits yet. Start tracking!</div>'; return; }
                 const today = todayStr();
                 el.innerHTML = data.habits.slice(0, 5).map(h => {
                     const done = !!data.completions[today + '_' + h.id];
-                    // Last 7 days
-                    const dots = Array.from({ length: 7 }, (_, i) => {
-                        const d = new Date(); d.setDate(d.getDate() - (6 - i));
-                        return data.completions[d.toISOString().slice(0, 10) + '_' + h.id] ? 'done' : '';
-                    });
-                    // Streak
-                    let streak = 0;
-                    for (let i = 0; i < 365; i++) {
-                        const d = new Date(); d.setDate(d.getDate() - i);
-                        if (data.completions[d.toISOString().slice(0, 10) + '_' + h.id]) streak++;
-                        else if (i > 0) break;
-                    }
+                    const dots = Array.from({ length: 7 }, (_, i) => { const d = new Date(); d.setDate(d.getDate() - (6 - i)); return data.completions[d.toISOString().slice(0, 10) + '_' + h.id] ? 'done' : ''; });
+                    let streak = 0; for (let i = 0; i < 365; i++) { const d = new Date(); d.setDate(d.getDate() - i); if (data.completions[d.toISOString().slice(0, 10) + '_' + h.id]) streak++; else if (i > 0) break; }
                     return `<div class="habit-mini" style="${done ? 'border-color:rgba(16,185,129,0.3);background:rgba(16,185,129,0.04)' : ''}">
                         <span class="habit-mini-emoji">${h.emoji}</span>
                         <span class="habit-mini-name" style="${done ? 'text-decoration:line-through;color:var(--text-muted)' : ''}">${h.name}</span>
@@ -897,12 +1393,9 @@
                         <span class="habit-mini-streak">🔥${streak}</span>
                     </div>`;
                 }).join('');
-            } catch (e) {
-                el.innerHTML = '<div class="empty-widget"><div class="ew-icon">🌱</div>No habits data.</div>';
-            }
+            } catch (e) { el.innerHTML = '<div class="empty-widget"><div class="ew-icon">🌱</div>No data.</div>'; }
         }
 
-        // ── Mood Widget ──
         function renderMoodWidget() {
             const el = document.getElementById('moodWidget');
             try {
@@ -912,56 +1405,35 @@
                 for (let i = 6; i >= 0; i--) {
                     const d = new Date(); d.setDate(d.getDate() - i);
                     const ds = d.toISOString().slice(0, 10);
-                    const dayEntries = entries.filter(e => e.ts && e.ts.slice(0, 10) === ds);
-                    const avg = dayEntries.length ? dayEntries.reduce((s, e) => s + MOODS_META[e.mood].score, 0) / dayEntries.length : 0;
+                    const de = entries.filter(e => e.ts && e.ts.slice(0, 10) === ds);
+                    const avg = de.length ? de.reduce((s, e) => s + MOODS_META[e.mood].score, 0) / de.length : 0;
                     const col = avg >= 4 ? '#10b981' : avg >= 3 ? '#06b6d4' : avg >= 2 ? '#f59e0b' : avg > 0 ? '#f43f5e' : 'rgba(255,255,255,0.06)';
-                    const lastM = dayEntries.length ? MOODS_META[dayEntries[dayEntries.length - 1].mood] : null;
-                    html += `<div class="mood-bar-col">
-                        <div class="mood-day-emoji">${lastM ? lastM.emoji : '·'}</div>
-                        <div class="mood-bar" style="height:${Math.max(3, avg * 10)}px;background:${col}"></div>
-                        <div class="mood-day-label">${days[d.getDay()]}</div>
-                    </div>`;
+                    const lm = de.length ? MOODS_META[de[de.length - 1].mood] : null;
+                    html += `<div class="mood-bar-col"><div class="mood-day-emoji">${lm ? lm.emoji : '·'}</div><div class="mood-bar" style="height:${Math.max(3, avg * 10)}px;background:${col}"></div><div class="mood-day-label">${days[d.getDay()]}</div></div>`;
                 }
                 html += '</div>';
-
-                // Latest entry
                 if (entries.length) {
-                    const latest = entries[0];
-                    const m = MOODS_META[latest.mood];
-                    const ts = new Date(latest.ts);
-                    html += `<div style="margin-top:12px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid var(--border);display:flex;gap:10px;align-items:center;">
+                    const l = entries[0], m = MOODS_META[l.mood], ts = new Date(l.ts);
+                    html += `<div style="margin-top:12px;padding:10px 12px;border-radius:12px;background:var(--surface3);border:1px solid var(--border);display:flex;gap:10px;align-items:center;">
                         <span style="font-size:1.6rem">${m.emoji}</span>
-                        <div style="flex:1;min-width:0">
-                            <div style="font-size:0.82rem;font-weight:700;color:${m.color}">${m.name}</div>
-                            <div style="font-size:0.7rem;color:var(--text-muted)">${ts.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} · ${ts.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</div>
-                        </div>
-                    </div>`;
+                        <div style="flex:1"><div style="font-size:0.82rem;font-weight:700;color:${m.color}">${m.name}</div><div style="font-size:0.7rem;color:var(--text-muted)">${ts.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} · ${ts.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</div></div></div>`;
                 }
-                el.innerHTML = html || '<div class="empty-widget"><div class="ew-icon">💭</div>No mood entries yet.</div>';
-            } catch (e) {
-                el.innerHTML = '<div class="empty-widget"><div class="ew-icon">💭</div>No mood data.</div>';
-            }
+                el.innerHTML = html || '<div class="empty-widget"><div class="ew-icon">💭</div>No mood data.</div>';
+            } catch (e) { el.innerHTML = '<div class="empty-widget"><div class="ew-icon">💭</div>No data.</div>'; }
         }
 
-        // ── Notes Widget ──
         function renderNotesWidget() {
             const el = document.getElementById('notesWidget');
             try {
                 const notes = JSON.parse(localStorage.getItem('nexus-notes') || '[]');
-                if (!notes.length) {
-                    el.innerHTML = '<div class="empty-widget"><div class="ew-icon">📝</div>No notes yet.</div>';
-                    return;
-                }
+                if (!notes.length) { el.innerHTML = '<div class="empty-widget"><div class="ew-icon">📝</div>No notes yet.</div>'; return; }
                 el.innerHTML = notes.slice(0, 4).map(n => `<div class="note-mini" onclick="openTool('notes.html', document.querySelector('[data-tool=\\'notes.html\\']'))">
                     <div class="note-mini-title">${n.title || 'Untitled'}</div>
-                    <div class="note-mini-preview">${(n.body || 'Empty note...').substring(0, 100)}</div>
+                    <div class="note-mini-preview">${(n.body || 'Empty...').substring(0, 100)}</div>
                 </div>`).join('');
-            } catch (e) {
-                el.innerHTML = '<div class="empty-widget"><div class="ew-icon">📝</div>No notes data.</div>';
-            }
+            } catch (e) { el.innerHTML = '<div class="empty-widget"><div class="ew-icon">📝</div>No data.</div>'; }
         }
 
-        // ─── INIT ───
         refreshWidgets();
     </script>
 </body>

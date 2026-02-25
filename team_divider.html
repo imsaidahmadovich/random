@@ -69,6 +69,44 @@
             color: var(--primary);
         }
 
+        /* Compact mode when inside an iframe (dashboard) */
+        body.in-iframe {
+            padding: 0;
+            min-height: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        body.in-iframe .back-link {
+            display: none !important;
+        }
+
+        body.in-iframe .app-container {
+            min-height: 0;
+            height: 100vh;
+            max-width: 100%;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        body.in-iframe .view {
+            padding: 12px;
+        }
+
+        body.in-iframe .header {
+            padding: 4px;
+        }
+
+        body.in-iframe .tab {
+            padding: 8px;
+            font-size: 13px;
+        }
+
+        body.in-iframe .wheel-container {
+            width: min(300px, 60vw);
+            height: min(300px, 60vw);
+        }
+
         .app-container {
             width: 100%;
             max-width: 1000px;
@@ -694,6 +732,12 @@
                 }
             }
     </style>
+    <script>
+        // Detect iframe embedding for compact mode
+        if (window.self !== window.top) {
+            document.addEventListener('DOMContentLoaded', () => document.body.classList.add('in-iframe'));
+        }
+    </script>
 </head>
 
 <body>

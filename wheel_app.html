@@ -45,6 +45,50 @@
       background-size: 24px 24px;
     }
 
+    /* Compact mode when inside an iframe (dashboard) */
+    body.in-iframe {
+      padding: 0;
+      min-height: 0;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    body.in-iframe .back-link {
+      display: none !important;
+    }
+
+    body.in-iframe .app-container {
+      min-height: 0;
+      height: 100vh;
+      max-width: 100%;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    body.in-iframe .wheel-wrapper {
+      width: min(320px, calc(100vw - 40px));
+      height: min(320px, calc(100vw - 40px));
+      margin: 4px auto;
+    }
+
+    body.in-iframe .view {
+      padding: 10px;
+    }
+
+    body.in-iframe .header {
+      padding: 4px;
+    }
+
+    body.in-iframe .tab {
+      padding: 8px;
+      font-size: 13px;
+    }
+
+    body.in-iframe #spinBtn {
+      padding: 10px 28px;
+      font-size: 16px;
+    }
+
     .app-container {
       width: 100%;
       max-width: 1000px;
@@ -58,7 +102,14 @@
       position: relative;
       transition: height 0.3s ease;
     }
-
+  </style>
+  <script>
+    // Detect iframe embedding for compact mode
+    if (window.self !== window.top) {
+      document.addEventListener('DOMContentLoaded', () => document.body.classList.add('in-iframe'));
+    }
+  </script>
+  <style>
     /* Header / Tabs */
     .header {
       display: flex;
