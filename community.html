@@ -1076,6 +1076,98 @@
             }
         }
 
+        /* ANNOUNCEMENT COMPOSE */
+        .announce-compose {
+            background: linear-gradient(135deg, rgba(244, 63, 94, 0.06), rgba(124, 58, 237, 0.06));
+            border: 1px solid rgba(244, 63, 94, 0.2);
+            border-radius: 18px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .announce-compose-head {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #fca5a5;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+        }
+
+        .announce-title-input {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px 14px;
+            color: var(--text);
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            outline: none;
+            width: 100%;
+            transition: border-color 0.25s;
+        }
+
+        .announce-title-input:focus {
+            border-color: rgba(244, 63, 94, 0.35);
+        }
+
+        .announce-title-input::placeholder {
+            color: var(--text-muted);
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .announce-body-input {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px 14px;
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.92rem;
+            outline: none;
+            width: 100%;
+            resize: none;
+            min-height: 72px;
+            line-height: 1.6;
+            transition: border-color 0.25s;
+        }
+
+        .announce-body-input:focus {
+            border-color: rgba(244, 63, 94, 0.35);
+        }
+
+        .announce-body-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .announce-post-btn {
+            align-self: flex-end;
+            padding: 10px 24px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #f43f5e, #e11d48);
+            border: none;
+            color: #fff;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.88rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+
+        .announce-post-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(244, 63, 94, 0.4);
+        }
+
+        .announce-post-btn:disabled {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
         @media(max-width:768px) {
             nav {
                 padding: 0 16px
@@ -1188,15 +1280,31 @@
                 </div>
             </div>
             <div class="input-area">
-                <div class="input-wrap">
-                    <textarea class="msg-input" id="msgInput" placeholder="Message #general…" rows="1"></textarea>
-                    <button class="send-btn" onclick="sendMessage()" title="Send (Enter)">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="22" y1="2" x2="11" y2="13" />
-                            <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                        </svg>
-                    </button>
+                <!-- Normal message input -->
+                <div id="normalInputArea">
+                    <div class="input-wrap">
+                        <textarea class="msg-input" id="msgInput" placeholder="Message #general…" rows="1"></textarea>
+                        <button class="send-btn" onclick="sendMessage()" title="Send (Enter)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="22" y1="2" x2="11" y2="13" />
+                                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <!-- Announcement composer (only shown for #announcements) -->
+                <div id="announceArea" style="display:none">
+                    <div class="announce-compose">
+                        <div class="announce-compose-head">📢 Post Announcement</div>
+                        <input class="announce-title-input" id="announceTitle" type="text"
+                            placeholder="Title (optional) — e.g. New Website Launch!" autocomplete="off">
+                        <textarea class="announce-body-input" id="announceBody"
+                            placeholder="Write your announcement here… e.g. We just launched the new Taso website! Check it out at taso.io 🎉"
+                            rows="3"></textarea>
+                        <button class="announce-post-btn" id="announceBtn" onclick="sendAnnouncement()">📢 Post
+                            Announcement</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1362,6 +1470,13 @@
         });
 
         // ─── CHANNELS ─────────────────────────────────────────────────────────────────
+        // 'general' uses the ORIGINAL top-level 'messages' collection to preserve old messages.
+        // All other channels use 'channels/{id}/messages'.
+        function getCollection(channelId) {
+            if (channelId === 'general') return collection(db, 'messages');
+            return collection(db, 'channels', channelId, 'messages');
+        }
+
         window.switchChannel = function (channelId, name, desc, icon) {
             if (channelId === currentChannel && lastMessages.length > 0) return;
             currentChannel = channelId;
@@ -1378,13 +1493,24 @@
             document.getElementById('chatIcon').textContent = meta.icon || icon || '#';
             document.getElementById('msgInput').placeholder = `Message ${meta.name || name || ''}…`;
 
+            // Show/hide announcement composer
+            const announceArea = document.getElementById('announceArea');
+            const normalInput = document.getElementById('normalInputArea');
+            if (channelId === 'announcements') {
+                announceArea.style.display = '';
+                normalInput.style.display = 'none';
+            } else {
+                announceArea.style.display = 'none';
+                normalInput.style.display = '';
+            }
+
             // Clear & load
             document.getElementById('messages').innerHTML =
                 '<div style="display:flex;align-items:center;justify-content:center;gap:12px;padding:40px;color:var(--text-muted);font-size:0.85rem;"><div class="loader-dots"><span></span><span></span><span></span></div> Loading…</div>';
             lastMessages = [];
 
             if (channelUnsub) channelUnsub();
-            const q = query(collection(db, 'channels', channelId, 'messages'), orderBy('createdAt', 'asc'), limit(200));
+            const q = query(getCollection(channelId), orderBy('createdAt', 'asc'), limit(200));
             channelUnsub = onSnapshot(q, (snap) => {
                 lastMessages = [];
                 snap.forEach(d => lastMessages.push({ id: d.id, ...d.data() }));
@@ -1452,23 +1578,49 @@
 
         window.deleteMsg = async function (id) {
             if (!confirm('Delete this message?')) return;
-            try { await deleteDoc(doc(db, 'channels', currentChannel, 'messages', id)); } catch (e) { }
+            // general uses old top-level 'messages' collection
+            try { await deleteDoc(doc(db, ...(currentChannel === 'general' ? ['messages', id] : ['channels', currentChannel, 'messages', id]))); } catch (e) { }
         };
 
-        // ─── SEND ─────────────────────────────────────────────────────────────────────
+        // ─── SEND (normal channels) ───────────────────────────────────────────────────
         window.sendMessage = async function () {
             const input = document.getElementById('msgInput');
             const text = input.value.trim();
             if (!text || !currentUser) return;
             input.value = ''; ajustTA();
             try {
-                await addDoc(collection(db, 'channels', currentChannel, 'messages'), {
+                await addDoc(getCollection(currentChannel), {
                     text, senderId: currentUser.uid,
                     senderName: currentUser.displayName || '',
                     senderEmail: currentUser.email || '',
                     createdAt: serverTimestamp()
                 });
             } catch (e) { input.value = text; }
+        };
+
+        // ─── SEND ANNOUNCEMENT ────────────────────────────────────────────────────────
+        window.sendAnnouncement = async function () {
+            const titleEl = document.getElementById('announceTitle');
+            const bodyEl = document.getElementById('announceBody');
+            const title = titleEl.value.trim();
+            const body = bodyEl.value.trim();
+            if (!body || !currentUser) return;
+            const btn = document.getElementById('announceBtn');
+            btn.textContent = '⏳ Posting…'; btn.disabled = true;
+            try {
+                const fullText = title ? `📢 ${title}\n\n${body}` : `📢 ${body}`;
+                await addDoc(getCollection('announcements'), {
+                    text: fullText,
+                    senderId: currentUser.uid,
+                    senderName: currentUser.displayName || '',
+                    senderEmail: currentUser.email || '',
+                    isAnnouncement: true,
+                    createdAt: serverTimestamp()
+                });
+                titleEl.value = ''; bodyEl.value = '';
+                bodyEl.style.height = 'auto';
+            } catch (e) { alert('Failed to post: ' + e.message); }
+            btn.textContent = '📢 Post Announcement'; btn.disabled = false;
         };
 
         document.getElementById('msgInput').addEventListener('keydown', (e) => {
