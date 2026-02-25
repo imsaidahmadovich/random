@@ -4,218 +4,855 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SyncTools - Random Picker & Team Divider</title>
+    <title>Taso — Your All-in-One Productivity Suite</title>
+    <meta name="description"
+        content="Taso is a premium productivity suite with scientific calculator, pomodoro timer, notes, spin wheel, team divider, community chat and more.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
     <style>
         :root {
-            --primary: #6366f1;
-            --secondary: #8b5cf6;
-            --accent: #ec4899;
-            --bg: #0f172a;
-            --card-bg: rgba(255, 255, 255, 0.05);
-            --text: #f8fafc;
-            --text-muted: #94a3b8;
+            --primary: #7c3aed;
+            --primary-light: #a78bfa;
+            --secondary: #06b6d4;
+            --accent: #f59e0b;
+            --rose: #f43f5e;
+            --emerald: #10b981;
+            --bg: #05070f;
+            --bg2: #0c0f1e;
+            --surface: rgba(255, 255, 255, 0.04);
+            --surface-hover: rgba(255, 255, 255, 0.08);
+            --border: rgba(255, 255, 255, 0.08);
+            --border-active: rgba(124, 58, 237, 0.6);
+            --text: #f1f5f9;
+            --text-muted: #64748b;
+            --text-subtle: #94a3b8;
+            --glow: 0 0 60px rgba(124, 58, 237, 0.3);
+            --nav-h: 68px;
         }
 
-        * {
+        *,
+        *::before,
+        *::after {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
-            font-family: 'Outfit', sans-serif;
+            font-family: 'Inter', sans-serif;
             background: var(--bg);
             color: var(--text);
-            overflow: hidden;
-            /* Prevent scroll on desktop, allow on mobile if needed via media query */
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
+            overflow-x: hidden;
+            min-height: 100vh;
         }
 
-        /* Animated Background */
-        #bg-canvas {
+        /* ── BACKGROUND ── */
+        #orb-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .orb {
             position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.18;
+            animation: orbFloat 12s ease-in-out infinite;
+        }
+
+        .orb1 {
+            width: 700px;
+            height: 700px;
+            background: #7c3aed;
+            top: -200px;
+            left: -200px;
+            animation-delay: 0s;
+        }
+
+        .orb2 {
+            width: 500px;
+            height: 500px;
+            background: #06b6d4;
+            bottom: -150px;
+            right: -150px;
+            animation-delay: -4s;
+        }
+
+        .orb3 {
+            width: 400px;
+            height: 400px;
+            background: #f43f5e;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-delay: -8s;
+        }
+
+        @keyframes orbFloat {
+
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            33% {
+                transform: translate(30px, -40px) scale(1.05);
+            }
+
+            66% {
+                transform: translate(-20px, 30px) scale(0.95);
+            }
+        }
+
+        .orb3 {
+            animation-name: orbFloat3;
+        }
+
+        @keyframes orbFloat3 {
+
+            0%,
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+
+            33% {
+                transform: translate(calc(-50% + 40px), calc(-50% + 30px)) scale(1.08);
+            }
+
+            66% {
+                transform: translate(calc(-50% - 30px), calc(-50% - 20px)) scale(0.92);
+            }
+        }
+
+        /* Grid overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+
+        /* ── NAVBAR ── */
+        nav {
+            position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-        }
-
-        .container {
-            position: relative;
-            z-index: 10;
-            width: 100%;
-            max-width: 1000px;
-            padding: 20px;
-            text-align: center;
+            right: 0;
+            z-index: 1000;
+            height: var(--nav-h);
             display: flex;
-            flex-direction: column;
             align-items: center;
-            gap: 40px;
+            justify-content: space-between;
+            padding: 0 40px;
+            background: rgba(5, 7, 15, 0.7);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            transition: box-shadow 0.3s;
         }
 
-        h1 {
-            font-size: 3rem;
-            font-weight: 900;
-            background: linear-gradient(135deg, #a5b4fc 0%, #c084fc 50%, #f472b6 100%);
+        nav.scrolled {
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .nav-logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #a78bfa, #06b6d4);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
-            color: transparent;
-            margin-bottom: 10px;
-            letter-spacing: -2px;
-            animation: fadeInDown 1s ease-out;
-            text-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
-        }
-
-        p {
-            color: var(--text-muted);
-            font-size: 1.2rem;
-            max-width: 500px;
-            line-height: 1.6;
-            animation: fadeIn 1.2s ease-out;
-        }
-
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
-            width: 100%;
-            perspective: 1000px;
-        }
-
-        .card {
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            padding: 40px;
             text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-logo span {
+            color: #f43f5e;
+            -webkit-text-fill-color: #f43f5e;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 6px;
+        }
+
+        .nav-tab {
+            padding: 8px 22px;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text-subtle);
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.25s;
+            border: none;
+            background: transparent;
+            white-space: nowrap;
+        }
+
+        .nav-tab:hover {
+            color: var(--text);
+            background: var(--surface-hover);
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, var(--primary), #4f46e5);
             color: white;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4);
+        }
+
+        .nav-tab.community-tab {
+            background: linear-gradient(135deg, #f43f5e, #e11d48);
+            color: white;
+            box-shadow: 0 4px 20px rgba(244, 63, 94, 0.4);
+            animation: communityPulse 2.5s ease-in-out infinite;
+        }
+
+        @keyframes communityPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 4px 20px rgba(244, 63, 94, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 4px 40px rgba(244, 63, 94, 0.7);
+            }
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            padding: 6px 16px 6px 8px;
+            font-size: 0.82rem;
+            color: var(--text-subtle);
+        }
+
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .logout-btn {
+            padding: 8px 18px;
+            border-radius: 10px;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-subtle);
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s;
+            font-family: inherit;
+        }
+
+        .logout-btn:hover {
+            border-color: var(--rose);
+            color: var(--rose);
+            background: rgba(244, 63, 94, 0.08);
+        }
+
+        /* ── HERO ── */
+        main {
+            position: relative;
+            z-index: 10;
+            padding-top: calc(var(--nav-h) + 60px);
+        }
+
+        .hero {
+            text-align: center;
+            padding: 0 24px 80px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(124, 58, 237, 0.12);
+            border: 1px solid rgba(124, 58, 237, 0.3);
+            border-radius: 50px;
+            padding: 6px 18px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--primary-light);
+            margin-bottom: 32px;
+            letter-spacing: 0.05em;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        .badge-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            animation: blink 1.4s infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        .hero h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(2.8rem, 7vw, 5.5rem);
+            font-weight: 700;
+            line-height: 1.08;
+            letter-spacing: -3px;
+            margin-bottom: 28px;
+            animation: fadeInDown 0.7s ease-out 0.1s both;
+        }
+
+        .hero h1 .grad {
+            background: linear-gradient(135deg, #a78bfa 0%, #06b6d4 50%, #f43f5e 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: clamp(1rem, 2.5vw, 1.25rem);
+            color: var(--text-subtle);
+            max-width: 580px;
+            margin: 0 auto 44px;
+            line-height: 1.7;
+            animation: fadeIn 0.8s ease-out 0.2s both;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeIn 0.8s ease-out 0.3s both;
+        }
+
+        .btn-primary {
+            padding: 15px 36px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--primary), #4f46e5);
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 8px 30px rgba(124, 58, 237, 0.4);
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(124, 58, 237, 0.55);
+        }
+
+        .btn-secondary {
+            padding: 15px 36px;
+            border-radius: 14px;
+            background: var(--surface);
+            color: var(--text);
+            font-weight: 700;
+            font-size: 1rem;
+            text-decoration: none;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-secondary:hover {
+            background: var(--surface-hover);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* ── STATS ── */
+        .stats-strip {
+            display: flex;
+            justify-content: center;
+            gap: 0;
+            max-width: 700px;
+            margin: 0 auto 100px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            animation: fadeIn 0.9s ease-out 0.4s both;
+        }
+
+        .stat {
+            flex: 1;
+            text-align: center;
+            padding: 24px 20px;
+            border-right: 1px solid var(--border);
+        }
+
+        .stat:last-child {
+            border-right: none;
+        }
+
+        .stat-num {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #a78bfa, #06b6d4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+        }
+
+        /* ── SECTION HEADERS ── */
+        .section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px 100px;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 56px;
+        }
+
+        .section-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            color: var(--primary-light);
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+
+        .section-label::before,
+        .section-label::after {
+            content: '';
+            flex: 1;
+            width: 24px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary-light));
+        }
+
+        .section-label::after {
+            background: linear-gradient(90deg, var(--primary-light), transparent);
+        }
+
+        .section-header h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(1.8rem, 4vw, 3rem);
+            font-weight: 700;
+            letter-spacing: -1.5px;
+            margin-bottom: 16px;
+        }
+
+        .section-header p {
+            color: var(--text-subtle);
+            font-size: 1.05rem;
+            max-width: 480px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* ── TOOLS GRID ── */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .tool-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 36px;
+            text-decoration: none;
+            color: var(--text);
             display: flex;
             flex-direction: column;
-            align-items: center;
             gap: 20px;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer;
+            animation: cardAppear 0.6s ease-out both;
         }
 
-        .card::before {
+        .tool-card:nth-child(1) {
+            animation-delay: 0.05s;
+        }
+
+        .tool-card:nth-child(2) {
+            animation-delay: 0.10s;
+        }
+
+        .tool-card:nth-child(3) {
+            animation-delay: 0.15s;
+        }
+
+        .tool-card:nth-child(4) {
+            animation-delay: 0.20s;
+        }
+
+        .tool-card:nth-child(5) {
+            animation-delay: 0.25s;
+        }
+
+        .tool-card:nth-child(6) {
+            animation-delay: 0.30s;
+        }
+
+        @keyframes cardAppear {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .tool-card::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent 60%);
+            inset: 0;
+            background: var(--card-gradient, linear-gradient(135deg, rgba(124, 58, 237, 0.1), transparent 60%));
             opacity: 0;
             transition: opacity 0.4s;
         }
 
-        .card:hover {
-            transform: translateY(-10px) scale(1.02);
-            border-color: rgba(255, 255, 255, 0.3);
-            box-shadow: 0 30px 60px -12px rgba(99, 102, 241, 0.4);
+        .tool-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
         }
 
-        .card:hover::before {
+        .tool-card:hover::before {
             opacity: 1;
         }
 
-        .icon {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+        .card-glow {
+            position: absolute;
+            top: -30px;
+            right: -30px;
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.4s;
+            filter: blur(40px);
+        }
+
+        .tool-card:hover .card-glow {
+            opacity: 0.5;
+        }
+
+        .tool-icon-wrap {
+            width: 64px;
+            height: 64px;
+            border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            font-size: 32px;
-            transition: transform 0.4s;
+            font-size: 28px;
+            position: relative;
+            z-index: 1;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .card:hover .icon {
-            transform: rotate(10deg) scale(1.1);
-            background: linear-gradient(135deg, var(--primary), var(--accent));
+        .tool-card:hover .tool-icon-wrap {
+            transform: scale(1.1) rotate(-5deg);
         }
 
-        .card-title {
-            font-size: 1.5rem;
+        .tool-badge {
+            position: absolute;
+            top: 20px;
+            right: 24px;
+            font-size: 0.68rem;
             font-weight: 700;
+            letter-spacing: 0.08em;
+            padding: 4px 10px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            z-index: 1;
         }
 
-        .card-desc {
+        .badge-new {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .badge-hot {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .badge-pro {
+            background: rgba(124, 58, 237, 0.15);
+            color: #a78bfa;
+            border: 1px solid rgba(124, 58, 237, 0.3);
+        }
+
+        .tool-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+
+        .tool-desc {
+            font-size: 0.9rem;
+            color: var(--text-subtle);
+            line-height: 1.6;
+            position: relative;
+            z-index: 1;
+            flex: 1;
+        }
+
+        .tool-arrow {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.82rem;
+            font-weight: 600;
             color: var(--text-muted);
-            font-size: 1rem;
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s;
+            margin-top: auto;
+        }
+
+        .tool-card:hover .tool-arrow {
+            color: var(--text);
+            gap: 10px;
+        }
+
+        /* ── COMMUNITY SECTION ── */
+        .community-banner {
+            background: linear-gradient(135deg, rgba(244, 63, 94, 0.12) 0%, rgba(124, 58, 237, 0.12) 100%);
+            border: 1px solid rgba(244, 63, 94, 0.25);
+            border-radius: 32px;
+            padding: 60px;
+            display: flex;
+            gap: 60px;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .community-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(244, 63, 94, 0.15), transparent 70%);
+            pointer-events: none;
+        }
+
+        .community-text {
+            flex: 1;
+        }
+
+        .community-text h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -1.5px;
+            margin-bottom: 16px;
+            line-height: 1.15;
+        }
+
+        .community-text h2 span {
+            background: linear-gradient(135deg, #f43f5e, #f59e0b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .community-text p {
+            color: var(--text-subtle);
+            font-size: 1.05rem;
+            line-height: 1.65;
+            margin-bottom: 32px;
+        }
+
+        .community-stats {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 36px;
+        }
+
+        .comm-stat {
             text-align: center;
         }
 
-        .footer-controls {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            display: flex;
-            gap: 10px;
-            z-index: 100;
+        .comm-stat-num {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #f43f5e;
         }
 
-        .mini-btn {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        .comm-stat-label {
+            font-size: 0.72rem;
             color: var(--text-muted);
+            font-weight: 500;
+            letter-spacing: 0.05em;
+        }
+
+        .community-visual {
+            flex-shrink: 0;
+            width: 260px;
+        }
+
+        .chat-preview {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 20px;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            opacity: 0.2;
+            flex-direction: column;
+            gap: 12px;
         }
 
-        .mini-btn:hover {
-            transform: scale(1.1);
-            opacity: 1;
-            background: rgba(255, 255, 255, 0.1);
-            border-color: var(--primary);
-            color: var(--accent);
-            box-shadow: 0 0 15px var(--primary);
-        }
-
-        .logout-btn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 8px 16px;
-            background: var(--card-bg);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            color: var(--text-muted);
+        .cp-msg {
+            padding: 10px 14px;
+            border-radius: 14px;
             font-size: 0.8rem;
-            cursor: pointer;
-            z-index: 100;
-            transition: all 0.3s;
+            line-height: 1.4;
+            max-width: 80%;
         }
 
-        .logout-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
+        .cp-msg.them {
+            background: rgba(255, 255, 255, 0.06);
+            align-self: flex-start;
+        }
+
+        .cp-msg.me {
+            background: linear-gradient(135deg, #7c3aed, #4f46e5);
+            align-self: flex-end;
             color: white;
         }
 
+        .cp-name {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            position: relative;
+            z-index: 10;
+            border-top: 1px solid var(--border);
+            padding: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .footer-logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #a78bfa, #06b6d4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 24px;
+        }
+
+        .footer-links a {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--text);
+        }
+
+        .footer-copy {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        /* ── ANIMATIONS ── */
         @keyframes fadeInDown {
             from {
                 opacity: 0;
@@ -238,175 +875,308 @@
             }
         }
 
-        /* Mobile Adjustments */
-        @media (max-width: 600px) {
-            body {
-                height: auto;
-                min-height: 100vh;
-                padding: 40px 20px;
+        /* ── RESPONSIVE ── */
+        @media (max-width: 768px) {
+            nav {
+                padding: 0 20px;
             }
 
-            h1 {
-                font-size: 2.2rem;
+            .nav-tabs {
+                gap: 2px;
             }
 
-            .cards-grid {
-                grid-template-columns: 1fr;
+            .nav-tab {
+                padding: 7px 14px;
+                font-size: 0.8rem;
+            }
+
+            .community-banner {
+                flex-direction: column;
+                padding: 36px 28px;
+            }
+
+            .community-visual {
+                width: 100%;
+            }
+
+            .hero h1 {
+                letter-spacing: -1.5px;
+            }
+
+            footer {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
+            .footer-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-logo {
+                font-size: 1.2rem;
+            }
+
+            .user-badge {
+                display: none;
+            }
+
+            .stats-strip {
+                flex-direction: column;
+            }
+
+            .stat {
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .stat:last-child {
+                border-bottom: none;
             }
         }
     </style>
     <script type="module">
-        import { checkAuth, logout } from "./auth.js";
+        import { checkAuth, logout, auth } from "./auth.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         checkAuth();
         window.handleLogout = logout;
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const av = document.getElementById('user-av');
+                const un = document.getElementById('user-name');
+                if (av) av.textContent = (user.displayName || user.email || 'U')[0].toUpperCase();
+                if (un) un.textContent = user.displayName || user.email || 'User';
+            }
+        });
     </script>
 </head>
 
 <body>
 
-    <button class="logout-btn" onclick="handleLogout()">Logout</button>
+    <!-- Background -->
+    <div id="orb-bg">
+        <div class="orb orb1"></div>
+        <div class="orb orb2"></div>
+        <div class="orb orb3"></div>
+    </div>
 
-    <canvas id="bg-canvas"></canvas>
+    <!-- NAVBAR -->
+    <nav id="navbar">
+        <a href="index.html" class="nav-logo">Taso<span>.</span></a>
 
-    <div class="container">
-        <div>
-            <h1>SyncTools</h1>
-            <p>Premium utilities for fairness, fun, and random selection.</p>
+        <div class="nav-tabs">
+            <a href="index.html" class="nav-tab active" id="tab-home">🏠 Home</a>
+            <a href="tools.html" class="nav-tab" id="tab-tools">⚡ Tools</a>
+            <a href="community.html" class="nav-tab community-tab" id="tab-community">🔥 Community</a>
         </div>
 
-        <div class="cards-grid">
-            <a href="wheel_app.html" class="card">
-                <div class="icon">🎡</div>
-                <div class="card-title">Spin The Wheel</div>
-                <div class="card-desc">Random name picker with distinct weights and smooth animations.</div>
-            </a>
+        <div class="nav-right">
+            <div class="user-badge">
+                <div class="user-avatar" id="user-av">U</div>
+                <span id="user-name">Loading…</span>
+            </div>
+            <button class="logout-btn" onclick="handleLogout()">Sign Out</button>
+        </div>
+    </nav>
 
-            <a href="team_divider.html" class="card">
-                <div class="icon">⚖️</div>
-                <div class="card-title">Team Divider</div>
-                <div class="card-desc">Split groups instantly. Choose between pure random or skill-balanced fairness.
+    <!-- MAIN -->
+    <main>
+        <!-- HERO -->
+        <section class="hero">
+            <div class="hero-badge">
+                <span class="badge-dot"></span>
+                All Systems Operational — 8 Tools Ready
+            </div>
+            <h1>
+                Your Ultimate<br>
+                <span class="grad">Productivity Suite</span>
+            </h1>
+            <p>Everything you need in one elegant space. From scientific calculations to team collaboration — Taso has
+                you covered.</p>
+            <div class="hero-actions">
+                <a href="tools.html" class="btn-primary">⚡ Explore Tools</a>
+                <a href="community.html" class="btn-secondary">🔥 Join Community</a>
+            </div>
+        </section>
+
+        <!-- STATS -->
+        <div class="stats-strip"
+            style="animation:fadeIn 0.9s ease-out 0.4s both; position:relative; z-index:10; margin: 0 auto 100px;">
+            <div class="stat">
+                <div class="stat-num">8+</div>
+                <div class="stat-label">Premium Tools</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num">∞</div>
+                <div class="stat-label">Notes & Flashcards</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num">Live</div>
+                <div class="stat-label">Community Chat</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num">Free</div>
+                <div class="stat-label">Forever</div>
+            </div>
+        </div>
+
+        <!-- TOOLS SECTION -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-label">⚡ Featured Tools</div>
+                <h2>Everything You Need,<br>Nothing You Don't</h2>
+                <p>Hand-crafted tools built for speed, elegance and real productivity.</p>
+            </div>
+
+            <div class="tools-grid">
+                <!-- Scientific Calculator -->
+                <a href="calculator.html" class="tool-card"
+                    style="--card-gradient: linear-gradient(135deg,rgba(6,182,212,0.12),transparent 60%);">
+                    <div class="card-glow" style="background:#06b6d4;"></div>
+                    <span class="tool-badge badge-new">New</span>
+                    <div class="tool-icon-wrap"
+                        style="background:rgba(6,182,212,0.12); border:1px solid rgba(6,182,212,0.25);">🔬</div>
+                    <div class="tool-title">Scientific Calculator</div>
+                    <div class="tool-desc">Advanced calculations with trig, log, exponents and full history. Designed
+                        for students and professionals.</div>
+                    <div class="tool-arrow">Open calculator <span>→</span></div>
+                </a>
+
+                <!-- Pomodoro Timer -->
+                <a href="pomodoro.html" class="tool-card"
+                    style="--card-gradient: linear-gradient(135deg,rgba(245,158,11,0.12),transparent 60%);">
+                    <div class="card-glow" style="background:#f59e0b;"></div>
+                    <span class="tool-badge badge-hot">Popular</span>
+                    <div class="tool-icon-wrap"
+                        style="background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.25);">🍅</div>
+                    <div class="tool-title">Pomodoro Timer</div>
+                    <div class="tool-desc">Boost focus with the Pomodoro technique. Customizable work & break intervals
+                        with soothing alerts.</div>
+                    <div class="tool-arrow">Start focusing <span>→</span></div>
+                </a>
+
+                <!-- Notes -->
+                <a href="notes.html" class="tool-card"
+                    style="--card-gradient: linear-gradient(135deg,rgba(16,185,129,0.12),transparent 60%);">
+                    <div class="card-glow" style="background:#10b981;"></div>
+                    <span class="tool-badge badge-new">New</span>
+                    <div class="tool-icon-wrap"
+                        style="background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.25);">📝</div>
+                    <div class="tool-title">Smart Notes</div>
+                    <div class="tool-desc">Markdown-powered notes with tags, search, and auto-save. Your second brain,
+                        always with you.</div>
+                    <div class="tool-arrow">Take notes <span>→</span></div>
+                </a>
+
+                <!-- Spin Wheel -->
+                <a href="wheel_app.html" class="tool-card"
+                    style="--card-gradient: linear-gradient(135deg,rgba(124,58,237,0.12),transparent 60%);">
+                    <div class="card-glow" style="background:#7c3aed;"></div>
+                    <span class="tool-badge badge-pro">Pro</span>
+                    <div class="tool-icon-wrap"
+                        style="background:rgba(124,58,237,0.12); border:1px solid rgba(124,58,237,0.25);">🎡</div>
+                    <div class="tool-title">Spin The Wheel</div>
+                    <div class="tool-desc">Random picker with custom weights, smooth animations and elegant winner
+                        reveal.</div>
+                    <div class="tool-arrow">Spin it <span>→</span></div>
+                </a>
+
+                <!-- Team Divider -->
+                <a href="team_divider.html" class="tool-card"
+                    style="--card-gradient: linear-gradient(135deg,rgba(244,63,94,0.12),transparent 60%);">
+                    <div class="card-glow" style="background:#f43f5e;"></div>
+                    <div class="tool-icon-wrap"
+                        style="background:rgba(244,63,94,0.12); border:1px solid rgba(244,63,94,0.25);">⚖️</div>
+                    <div class="tool-title">Team Divider</div>
+                    <div class="tool-desc">Split groups instantly with pure random or skill-balanced fairness modes.
+                    </div>
+                    <div class="tool-arrow">Divide teams <span>→</span></div>
+                </a>
+
+                <!-- Flashcards -->
+                <a href="flash.html" class="tool-card"
+                    style="--card-gradient: linear-gradient(135deg,rgba(245,158,11,0.12),transparent 60%);">
+                    <div class="card-glow" style="background:#f59e0b;"></div>
+                    <div class="tool-icon-wrap"
+                        style="background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.25);">🧠</div>
+                    <div class="tool-title">Flashcards</div>
+                    <div class="tool-desc">AI-powered spaced repetition flashcards. Study smarter and remember more,
+                        forever.</div>
+                    <div class="tool-arrow">Study now <span>→</span></div>
+                </a>
+            </div>
+        </section>
+
+        <!-- COMMUNITY SECTION -->
+        <section class="section">
+            <div class="community-banner">
+                <div class="community-text">
+                    <h2>Join the <span>Community</span> — It's Alive 🔥</h2>
+                    <p>Connect with everyone in the Taso community. Share ideas, get help, or just hang out. Real-time,
+                        end-to-end, always on.</p>
+                    <div class="community-stats">
+                        <div class="comm-stat">
+                            <div class="comm-stat-num">Live</div>
+                            <div class="comm-stat-label">Real-Time Chat</div>
+                        </div>
+                        <div class="comm-stat">
+                            <div class="comm-stat-num">🔒</div>
+                            <div class="comm-stat-label">Secure</div>
+                        </div>
+                        <div class="comm-stat">
+                            <div class="comm-stat-num">∞</div>
+                            <div class="comm-stat-label">Messages</div>
+                        </div>
+                    </div>
+                    <a href="community.html" class="btn-primary"
+                        style="background:linear-gradient(135deg,#f43f5e,#e11d48); box-shadow:0 8px 30px rgba(244,63,94,0.4);">
+                        🔥 Open Community Chat
+                    </a>
                 </div>
-            </a>
+                <div class="community-visual">
+                    <div class="chat-preview">
+                        <div class="cp-msg them">
+                            <div class="cp-name">Alex</div>
+                            Just used the Pomodoro timer — focus level 💯
+                        </div>
+                        <div class="cp-msg me">
+                            Same! Scientific calc is 🔥 too
+                        </div>
+                        <div class="cp-msg them">
+                            <div class="cp-name">Sam</div>
+                            Taso is the best thing ever 🚀
+                        </div>
+                        <div class="cp-msg me">
+                            Agreed! See everyone tomorrow
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-logo">Taso.</div>
+        <div class="footer-links">
+            <a href="index.html">Home</a>
+            <a href="tools.html">Tools</a>
+            <a href="community.html">Community</a>
+            <a href="calculator.html">Calculator</a>
+            <a href="pomodoro.html">Pomodoro</a>
+            <a href="notes.html">Notes</a>
         </div>
-    </div>
-    <div class="footer-controls">
-        <a href="flash.html" class="mini-btn flash-btn" title="Flash">⚡</a>
-        <a href="chat.html" class="mini-btn chat-btn" title="Chat">💬</a>
-    </div>
+        <div class="footer-copy">© 2026 Taso. Built with ❤️</div>
+    </footer>
 
     <script>
-        /**
-         * Animated Background
-         * Particle Mesh Network
-         */
-        const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d');
-
-        let width, height;
-        let particles = [];
-
-        // Configuration
-        const particleCount = window.innerWidth < 600 ? 40 : 80;
-        const connectionDistance = 150;
-        const mouseDistance = 200;
-
-        let mouse = { x: null, y: null };
-
-        window.addEventListener('resize', resize);
-        window.addEventListener('mousemove', (e) => {
-            mouse.x = e.x;
-            mouse.y = e.y;
+        // Navbar scroll shadow
+        window.addEventListener('scroll', () => {
+            document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 10);
         });
-
-        class Particle {
-            constructor() {
-                this.x = Math.random() * width;
-                this.y = Math.random() * height;
-                this.vx = (Math.random() - 0.5) * 0.5;
-                this.vy = (Math.random() - 0.5) * 0.5;
-                this.size = Math.random() * 2 + 1;
-                this.color = 'rgba(165, 180, 252, ' + (Math.random() * 0.5 + 0.1) + ')'; // Indigo tint
-            }
-
-            update() {
-                this.x += this.vx;
-                this.y += this.vy;
-
-                // Bounce off edges
-                if (this.x < 0 || this.x > width) this.vx *= -1;
-                if (this.y < 0 || this.y > height) this.vy *= -1;
-
-                // Mouse interaction
-                if (mouse.x != null) {
-                    let dx = mouse.x - this.x;
-                    let dy = mouse.y - this.y;
-                    let distance = Math.sqrt(dx * dx + dy * dy);
-                    if (distance < mouseDistance) {
-                        const forceDirectionX = dx / distance;
-                        const forceDirectionY = dy / distance;
-                        const force = (mouseDistance - distance) / mouseDistance;
-                        // Gently push away
-                        const directionX = forceDirectionX * force * this.size;
-                        const directionY = forceDirectionY * force * this.size;
-                        this.vx -= directionX * 0.05;
-                        this.vy -= directionY * 0.05;
-                    }
-                }
-            }
-
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fillStyle = this.color;
-                ctx.fill();
-            }
-        }
-
-        function init() {
-            particles = [];
-            resize();
-            for (let i = 0; i < particleCount; i++) {
-                particles.push(new Particle());
-            }
-            animate();
-        }
-
-        function resize() {
-            width = window.innerWidth;
-            height = window.innerHeight;
-            canvas.width = width;
-            canvas.height = height;
-        }
-
-        function animate() {
-            ctx.clearRect(0, 0, width, height);
-
-            // Update and draw particles
-            for (let i = 0; i < particles.length; i++) {
-                particles[i].update();
-                particles[i].draw();
-
-                // Connections
-                for (let j = i; j < particles.length; j++) {
-                    let dx = particles[i].x - particles[j].x;
-                    let dy = particles[i].y - particles[j].y;
-                    let distance = Math.sqrt(dx * dx + dy * dy);
-
-                    if (distance < connectionDistance) {
-                        ctx.beginPath();
-                        let opacity = 1 - (distance / connectionDistance);
-                        ctx.strokeStyle = 'rgba(165, 180, 252, ' + (opacity * 0.2) + ')';
-                        ctx.lineWidth = 1;
-                        ctx.moveTo(particles[i].x, particles[i].y);
-                        ctx.lineTo(particles[j].x, particles[j].y);
-                        ctx.stroke();
-                    }
-                }
-            }
-            requestAnimationFrame(animate);
-        }
-
-        init();
     </script>
 </body>
 

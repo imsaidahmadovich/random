@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taso — Smart Notes</title>
+    <meta name="description" content="Rich notes with tags, search, pinning, and auto-save. Your second brain.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #7c3aed;
+            --primary-light: #a78bfa;
+            --secondary: #06b6d4;
+            --emerald: #10b981;
+            --bg: #05070f;
+            --surface: rgba(255, 255, 255, 0.04);
+            --border: rgba(255, 255, 255, 0.07);
+            --text: #f1f5f9;
+            --text-muted: #64748b;
+            --text-subtle: #94a3b8;
+            --nav-h: 68px;
+            --rose: #f43f5e;
+            --amber: #f59e0b;
+            --sidebar-w: 280px;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+        }
+
+        #orb-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(130px);
+            opacity: 0.1;
+        }
+
+        .orb1 {
+            width: 500px;
+            height: 500px;
+            background: #10b981;
+            top: -100px;
+            left: -100px;
+        }
+
+        .orb2 {
+            width: 400px;
+            height: 400px;
+            background: #7c3aed;
+            bottom: -100px;
+            right: -100px;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.012) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.012) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            height: var(--nav-h);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            background: rgba(5, 7, 15, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #a78bfa, #06b6d4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        .nav-logo span {
+            -webkit-text-fill-color: #f43f5e;
+        }
+
+        .nav-back {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-subtle);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            transition: all 0.25s;
+        }
+
+        .nav-back:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            color: var(--text);
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 6px;
+        }
+
+        .nav-tab {
+            padding: 8px 22px;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text-subtle);
+            text-decoration: none;
+            transition: all 0.25s;
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, var(--primary), #4f46e5);
+            color: white;
+        }
+
+        .nav-tab.community-tab {
+            background: linear-gradient(135deg, #f43f5e, #e11d48);
+            color: white;
+        }
+
+        .logout-btn {
+            padding: 8px 18px;
+            border-radius: 10px;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-subtle);
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s;
+            font-family: inherit;
+        }
+
+        .logout-btn:hover {
+            border-color: var(--rose);
+            color: var(--rose);
+        }
+
+        /* LAYOUT */
+        .app {
+            display: flex;
+            position: fixed;
+            top: var(--nav-h);
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 10;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: var(--sidebar-w);
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.025);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 20px 20px 0;
+        }
+
+        .sidebar-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .new-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--primary), #4f46e5);
+            border: none;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.25s;
+        }
+
+        .new-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 16px rgba(124, 58, 237, 0.4);
+        }
+
+        .search-box {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px 14px;
+            color: var(--text);
+            font-size: 0.85rem;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+            margin-bottom: 16px;
+            transition: all 0.25s;
+        }
+
+        .search-box:focus {
+            border-color: rgba(124, 58, 237, 0.4);
+        }
+
+        .search-box::placeholder {
+            color: var(--text-muted);
+        }
+
+        .tag-filter {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            padding: 0 20px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tag-chip {
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .tag-chip.active {
+            background: rgba(16, 185, 129, 0.15);
+            color: #6ee7b7;
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .tag-chip:hover {
+            color: var(--text);
+        }
+
+        .notes-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.06) transparent;
+        }
+
+        .note-item {
+            padding: 14px 16px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 6px;
+            border: 1px solid transparent;
+            position: relative;
+        }
+
+        .note-item:hover {
+            background: var(--surface);
+            border-color: var(--border);
+        }
+
+        .note-item.active {
+            background: rgba(124, 58, 237, 0.12);
+            border-color: rgba(124, 58, 237, 0.3);
+        }
+
+        .note-item-title {
+            font-weight: 700;
+            font-size: 0.88rem;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .note-pin {
+            font-size: 0.7rem;
+        }
+
+        .note-item-preview {
+            font-size: 0.77rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .note-item-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 8px;
+        }
+
+        .note-item-date {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+        }
+
+        .note-item-tags {
+            display: flex;
+            gap: 4px;
+        }
+
+        .note-tag {
+            font-size: 0.62rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .note-color-bar {
+            position: absolute;
+            left: 0;
+            top: 8px;
+            bottom: 8px;
+            width: 3px;
+            border-radius: 0 3px 3px 0;
+        }
+
+        .empty-notes {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* EDITOR */
+        .editor {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .editor-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 24px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.02);
+            flex-wrap: wrap;
+        }
+
+        .toolbar-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text-subtle);
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .toolbar-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text);
+        }
+
+        .toolbar-sep {
+            width: 1px;
+            height: 20px;
+            background: var(--border);
+            margin: 0 4px;
+        }
+
+        .color-btn {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .color-btn:hover,
+        .color-btn.selected {
+            border-color: white;
+            transform: scale(1.15);
+        }
+
+        .toolbar-right {
+            margin-left: auto;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .pin-btn {
+            font-size: 0.75rem;
+            padding: 6px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text-subtle);
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .pin-btn.pinned {
+            color: var(--amber);
+            border-color: rgba(245, 158, 11, 0.3);
+            background: rgba(245, 158, 11, 0.08);
+        }
+
+        .del-btn {
+            font-size: 0.75rem;
+            padding: 6px 14px;
+            border-radius: 8px;
+            border: 1px solid rgba(244, 63, 94, 0.15);
+            background: rgba(244, 63, 94, 0.06);
+            color: #fca5a5;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .del-btn:hover {
+            background: rgba(244, 63, 94, 0.15);
+        }
+
+        .editor-title-wrap {
+            padding: 24px 28px 0;
+        }
+
+        .editor-title {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: var(--text);
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            outline: none;
+            padding: 0;
+            letter-spacing: -0.5px;
+        }
+
+        .editor-title::placeholder {
+            color: rgba(255, 255, 255, 0.12);
+        }
+
+        .editor-tags-row {
+            padding: 8px 28px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .editor-tag {
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            border: 1px solid transparent;
+        }
+
+        .editor-tag-del {
+            cursor: pointer;
+            opacity: 0.5;
+            transition: opacity 0.2s;
+            font-size: 0.85rem;
+        }
+
+        .editor-tag-del:hover {
+            opacity: 1;
+        }
+
+        .tag-input {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.78rem;
+            outline: none;
+            padding: 2px 4px;
+            width: 80px;
+        }
+
+        .editor-body {
+            flex: 1;
+            padding: 16px 28px 24px;
+            overflow-y: auto;
+        }
+
+        .editor-textarea {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border: none;
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            line-height: 1.75;
+            outline: none;
+            resize: none;
+            min-height: 300px;
+        }
+
+        .editor-textarea::placeholder {
+            color: rgba(255, 255, 255, 0.1);
+        }
+
+        .editor-status {
+            padding: 8px 28px;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            display: flex;
+            gap: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .no-note-selected {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            color: var(--text-muted);
+        }
+
+        .no-note-selected .big-icon {
+            font-size: 4rem;
+            opacity: 0.3;
+        }
+
+        .no-note-selected p {
+            font-size: 0.95rem;
+        }
+
+        .no-note-selected a {
+            color: var(--primary-light);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* NOTE COLORS */
+        .nc-default {
+            --note-color: #7c3aed;
+        }
+
+        .nc-rose {
+            --note-color: #f43f5e;
+        }
+
+        .nc-amber {
+            --note-color: #f59e0b;
+        }
+
+        .nc-emerald {
+            --note-color: #10b981;
+        }
+
+        .nc-cyan {
+            --note-color: #06b6d4;
+        }
+
+        @media(max-width:768px) {
+            nav {
+                padding: 0 16px
+            }
+
+            .nav-tabs {
+                display: none
+            }
+
+            .sidebar {
+                width: 240px
+            }
+
+            .editor-title {
+                font-size: 1.4rem
+            }
+        }
+
+        @media(max-width:520px) {
+            .sidebar {
+                display: none
+            }
+
+            .sidebar.open {
+                display: flex;
+                position: absolute;
+                inset: 0;
+                z-index: 100;
+                width: 100%
+            }
+        }
+    </style>
+    <script type="module">
+        import { checkAuth, logout } from "./auth.js";
+        checkAuth();
+        window.handleLogout = logout;
+    </script>
+</head>
+
+<body>
+    <div id="orb-bg">
+        <div class="orb orb1"></div>
+        <div class="orb orb2"></div>
+    </div>
+
+    <nav>
+        <a href="index.html" class="nav-logo">Taso<span>.</span></a>
+        <div class="nav-tabs">
+            <a href="index.html" class="nav-tab">🏠 Home</a>
+            <a href="tools.html" class="nav-tab active">⚡ Tools</a>
+            <a href="community.html" class="nav-tab community-tab">🔥 Community</a>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+            <a href="tools.html" class="nav-back">← Tools</a>
+            <button class="logout-btn" onclick="handleLogout()">Sign Out</button>
+        </div>
+    </nav>
+
+    <div class="app">
+        <!-- SIDEBAR -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">
+                    📝 Notes
+                    <button class="new-btn" onclick="createNote()" title="New Note">+</button>
+                </div>
+                <input type="text" class="search-box" placeholder="🔍 Search notes…" oninput="renderNotesList()"
+                    id="noteSearch">
+            </div>
+            <div class="tag-filter" id="tagFilter">
+                <span class="tag-chip active" onclick="filterTag('', this)">All</span>
+            </div>
+            <div class="notes-list" id="notesList"></div>
+        </div>
+
+        <!-- EDITOR -->
+        <div class="editor" id="editorArea">
+            <!-- Shown when a note is selected -->
+            <div id="noNote" class="no-note-selected">
+                <div class="big-icon">📝</div>
+                <p>Select a note or <a href="#" onclick="createNote();return false;">create a new one</a></p>
+            </div>
+            <div id="noteEditor"
+                style="display:none;flex:1;display:none;flex-direction:column;height:100%;overflow:hidden;">
+                <div class="editor-toolbar">
+                    <button class="toolbar-btn" onclick="fmt('bold')" title="Bold"><b>B</b></button>
+                    <button class="toolbar-btn" onclick="fmt('italic')" title="Italic"><i>I</i></button>
+                    <button class="toolbar-btn" onclick="fmt('underline')" title="Underline"><u>U</u></button>
+                    <div class="toolbar-sep"></div>
+                    <button class="toolbar-btn" onclick="insertMd('## ')" title="Heading">H</button>
+                    <button class="toolbar-btn" onclick="insertMd('- ')" title="List">≡</button>
+                    <button class="toolbar-btn" onclick="insertMd('> ')" title="Quote">❝</button>
+                    <button class="toolbar-btn" onclick="insertMd('`')" title="Code">&lt;/&gt;</button>
+                    <div class="toolbar-sep"></div>
+                    <!-- Colors -->
+                    <div class="color-btn selected" style="background:#7c3aed;" onclick="setNoteColor('default', this)"
+                        title="Purple"></div>
+                    <div class="color-btn" style="background:#f43f5e;" onclick="setNoteColor('rose', this)"
+                        title="Rose"></div>
+                    <div class="color-btn" style="background:#f59e0b;" onclick="setNoteColor('amber', this)"
+                        title="Amber"></div>
+                    <div class="color-btn" style="background:#10b981;" onclick="setNoteColor('emerald', this)"
+                        title="Green"></div>
+                    <div class="color-btn" style="background:#06b6d4;" onclick="setNoteColor('cyan', this)"
+                        title="Cyan"></div>
+                    <div class="toolbar-right">
+                        <button class="pin-btn" id="pinBtn" onclick="togglePin()">📌 Pin</button>
+                        <button class="del-btn" onclick="deleteNote()">🗑 Delete</button>
+                    </div>
+                </div>
+                <div class="editor-title-wrap">
+                    <input type="text" class="editor-title" id="editorTitle" placeholder="Note title…"
+                        oninput="autoSave()">
+                </div>
+                <div class="editor-tags-row" id="editorTagsRow">
+                    <input type="text" class="tag-input" id="tagInput" placeholder="+ tag"
+                        onkeydown="handleTagInput(event)">
+                </div>
+                <div class="editor-body">
+                    <textarea class="editor-textarea" id="editorBody"
+                        placeholder="Start writing…&#10;&#10;Use ## for headings, - for lists, > for quotes…"
+                        oninput="autoSave()"></textarea>
+                </div>
+                <div class="editor-status">
+                    <span id="statusWords">0 words</span>
+                    <span id="statusChars">0 chars</span>
+                    <span id="statusSaved">Saved</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // STORE
+        let notes = JSON.parse(localStorage.getItem('nexus-notes') || '[]');
+        let activeNoteId = null;
+        let saveTimeout = null;
+        let activeTagFilter = '';
+
+        const NOTE_COLORS = {
+            default: { bg: 'rgba(124,58,237,0.12)', text: '#a78bfa', bar: '#7c3aed' },
+            rose: { bg: 'rgba(244,63,94,0.12)', text: '#fca5a5', bar: '#f43f5e' },
+            amber: { bg: 'rgba(245,158,11,0.12)', text: '#fcd34d', bar: '#f59e0b' },
+            emerald: { bg: 'rgba(16,185,129,0.12)', text: '#6ee7b7', bar: '#10b981' },
+            cyan: { bg: 'rgba(6,182,212,0.12)', text: '#67e8f9', bar: '#06b6d4' }
+        };
+
+        function createNote() {
+            const note = {
+                id: Date.now().toString(),
+                title: '',
+                body: '',
+                tags: [],
+                color: 'default',
+                pinned: false,
+                created: Date.now(),
+                updated: Date.now()
+            };
+            notes.unshift(note);
+            saveNotes();
+            openNote(note.id);
+            renderNotesList();
+            renderTagFilter();
+            document.getElementById('editorTitle').focus();
+        }
+
+        function openNote(id) {
+            activeNoteId = id;
+            const note = notes.find(n => n.id === id);
+            if (!note) return;
+
+            document.getElementById('noNote').style.display = 'none';
+            const ed = document.getElementById('noteEditor');
+            ed.style.display = 'flex';
+            ed.style.flexDirection = 'column';
+            ed.style.height = '100%';
+            ed.style.overflow = 'hidden';
+
+            document.getElementById('editorTitle').value = note.title;
+            document.getElementById('editorBody').value = note.body;
+            renderEditorTags(note);
+            updatePinBtn(note);
+            updateWordCount();
+            renderNotesList();
+
+            // Set color buttons
+            document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
+            const colors = ['default', 'rose', 'amber', 'emerald', 'cyan'];
+            const idx = colors.indexOf(note.color);
+            if (idx >= 0) document.querySelectorAll('.color-btn')[idx].classList.add('selected');
+
+            document.getElementById('statusSaved').textContent = 'Saved';
+        }
+
+        function renderEditorTags(note) {
+            const row = document.getElementById('editorTagsRow');
+            const input = document.getElementById('tagInput');
+            row.innerHTML = '';
+            (note.tags || []).forEach(tag => {
+                const s = document.createElement('span');
+                s.className = 'editor-tag';
+                const col = NOTE_COLORS[note.color] || NOTE_COLORS.default;
+                s.style.background = col.bg; s.style.color = col.text; s.style.borderColor = col.bg;
+                s.innerHTML = `#${tag} <span class="editor-tag-del" onclick="removeTag('${tag}')">×</span>`;
+                row.appendChild(s);
+            });
+            row.appendChild(input);
+        }
+
+        function handleTagInput(e) {
+            if ((e.key === 'Enter' || e.key === ',') && activeNoteId) {
+                e.preventDefault();
+                const val = e.target.value.trim().replace(/[^a-z0-9\-_]/gi, '').toLowerCase();
+                if (!val) return;
+                const note = notes.find(n => n.id === activeNoteId);
+                if (note && !note.tags.includes(val)) {
+                    note.tags.push(val); note.updated = Date.now();
+                    saveNotes(); renderEditorTags(note); renderTagFilter(); renderNotesList();
+                }
+                e.target.value = '';
+            }
+        }
+
+        function removeTag(tag) {
+            const note = notes.find(n => n.id === activeNoteId);
+            if (!note) return;
+            note.tags = note.tags.filter(t => t !== tag);
+            note.updated = Date.now();
+            saveNotes(); renderEditorTags(note); renderTagFilter(); renderNotesList();
+        }
+
+        function autoSave() {
+            if (!activeNoteId) return;
+            clearTimeout(saveTimeout);
+            document.getElementById('statusSaved').textContent = 'Saving…';
+            const note = notes.find(n => n.id === activeNoteId);
+            if (!note) return;
+            note.title = document.getElementById('editorTitle').value;
+            note.body = document.getElementById('editorBody').value;
+            note.updated = Date.now();
+            updateWordCount();
+            saveTimeout = setTimeout(() => {
+                saveNotes();
+                renderNotesList();
+                document.getElementById('statusSaved').textContent = '✓ Saved';
+            }, 600);
+        }
+
+        function updateWordCount() {
+            const body = document.getElementById('editorBody').value;
+            const words = body.trim() ? body.trim().split(/\s+/).length : 0;
+            document.getElementById('statusWords').textContent = words + ' words';
+            document.getElementById('statusChars').textContent = body.length + ' chars';
+        }
+
+        function togglePin() {
+            const note = notes.find(n => n.id === activeNoteId);
+            if (!note) return;
+            note.pinned = !note.pinned; note.updated = Date.now();
+            updatePinBtn(note); saveNotes(); renderNotesList();
+        }
+
+        function updatePinBtn(note) {
+            const btn = document.getElementById('pinBtn');
+            btn.textContent = note.pinned ? '📌 Pinned' : '📌 Pin';
+            btn.classList.toggle('pinned', note.pinned);
+        }
+
+        function setNoteColor(color, btn) {
+            document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            const note = notes.find(n => n.id === activeNoteId);
+            if (!note) return;
+            note.color = color; note.updated = Date.now();
+            saveNotes(); renderNotesList(); renderEditorTags(note);
+        }
+
+        function deleteNote() {
+            if (!activeNoteId || !confirm('Delete this note?')) return;
+            notes = notes.filter(n => n.id !== activeNoteId);
+            activeNoteId = null;
+            saveNotes(); renderNotesList(); renderTagFilter();
+            document.getElementById('noNote').style.display = '';
+            document.getElementById('noteEditor').style.display = 'none';
+        }
+
+        function fmt(cmd) {
+            const ta = document.getElementById('editorBody');
+            const start = ta.selectionStart, end = ta.selectionEnd;
+            const sel = ta.value.substring(start, end);
+            let wrap = cmd === 'bold' ? '**' : cmd === 'italic' ? '_' : '__';
+            const replacement = wrap + sel + wrap;
+            ta.value = ta.value.substring(0, start) + replacement + ta.value.substring(end);
+            ta.setSelectionRange(start + wrap.length, end + wrap.length);
+            autoSave();
+        }
+
+        function insertMd(prefix) {
+            const ta = document.getElementById('editorBody');
+            const pos = ta.selectionStart;
+            const before = ta.value.substring(0, pos);
+            const lineStart = before.lastIndexOf('\n') + 1;
+            ta.value = ta.value.substring(0, lineStart) + prefix + ta.value.substring(lineStart);
+            ta.setSelectionRange(lineStart + prefix.length, lineStart + prefix.length);
+            autoSave();
+        }
+
+        function filterTag(tag, el) {
+            activeTagFilter = tag;
+            document.querySelectorAll('.tag-chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            renderNotesList();
+        }
+
+        function renderTagFilter() {
+            const allTags = [...new Set(notes.flatMap(n => n.tags || []))];
+            const filter = document.getElementById('tagFilter');
+            filter.innerHTML = `<span class="tag-chip active" onclick="filterTag('', this)">All</span>`;
+            allTags.forEach(tag => {
+                const s = document.createElement('span');
+                s.className = 'tag-chip';
+                s.textContent = '#' + tag;
+                s.onclick = function () { filterTag(tag, this); };
+                filter.appendChild(s);
+            });
+        }
+
+        function renderNotesList() {
+            const q = document.getElementById('noteSearch').value.toLowerCase();
+            const list = document.getElementById('notesList');
+            let filtered = notes.filter(n => {
+                const matchTag = !activeTagFilter || n.tags.includes(activeTagFilter);
+                const matchSearch = !q || n.title.toLowerCase().includes(q) || n.body.toLowerCase().includes(q);
+                return matchTag && matchSearch;
+            });
+            // Pinned first
+            filtered.sort((a, b) => (b.pinned - a.pinned) || (b.updated - a.updated));
+
+            if (!filtered.length) {
+                list.innerHTML = '<div class="empty-notes">No notes found.<br>Click + to create one!</div>';
+                return;
+            }
+            list.innerHTML = filtered.map(note => {
+                const col = NOTE_COLORS[note.color] || NOTE_COLORS.default;
+                const tags = (note.tags || []).slice(0, 3).map(t =>
+                    `<span class="note-tag" style="background:${col.bg};color:${col.text}">#${t}</span>`).join('');
+                const preview = note.body.replace(/[#*_`>-]/g, '').slice(0, 80);
+                const date = new Date(note.updated).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                return `<div class="note-item ${note.id === activeNoteId ? 'active' : ''}" onclick="openNote('${note.id}')">
+            <div class="note-color-bar" style="background:${col.bar}"></div>
+            <div class="note-item-title">
+                ${note.pinned ? '<span class="note-pin">📌</span>' : ''}
+                ${note.title || '<span style="opacity:0.3">Untitled</span>'}
+            </div>
+            <div class="note-item-preview">${preview || '…'}</div>
+            <div class="note-item-meta">
+                <span class="note-item-date">${date}</span>
+                <div class="note-item-tags">${tags}</div>
+            </div>
+        </div>`;
+            }).join('');
+        }
+
+        function saveNotes() {
+            localStorage.setItem('nexus-notes', JSON.stringify(notes));
+        }
+
+        // INIT
+        renderNotesList();
+        renderTagFilter();
+
+        // Auto-open first note if any
+        if (notes.length) {
+            // don't auto-open, let user choose
+        }
+    </script>
+</body>
+
+</html>

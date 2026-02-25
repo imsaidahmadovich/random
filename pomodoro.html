@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taso — Pomodoro Timer</title>
+    <meta name="description" content="Boost focus with the Pomodoro technique. Customizable work and break intervals.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #7c3aed;
+            --primary-light: #a78bfa;
+            --secondary: #06b6d4;
+            --bg: #05070f;
+            --surface: rgba(255, 255, 255, 0.04);
+            --border: rgba(255, 255, 255, 0.08);
+            --text: #f1f5f9;
+            --text-muted: #64748b;
+            --text-subtle: #94a3b8;
+            --nav-h: 68px;
+            --rose: #f43f5e;
+            --amber: #f59e0b;
+            --emerald: #10b981;
+            --work-color: #f43f5e;
+            --short-color: #10b981;
+            --long-color: #06b6d4;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        #orb-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(130px);
+            opacity: 0.12;
+            transition: background 1s ease;
+        }
+
+        .orb1 {
+            width: 600px;
+            height: 600px;
+            background: var(--orb-color, #f43f5e);
+            top: 5%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .orb2 {
+            width: 400px;
+            height: 400px;
+            background: #7c3aed;
+            bottom: -100px;
+            right: -100px;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            height: var(--nav-h);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            background: rgba(5, 7, 15, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #a78bfa, #06b6d4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        .nav-logo span {
+            -webkit-text-fill-color: #f43f5e;
+        }
+
+        .nav-back {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-subtle);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            transition: all 0.25s;
+        }
+
+        .nav-back:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            color: var(--text);
+            background: var(--surface);
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 6px;
+        }
+
+        .nav-tab {
+            padding: 8px 22px;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text-subtle);
+            text-decoration: none;
+            transition: all 0.25s;
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, var(--primary), #4f46e5);
+            color: white;
+        }
+
+        .nav-tab.community-tab {
+            background: linear-gradient(135deg, #f43f5e, #e11d48);
+            color: white;
+        }
+
+        .logout-btn {
+            padding: 8px 18px;
+            border-radius: 10px;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-subtle);
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s;
+            font-family: inherit;
+        }
+
+        .logout-btn:hover {
+            border-color: var(--rose);
+            color: var(--rose);
+        }
+
+        main {
+            position: relative;
+            z-index: 10;
+            padding-top: calc(var(--nav-h) + 40px);
+            padding-bottom: 60px;
+            max-width: 700px;
+            margin: 0 auto;
+            padding-left: 24px;
+            padding-right: 24px;
+        }
+
+        /* MODE TABS */
+        .mode-tabs {
+            display: flex;
+            gap: 6px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 6px;
+            margin-bottom: 40px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .mode-tab {
+            flex: 1;
+            padding: 11px;
+            border-radius: 11px;
+            border: none;
+            background: transparent;
+            color: var(--text-subtle);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .mode-tab.work.active {
+            background: rgba(244, 63, 94, 0.2);
+            color: #fca5a5;
+        }
+
+        .mode-tab.short.active {
+            background: rgba(16, 185, 129, 0.2);
+            color: #6ee7b7;
+        }
+
+        .mode-tab.long.active {
+            background: rgba(6, 182, 212, 0.2);
+            color: #67e8f9;
+        }
+
+        .mode-tab:hover {
+            background: var(--surface);
+            color: var(--text);
+        }
+
+        /* TIMER RING */
+        .timer-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .ring-container {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            margin: 0 auto 32px;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .ring-bg {
+            position: absolute;
+            inset: 0;
+        }
+
+        svg.ring {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .ring-track {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.06);
+            stroke-width: 8;
+        }
+
+        .ring-progress {
+            fill: none;
+            stroke-width: 8;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.5s linear, stroke 1s ease;
+        }
+
+        .timer-inner {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .timer-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .timer-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 3.8rem;
+            font-weight: 700;
+            color: white;
+            line-height: 1;
+            letter-spacing: -2px;
+        }
+
+        .timer-session {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* CONTROLS */
+        .controls {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .ctrl-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text-subtle);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.25s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ctrl-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text);
+        }
+
+        .play-btn {
+            width: 72px;
+            height: 72px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, var(--phase-color, #f43f5e), var(--phase-darken, #be123c));
+            border: none;
+            color: white;
+            font-size: 1.6rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 8px 24px rgba(244, 63, 94, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .play-btn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 12px 32px var(--play-shadow, rgba(244, 63, 94, 0.5));
+        }
+
+        /* SETTINGS */
+        .settings-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 28px;
+            margin-bottom: 32px;
+            animation: fadeIn 0.7s ease-out;
+        }
+
+        .settings-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text-subtle);
+            letter-spacing: 0.04em;
+        }
+
+        .settings-row {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .setting-item {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .setting-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .setting-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px 14px;
+            color: var(--text);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            font-weight: 700;
+            outline: none;
+            transition: all 0.25s;
+            text-align: center;
+        }
+
+        .setting-input:focus {
+            border-color: rgba(124, 58, 237, 0.5);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+        }
+
+        /* CYCLES */
+        .cycles-bar {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 32px;
+        }
+
+        .cycle-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--border);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s;
+        }
+
+        .cycle-dot.done {
+            background: var(--rose);
+            border-color: rgba(244, 63, 94, 0.4);
+            box-shadow: 0 0 8px rgba(244, 63, 94, 0.5);
+        }
+
+        .cycle-dot.active {
+            background: rgba(244, 63, 94, 0.4);
+            border-color: rgba(244, 63, 94, 0.5);
+            animation: pulseDot 1s ease-in-out infinite;
+        }
+
+        @keyframes pulseDot {
+
+            0%,
+            100% {
+                transform: scale(1)
+            }
+
+            50% {
+                transform: scale(1.3)
+            }
+        }
+
+        /* STATS */
+        .stats-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .stat-box {
+            flex: 1;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-num {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--primary-light);
+        }
+
+        .stat-label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0
+            }
+
+            to {
+                opacity: 1
+            }
+        }
+
+        @media(max-width:768px) {
+            nav {
+                padding: 0 16px
+            }
+
+            .nav-tabs {
+                display: none
+            }
+        }
+
+        @media(max-width:480px) {
+            .controls {
+                gap: 8px
+            }
+
+            .play-btn {
+                width: 64px;
+                height: 64px
+            }
+        }
+    </style>
+    <script type="module">
+        import { checkAuth, logout } from "./auth.js";
+        checkAuth();
+        window.handleLogout = logout;
+    </script>
+</head>
+
+<body>
+    <div id="orb-bg">
+        <div class="orb orb1" id="bgOrb"></div>
+        <div class="orb orb2"></div>
+    </div>
+
+    <nav>
+        <a href="index.html" class="nav-logo">Taso<span>.</span></a>
+        <div class="nav-tabs">
+            <a href="index.html" class="nav-tab">🏠 Home</a>
+            <a href="tools.html" class="nav-tab active">⚡ Tools</a>
+            <a href="community.html" class="nav-tab community-tab">🔥 Community</a>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+            <a href="tools.html" class="nav-back">← Back to Tools</a>
+            <button class="logout-btn" onclick="handleLogout()">Sign Out</button>
+        </div>
+    </nav>
+
+    <main>
+        <!-- MODE TABS -->
+        <div class="mode-tabs">
+            <button class="mode-tab work active" id="tab-work" onclick="switchPhase('work')">🍅 Focus</button>
+            <button class="mode-tab short" id="tab-short" onclick="switchPhase('short')">☕ Short Break</button>
+            <button class="mode-tab long" id="tab-long" onclick="switchPhase('long')">🌿 Long Break</button>
+        </div>
+
+        <!-- TIMER -->
+        <div class="timer-section">
+            <div class="ring-container">
+                <svg class="ring" viewBox="0 0 280 280">
+                    <circle class="ring-track" cx="140" cy="140" r="124" />
+                    <circle class="ring-progress" id="ringProgress" cx="140" cy="140" r="124" stroke="#f43f5e"
+                        stroke-dasharray="779.4" stroke-dashoffset="0" />
+                </svg>
+                <div class="timer-inner">
+                    <div class="timer-label" id="phaseLabel">FOCUS TIME</div>
+                    <div class="timer-time" id="timerDisplay">25:00</div>
+                    <div class="timer-session" id="sessionLabel">Session 1 of 4</div>
+                </div>
+            </div>
+
+            <!-- CYCLES -->
+            <div class="cycles-bar" id="cyclesBar"></div>
+
+            <!-- CONTROLS -->
+            <div class="controls">
+                <button class="ctrl-btn" id="prevBtn" onclick="prevSession()" title="Previous">⏮</button>
+                <button class="play-btn" id="playBtn" onclick="toggleTimer()" title="Play/Pause">▶</button>
+                <button class="ctrl-btn" id="nextBtn" onclick="skipSession()" title="Skip">⏭</button>
+                <button class="ctrl-btn" onclick="resetTimer()" title="Reset" style="font-size:0.9rem;">↺</button>
+            </div>
+        </div>
+
+        <!-- SETTINGS -->
+        <div class="settings-card">
+            <div class="settings-title">⚙️ Timer Settings</div>
+            <div class="settings-row">
+                <div class="setting-item">
+                    <span class="setting-label">Focus (min)</span>
+                    <input type="number" class="setting-input" id="setWork" value="25" min="1" max="60"
+                        onchange="applySettings()">
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">Short Break</span>
+                    <input type="number" class="setting-input" id="setShort" value="5" min="1" max="30"
+                        onchange="applySettings()">
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">Long Break</span>
+                    <input type="number" class="setting-input" id="setLong" value="15" min="1" max="60"
+                        onchange="applySettings()">
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">Cycles</span>
+                    <input type="number" class="setting-input" id="setCycles" value="4" min="2" max="8"
+                        onchange="applySettings()">
+                </div>
+            </div>
+        </div>
+
+        <!-- STATS -->
+        <div class="stats-row">
+            <div class="stat-box">
+                <div class="stat-num" id="statPomodoros">0</div>
+                <div class="stat-label">Pomodoros Today</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-num" id="statFocusMin">0</div>
+                <div class="stat-label">Focus Minutes</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-num" id="statStreak">0</div>
+                <div class="stat-label">Day Streak 🔥</div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // CONFIG
+        let config = {
+            work: 25, short: 5, long: 15, cycles: 4
+        };
+
+        // STATE
+        let phase = 'work'; // work|short|long
+        let isRunning = false;
+        let currentSession = 0; // 0-indexed
+        let timeLeft = config.work * 60;
+        let totalTime = config.work * 60;
+        let timerInterval = null;
+
+        // STATS
+        let stats = JSON.parse(localStorage.getItem('pomodoro-stats') || '{"pomodoros":0,"focusMin":0,"streak":0,"lastDate":""}');
+
+        const CIRCUMFERENCE = 2 * Math.PI * 124;
+        document.getElementById('ringProgress').setAttribute('stroke-dasharray', CIRCUMFERENCE);
+
+        const phaseConfig = {
+            work: { label: 'FOCUS TIME', session: 'Session', color: '#f43f5e', shadow: 'rgba(244,63,94,0.5)', tab: 'work', orbColor: '#f43f5e', darken: '#be123c' },
+            short: { label: 'SHORT BREAK', session: 'Break', color: '#10b981', shadow: 'rgba(16,185,129,0.5)', tab: 'short', orbColor: '#10b981', darken: '#065f46' },
+            long: { label: 'LONG BREAK', session: 'Long Break', color: '#06b6d4', shadow: 'rgba(6,182,212,0.5)', tab: 'long', orbColor: '#06b6d4', darken: '#0e7490' }
+        };
+
+        function getPhaseTime(p) {
+            return (p === 'work' ? config.work : p === 'short' ? config.short : config.long) * 60;
+        }
+
+        function switchPhase(p) {
+            phase = p;
+            resetTimer();
+            updateUI();
+        }
+
+        function updateUI() {
+            const cfg = phaseConfig[phase];
+            // Tabs
+            document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('tab-' + phase).classList.add('active');
+            // Ring color
+            document.getElementById('ringProgress').setAttribute('stroke', cfg.color);
+            // Play button color
+            const pb = document.getElementById('playBtn');
+            pb.style.background = `linear-gradient(135deg,${cfg.color},${cfg.darken})`;
+            pb.style.boxShadow = `0 8px 24px ${cfg.shadow}`;
+            // Orb
+            document.getElementById('bgOrb').style.background = cfg.orbColor;
+            // Labels
+            document.getElementById('phaseLabel').textContent = cfg.label;
+            // Cycles display
+            renderCycles();
+            updateSessionLabel();
+        }
+
+        function updateSessionLabel() {
+            const s = phase === 'work' ? `Session ${currentSession + 1} of ${config.cycles}` : phaseConfig[phase].session;
+            document.getElementById('sessionLabel').textContent = s;
+        }
+
+        function updateTimeDisplay() {
+            const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+            const s = (timeLeft % 60).toString().padStart(2, '0');
+            document.getElementById('timerDisplay').textContent = `${m}:${s}`;
+            document.title = `${m}:${s} — Taso Pomodoro`;
+            // Ring
+            const offset = CIRCUMFERENCE * (timeLeft / totalTime);
+            document.getElementById('ringProgress').setAttribute('stroke-dashoffset', CIRCUMFERENCE - offset);
+        }
+
+        function toggleTimer() {
+            isRunning = !isRunning;
+            document.getElementById('playBtn').textContent = isRunning ? '⏸' : '▶';
+            if (isRunning) {
+                timerInterval = setInterval(tick, 1000);
+            } else {
+                clearInterval(timerInterval);
+            }
+        }
+
+        function tick() {
+            if (timeLeft > 0) {
+                timeLeft--;
+                updateTimeDisplay();
+            } else {
+                sessionComplete();
+            }
+        }
+
+        function sessionComplete() {
+            clearInterval(timerInterval); isRunning = false;
+            document.getElementById('playBtn').textContent = '▶';
+            playBeep();
+            if (phase === 'work') {
+                currentSession++;
+                stats.pomodoros++;
+                stats.focusMin += config.work;
+                saveStats();
+                updateStats();
+                if (currentSession >= config.cycles) {
+                    currentSession = 0;
+                    switchPhase('long');
+                } else {
+                    switchPhase('short');
+                }
+            } else {
+                switchPhase('work');
+            }
+            renderCycles();
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval); isRunning = false;
+            document.getElementById('playBtn').textContent = '▶';
+            totalTime = getPhaseTime(phase);
+            timeLeft = totalTime;
+            updateTimeDisplay();
+        }
+
+        function skipSession() {
+            clearInterval(timerInterval); isRunning = false;
+            sessionComplete();
+        }
+        function prevSession() {
+            if (phase === 'work' && currentSession > 0) currentSession--;
+            switchPhase('work');
+        }
+
+        function applySettings() {
+            config.work = parseInt(document.getElementById('setWork').value) || 25;
+            config.short = parseInt(document.getElementById('setShort').value) || 5;
+            config.long = parseInt(document.getElementById('setLong').value) || 15;
+            config.cycles = parseInt(document.getElementById('setCycles').value) || 4;
+            currentSession = 0;
+            resetTimer();
+            renderCycles();
+        }
+
+        function renderCycles() {
+            const bar = document.getElementById('cyclesBar');
+            bar.innerHTML = '';
+            for (let i = 0; i < config.cycles; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'cycle-dot';
+                if (i < currentSession) dot.classList.add('done');
+                else if (i === currentSession && phase === 'work') dot.classList.add('active');
+                bar.appendChild(dot);
+            }
+        }
+
+        function saveStats() {
+            const today = new Date().toDateString();
+            if (stats.lastDate !== today) {
+                if (stats.lastDate === new Date(Date.now() - 86400000).toDateString()) stats.streak++;
+                else if (stats.lastDate !== today) stats.streak = 1;
+                stats.pomodoros = 1; stats.focusMin = config.work;
+            }
+            stats.lastDate = today;
+            localStorage.setItem('pomodoro-stats', JSON.stringify(stats));
+        }
+
+        function updateStats() {
+            document.getElementById('statPomodoros').textContent = stats.pomodoros;
+            document.getElementById('statFocusMin').textContent = stats.focusMin;
+            document.getElementById('statStreak').textContent = stats.streak;
+        }
+
+        let audioCtx = null;
+        function playBeep() {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                [0, 200, 400].forEach(delay => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.connect(gain); gain.connect(audioCtx.destination);
+                    osc.frequency.value = phase === 'work' ? 880 : 660;
+                    osc.type = 'sine';
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime + delay / 1000);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + delay / 1000 + 0.5);
+                    osc.start(audioCtx.currentTime + delay / 1000);
+                    osc.stop(audioCtx.currentTime + delay / 1000 + 0.5);
+                });
+            } catch (e) { }
+        }
+
+        // INIT
+        updateUI();
+        updateTimeDisplay();
+        updateStats();
+    </script>
+</body>
+
+</html>
