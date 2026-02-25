@@ -645,6 +645,280 @@
             color: var(--rose);
         }
 
+        /* BADGES */
+        .msg-badge {
+            font-size: 0.62rem;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-left: 4px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .badge-honored {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .badge-panthera {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .badge-kind {
+            background: rgba(6, 182, 212, 0.15);
+            color: #22d3ee;
+            border: 1px solid rgba(6, 182, 212, 0.2);
+        }
+
+        .badge-brave {
+            background: rgba(124, 58, 237, 0.15);
+            color: #a78bfa;
+            border: 1px solid rgba(124, 58, 237, 0.2);
+        }
+
+        .badge-custom {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-subtle);
+            border: 1px solid var(--border);
+        }
+
+        /* EDITING MODE */
+        .msg-group.is-editing .msg-text {
+            background: rgba(124, 58, 237, 0.08);
+            border-color: rgba(124, 58, 237, 0.4);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.05);
+        }
+
+        .edit-input-container {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .msg-edit-input {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px 14px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.9rem;
+            outline: none;
+            resize: none;
+            width: 100%;
+        }
+
+        .edit-controls {
+            display: flex;
+            gap: 8px;
+            font-size: 0.72rem;
+        }
+
+        .edit-save {
+            color: var(--emerald);
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .edit-cancel {
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .edited-tag {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-left: 6px;
+        }
+
+        /* PANELS */
+        .input-actions {
+            display: flex;
+            gap: 6px;
+            padding-bottom: 2px;
+        }
+
+        .input-act-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            transition: all 0.2s;
+        }
+
+        .input-act-btn:hover {
+            background: var(--surface);
+            color: var(--text);
+        }
+
+        .emoji-gif-panel {
+            position: absolute;
+            bottom: calc(100% + 12px);
+            left: 0;
+            width: 320px;
+            background: rgba(10, 12, 22, 0.98);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 2000;
+        }
+
+        .emoji-gif-panel.open {
+            display: flex;
+            animation: panelIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes panelIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .panel-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            padding: 4px;
+            gap: 4px;
+        }
+
+        .panel-tab {
+            flex: 1;
+            padding: 8px;
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 12px;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        .panel-tab.active {
+            background: var(--surface);
+            color: var(--text);
+        }
+
+        .panel-content {
+            height: 300px;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        .emoji-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+        }
+
+        .emoji-item {
+            font-size: 1.3rem;
+            cursor: pointer;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+
+        .emoji-item:hover {
+            background: var(--surface);
+            transform: scale(1.15);
+        }
+
+        .gif-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .gif-item {
+            cursor: pointer;
+            border-radius: 8px;
+            overflow: hidden;
+            aspect-ratio: 4/3;
+            background: var(--surface);
+        }
+
+        .gif-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* ADMIN PROFILE TOOLS */
+        .admin-profile-tools {
+            margin-top: 24px;
+            padding: 16px;
+            background: rgba(244, 63, 94, 0.05);
+            border: 1px solid rgba(244, 63, 94, 0.15);
+            border-radius: 16px;
+        }
+
+        .admin-tool-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: var(--rose);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 12px;
+        }
+
+        .admin-role-input {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 8px 12px;
+            color: var(--text);
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+        }
+
+        .admin-role-btn {
+            width: 100%;
+            padding: 9px;
+            border-radius: 10px;
+            background: var(--rose);
+            color: white;
+            border: none;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .admin-role-btn:hover {
+            opacity: 0.9;
+        }
+
         .date-divider {
             display: flex;
             align-items: center;
@@ -1280,8 +1554,24 @@
                 </div>
             </div>
             <div class="input-area">
+                <!-- Emoji/GIF Panel -->
+                <div class="emoji-gif-panel" id="panelEmojiGif">
+                    <div class="panel-tabs">
+                        <div class="panel-tab active" id="tabEmoji" onclick="switchPanelTab('emoji')">Emojis</div>
+                        <div class="panel-tab" id="tabGif" onclick="switchPanelTab('gif')">GIFs</div>
+                    </div>
+                    <div class="panel-content" id="panelContent">
+                        <div class="emoji-grid" id="emojiGrid"></div>
+                        <div class="gif-grid" id="gifGrid" style="display:none"></div>
+                    </div>
+                </div>
+
                 <!-- Normal message input -->
                 <div id="normalInputArea">
+                    <div class="input-actions" style="margin-bottom: 6px;">
+                        <button class="input-act-btn" onclick="toggleEmojiPanel('emoji')" title="Emojis">😊</button>
+                        <button class="input-act-btn" onclick="toggleEmojiPanel('gif')" title="GIFs">📺</button>
+                    </div>
                     <div class="input-wrap">
                         <textarea class="msg-input" id="msgInput" placeholder="Message #general…" rows="1"></textarea>
                         <button class="send-btn" onclick="sendMessage()" title="Send (Enter)">
@@ -1360,6 +1650,17 @@
                 <div class="profile-divider"></div>
                 <button class="profile-edit-btn" id="editProfileBtn" onclick="startEdit()" style="display:none">✏️ Edit
                     My Profile</button>
+
+                <!-- Admin Tools -->
+                <div id="adminToolsSection" class="admin-profile-tools" style="display:none">
+                    <div class="admin-tool-title">🛠 Admin Management</div>
+                    <div class="admin-role-label"
+                        style="font-size:0.75rem; color:var(--text-subtle); margin-bottom:8px;">User Badge / Title:
+                    </div>
+                    <input type="text" id="adminCustomBadge" class="admin-role-input"
+                        placeholder="e.g. honored, panthera, kind...">
+                    <button class="admin-role-btn" onclick="saveCustomBadge()">Update User Title</button>
+                </div>
             </div>
 
             <div id="profileEditForm" style="display:none">
@@ -1413,6 +1714,7 @@
         let lastMessages = [];
         let profileUserId = null;  // whose profile is open
         let profileUserData = {};  // profile data cache
+        let editingMessageId = null; // ID of the message being edited
 
         // CHANNEL META
         const CHANNELS = {
@@ -1547,13 +1849,28 @@
                 const color = userColor(msg.senderId);
                 const initial = (msg.senderName || msg.senderEmail || '?')[0].toUpperCase();
                 const timeStr = ts.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+                // Custom Badge logic
+                let badgeHtml = '';
+                const cBadge = msg.senderTitle || ''; // we'll fetch from msg or profile
+                if (cBadge) {
+                    const cType = ['honored', 'panthera', 'kind', 'brave'].includes(cBadge.toLowerCase()) ? cBadge.toLowerCase() : 'custom';
+                    badgeHtml = `<span class="msg-badge badge-${cType}">${cBadge}</span>`;
+                }
+
                 const displayName = isMe ? 'You' : (isAdminMode ? (msg.senderName || 'Member') : 'Member');
 
                 const delBtn = (isAdminMode || isMe) ?
                     `<button class="msg-action-btn" onclick="deleteMsg('${msg.id}')" title="Delete message">🗑</button>` : '';
+                const editBtn = isMe ? `<button class="msg-action-btn" onclick="startEditMessage('${msg.id}', '${esc(msg.text)}')" title="Edit message">✏️</button>` : '';
 
                 const group = document.createElement('div');
+                group.id = `msg-group-${msg.id}`;
                 group.className = `msg-group ${isMe ? 'me' : ''} ${consec ? 'consecutive' : ''}`;
+
+                const textContent = msg.isGif ? `<img src="${msg.text}" class="gif-img" style="max-width:200px; border-radius:12px;">` : escHtml(msg.text);
+                const editedTag = msg.updatedAt ? `<span class="edited-tag">(edited)</span>` : '';
+
                 group.innerHTML = `
             <div class="msg-avatar-wrap" style="cursor:pointer">
                 <div class="msg-avatar" style="background:linear-gradient(135deg,${color},${color}88)">${initial}</div>
@@ -1561,10 +1878,13 @@
             <div class="msg-content">
                 ${!consec ? `<div class="msg-meta">
                     <span class="msg-author" style="color:${color};cursor:pointer">${escHtml(displayName)}</span>
+                    ${badgeHtml}
                     <span class="msg-time">${timeStr}</span>
-                    <div class="msg-actions">${delBtn}</div>
-                </div>` : `<div class="msg-actions" style="margin-bottom:4px">${delBtn}</div>`}
-                <span class="msg-text">${escHtml(msg.text)}</span>
+                    <div class="msg-actions">${editBtn}${delBtn}</div>
+                </div>` : `<div class="msg-actions" style="margin-bottom:4px">${editBtn}${delBtn}</div>`}
+                <div class="msg-text-wrap" id="msg-text-${msg.id}">
+                    <span class="msg-text">${textContent}${editedTag}</span>
+                </div>
             </div>`;
 
                 // Attach profile clicks via addEventListener — safe regardless of special chars in names/emails
@@ -1591,19 +1911,79 @@
         };
 
         // ─── SEND (normal channels) ───────────────────────────────────────────────────
-        window.sendMessage = async function () {
+        window.sendMessage = async function (type = 'text', val = null) {
             const input = document.getElementById('msgInput');
-            const text = input.value.trim();
+            const text = val || input.value.trim();
             if (!text || !currentUser) return;
-            input.value = ''; ajustTA();
+            if (type === 'text') { input.value = ''; ajustTA(); }
+
+            // Close panels
+            document.getElementById('panelEmojiGif').classList.remove('open');
+
             try {
+                // Fetch current user's profile to get their title
+                const pDoc = await getDoc(doc(db, 'userProfiles', currentUser.uid));
+                const userTitle = pDoc.exists() ? pDoc.data().customTitle : '';
+
                 await addDoc(getCollection(currentChannel), {
-                    text, senderId: currentUser.uid,
+                    text,
+                    isGif: (type === 'gif'),
+                    senderId: currentUser.uid,
                     senderName: currentUser.displayName || '',
                     senderEmail: currentUser.email || '',
+                    senderTitle: userTitle || '',
                     createdAt: serverTimestamp()
                 });
-            } catch (e) { input.value = text; }
+            } catch (e) { if (type === 'text') input.value = text; }
+        };
+
+        // ─── EDITING ───────────────────────────────────────────────────────────────────
+        window.startEditMessage = function (id, currentText) {
+            if (editingMessageId) cancelEditMessage();
+            editingMessageId = id;
+            const container = document.getElementById(`msg-text-${id}`);
+            const group = document.getElementById(`msg-group-${id}`);
+            group.classList.add('is-editing');
+
+            const originalHtml = container.innerHTML;
+            container.setAttribute('data-original', originalHtml);
+
+            container.innerHTML = `
+                <div class="edit-input-container">
+                    <textarea class="msg-edit-input" id="edit-input-${id}" rows="2">${currentText}</textarea>
+                    <div class="edit-controls">
+                        <span class="edit-save" onclick="saveEditMessage('${id}')">Save Changes</span>
+                        <span class="edit-cancel" onclick="cancelEditMessage()">Cancel</span>
+                    </div>
+                </div>`;
+            document.getElementById(`edit-input-${id}`).focus();
+        };
+
+        window.cancelEditMessage = function () {
+            if (!editingMessageId) return;
+            const id = editingMessageId;
+            const container = document.getElementById(`msg-text-${id}`);
+            const group = document.getElementById(`msg-group-${id}`);
+            if (group) group.classList.remove('is-editing');
+            if (container) container.innerHTML = container.getAttribute('data-original');
+            editingMessageId = null;
+        };
+
+        window.saveEditMessage = async function (id) {
+            const newText = document.getElementById(`edit-input-${id}`).value.trim();
+            if (!newText) { cancelEditMessage(); return; }
+
+            try {
+                const coll = getCollection(currentChannel);
+                await setDoc(doc(db, coll.path, id), {
+                    text: newText,
+                    updatedAt: serverTimestamp()
+                }, { merge: true });
+                editingMessageId = null; // Snapshot will re-render
+            } catch (e) {
+                alert("Failed to edit: " + e.message);
+                cancelEditMessage();
+            }
         };
 
         // ─── SEND ANNOUNCEMENT ────────────────────────────────────────────────────────
@@ -1689,8 +2069,17 @@
             // Load profile data
             const data = await fetchProfile(uid);
             profileUserData = data || {};
-            let hasInfo = false;
 
+            // Admin Tools
+            const adminTools = document.getElementById('adminToolsSection');
+            if (isAdminMode && !isMe) {
+                adminTools.style.display = 'block';
+                document.getElementById('adminCustomBadge').value = data?.customTitle || '';
+            } else {
+                adminTools.style.display = 'none';
+            }
+
+            let hasInfo = false;
             if (data?.bio) { show('fieldBio', 'valBio', data.bio); hasInfo = true; }
             if (data?.location) { show('fieldLocation', 'valLocation', data.location); hasInfo = true; }
             if (data?.age) { show('fieldAge', 'valAge', data.age + ' years old'); hasInfo = true; }
@@ -1700,6 +2089,76 @@
             }
             document.getElementById('noInfoMsg').style.display = hasInfo ? 'none' : '';
         };
+
+        window.saveCustomBadge = async function () {
+            if (!profileUserId || !isAdminMode) return;
+            const newTitle = document.getElementById('adminCustomBadge').value.trim();
+            const btn = document.querySelector('.admin-role-btn');
+            btn.textContent = '⏳ Saving…'; btn.disabled = true;
+            try {
+                await setDoc(doc(db, 'userProfiles', profileUserId), {
+                    customTitle: newTitle
+                }, { merge: true });
+                alert("User title updated to: " + (newTitle || 'None'));
+            } catch (e) { alert("Failed: " + e.message); }
+            btn.textContent = 'Update User Title'; btn.disabled = false;
+        };
+
+        // ─── EMOJI/GIF PANELS ──────────────────────────────────────────────────────────
+        const EMOJIS = ['😊', '😂', '🔥', '💖', '👍', '🙌', '✨', '🤡', '🚀', '💀', '🤨', '👀', '🫠', '🤩', '😤', '🥺', '🤯', '🥳', '😎', '😜', '🤓', '💯', '🌈', '🍕', '🎉', '💡', '🤖', '👾', '👑', '⭐️'];
+        const GIFS = [
+            'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHU1cnZncDJpbm56NGV3ZDNpbm56NGV3ZDNpbm56NGV3ZDNpbm56NCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKSjPqcKUIw49u8/giphy.gif',
+            'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHU1cnZncDJpbm56NGV3ZDNpbm56NGV3ZDNpbm56NGV3ZDNpbm56NCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/u00dM1B51U63v1XInE/giphy.gif',
+            'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHU1cnZncDJpbm56NGV3ZDNpbm56NGV3ZDNpbm56NGV3ZDNpbm56NCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/26ufcYAkp8e6bevJ6/giphy.gif',
+            'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHU1cnZncDJpbm56NGV3ZDNpbm56NGV3ZDNpbm56NGV3ZDNpbm56NCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l0HlHFRbmaZtBRhXG/giphy.gif',
+            'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHU1cnZncDJpbm56NGV3ZDNpbm56NGV3ZDNpbm56NGV3ZDNpbm56NCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3oEdv4SjPx958T3S7K/giphy.gif',
+            'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHU1cnZncDJpbm56NGV3ZDNpbm56NGV3ZDNpbm56NGV3ZDNpbm56NCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o85xGocUH8RYoDKKs/giphy.gif'
+        ];
+
+        window.toggleEmojiPanel = function (tab = 'emoji') {
+            const p = document.getElementById('panelEmojiGif');
+            if (p.classList.contains('open') && p.getAttribute('data-tab') === tab) {
+                p.classList.remove('open');
+            } else {
+                p.classList.add('open');
+                p.setAttribute('data-tab', tab);
+                switchPanelTab(tab);
+            }
+        };
+
+        window.switchPanelTab = function (tab) {
+            document.getElementById('tabEmoji').classList.toggle('active', tab === 'emoji');
+            document.getElementById('tabGif').classList.toggle('active', tab === 'gif');
+            document.getElementById('emojiGrid').style.display = tab === 'emoji' ? 'grid' : 'none';
+            document.getElementById('gifGrid').style.display = tab === 'gif' ? 'grid' : 'none';
+            document.getElementById('panelEmojiGif').setAttribute('data-tab', tab);
+
+            if (tab === 'emoji' && !document.getElementById('emojiGrid').children.length) {
+                EMOJIS.forEach(e => {
+                    const el = document.createElement('div'); el.className = 'emoji-item'; el.textContent = e;
+                    el.onclick = () => { document.getElementById('msgInput').value += e; toggleEmojiPanel(); document.getElementById('msgInput').focus(); };
+                    document.getElementById('emojiGrid').appendChild(el);
+                });
+            } else if (tab === 'gif' && !document.getElementById('gifGrid').children.length) {
+                GIFS.forEach(g => {
+                    const el = document.createElement('div'); el.className = 'gif-item';
+                    el.innerHTML = `<img src="${g}" class="gif-img">`;
+                    el.onclick = () => { sendMessage('gif', g); toggleEmojiPanel(); };
+                    document.getElementById('gifGrid').appendChild(el);
+                });
+            }
+        };
+
+        // Close panel on outside click
+        document.addEventListener('mousedown', (e) => {
+            const p = document.getElementById('panelEmojiGif');
+            const btns = document.querySelectorAll('.input-act-btn');
+            if (p.classList.contains('open') && !p.contains(e.target)) {
+                let onBtn = false;
+                btns.forEach(b => { if (b.contains(e.target)) onBtn = true; });
+                if (!onBtn) p.classList.remove('open');
+            }
+        });
 
         function show(fieldId, valId, val) {
             document.getElementById(fieldId).style.display = '';
