@@ -574,7 +574,7 @@
             const words = txt.match(/\b\w+\b/g) || [];
             const chars = txt.length;
             const sents = (txt.match(/[.!?]+/g) || []).length;
-            const paras = txt.split(/\n\s*\n/).filter(p => p.trim()).length;
+            const paras = txt.split(/\n+/).filter(p => p.trim()).length;
             const unique = new Set(words.map(w => w.toLowerCase())).size;
             const avgW = words.length ? +(words.reduce((s, w) => s + w.length, 0) / words.length).toFixed(1) : 0;
             const readSec = Math.ceil(words.length / 200 * 60);

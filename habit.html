@@ -425,7 +425,8 @@
             inset: 0;
             background: linear-gradient(90deg, rgba(16, 185, 129, 0.07), transparent);
             opacity: 0;
-            transition: opacity 0.4s
+            transition: opacity 0.4s;
+            pointer-events: none;
         }
 
         .habit-row.done::before {
@@ -540,7 +541,9 @@
             transition: all 0.2s;
             display: flex;
             align-items: center;
-            justify-content: center
+            justify-content: center;
+            position: relative;
+            z-index: 2;
         }
 
         .habit-row:hover .habit-del {

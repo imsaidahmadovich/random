@@ -790,11 +790,9 @@
         // Winner center angle relative to 0
         const winnerCenterFromStart = (winnerIndex * sliceArc) + (sliceArc / 2);
 
-        // We want target to be at -PI/2 (Top)
-        // targetPos = (winnerCenterFromStart + finalRotation) % 2PI
-        // we want targetPos = -PI/2
-        // So finalRotation = -PI/2 - winnerCenterFromStart
-        const targetBase = -Math.PI / 2 - winnerCenterFromStart;
+        // We want target to be at -PI/2 (Top). Add random offset to stop anywhere in the slice.
+        const randomOffset = (Math.random() * 0.9 - 0.45) * sliceArc;
+        const targetBase = -Math.PI / 2 - (winnerCenterFromStart + randomOffset);
 
         // Calculate delta (must be positive)
         let delta = (targetBase - currentRotation);

@@ -1848,7 +1848,7 @@
                 lastSender = msg.senderId;
 
                 const color = userColor(msg.senderId);
-                const initial = (msg.senderName || msg.senderEmail || '?')[0].toUpperCase();
+                const initial = (isAdminMode || isMe) ? (msg.senderName || msg.senderEmail || '?')[0].toUpperCase() : 'U';
                 const timeStr = ts.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
                 // Custom Badge logic
@@ -2039,7 +2039,7 @@
             profileUserId = uid;
             const isMe = uid === currentUser?.uid;
             const color = userColor(uid);
-            const initial = (name || email || '?')[0].toUpperCase();
+            const initial = (isAdminMode || isMe) ? (name || email || '?')[0].toUpperCase() : 'U';
             const displayName = isMe ? (currentUser.displayName || email) : (isAdminMode ? name : 'Member');
 
             // Reset panel
@@ -2047,7 +2047,7 @@
             document.getElementById('profileAv').style.background = `linear-gradient(135deg,${color},${color}77)`;
             document.getElementById('profileBanner').style.background = `linear-gradient(135deg,${color}22,${color}08)`;
             document.getElementById('profileName').textContent = displayName || 'Member';
-            document.getElementById('profileHandle').textContent = isAdminMode || isMe ? email : `#${uid.slice(0, 8)}`;
+            document.getElementById('profileHandle').textContent = isAdminMode || isMe ? email : `Hidden`;
 
             // Badges
             const badges = document.getElementById('profileBadges');
