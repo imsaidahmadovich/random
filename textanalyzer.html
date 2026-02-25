@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taso — Text Analyzer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&family=JetBrains+Mono:wght@400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #05070f;
+            --surface: rgba(255, 255, 255, .04);
+            --border: rgba(255, 255, 255, .08);
+            --text: #f1f5f9;
+            --muted: #64748b;
+            --subtle: #94a3b8;
+            --nav-h: 68px;
+            --rose: #f43f5e;
+            --green: #10b981;
+            --amber: #f59e0b;
+            --purple: #7c3aed;
+            --cyan: #06b6d4
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh
+        }
+
+        #orb-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: .1
+        }
+
+        .orb1 {
+            width: 450px;
+            height: 450px;
+            background: #06b6d4;
+            top: -100px;
+            right: -80px
+        }
+
+        .orb2 {
+            width: 350px;
+            height: 350px;
+            background: #7c3aed;
+            bottom: -60px;
+            left: -60px
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background-image: linear-gradient(rgba(255, 255, 255, .012) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .012) 1px, transparent 1px);
+            background-size: 60px 60px
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            height: var(--nav-h);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            background: rgba(5, 7, 15, .88);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border)
+        }
+
+        .nav-logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #a78bfa, #06b6d4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none
+        }
+
+        .nav-logo span {
+            -webkit-text-fill-color: #f43f5e
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 4px;
+            background: rgba(255, 255, 255, .04);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 6px
+        }
+
+        .nav-tab {
+            padding: 8px 22px;
+            border-radius: 10px;
+            font-size: .88rem;
+            font-weight: 600;
+            color: var(--subtle);
+            text-decoration: none;
+            transition: all .25s
+        }
+
+        .nav-tab.act {
+            background: linear-gradient(135deg, var(--purple), #4f46e5);
+            color: #fff
+        }
+
+        .nav-tab.com {
+            background: linear-gradient(135deg, var(--rose), #e11d48);
+            color: #fff
+        }
+
+        .back-link {
+            font-size: .82rem;
+            font-weight: 600;
+            color: var(--subtle);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            transition: all .25s
+        }
+
+        .back-link:hover {
+            color: var(--text)
+        }
+
+        main {
+            position: relative;
+            z-index: 10;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: calc(var(--nav-h)+40px) 24px 80px
+        }
+
+        h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 6px
+        }
+
+        .sub {
+            color: var(--muted);
+            font-size: .9rem;
+            margin-bottom: 28px
+        }
+
+        /* LAYOUT */
+        .layout {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+            align-items: start
+        }
+
+        /* EDITOR */
+        .editor-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            overflow: hidden;
+            animation: fIn .4s ease-out
+        }
+
+        @keyframes fIn {
+            from {
+                opacity: 0;
+                transform: translateY(14px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .editor-toolbar {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(255, 255, 255, .02);
+            flex-wrap: wrap
+        }
+
+        .tool-btn {
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--subtle);
+            font-family: 'Inter', sans-serif;
+            font-size: .78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s
+        }
+
+        .tool-btn:hover {
+            color: var(--text);
+            border-color: rgba(255, 255, 255, .18)
+        }
+
+        .tool-btn.active {
+            background: rgba(124, 58, 237, .15);
+            border-color: rgba(124, 58, 237, .35);
+            color: #a78bfa
+        }
+
+        .sep {
+            width: 1px;
+            height: 20px;
+            background: var(--border);
+            margin: 0 4px
+        }
+
+        .editor-area {
+            width: 100%;
+            min-height: 360px;
+            background: transparent;
+            border: none;
+            color: var(--text);
+            font-family: 'JetBrains Mono', 'Inter', sans-serif;
+            font-size: .93rem;
+            line-height: 1.75;
+            padding: 20px;
+            outline: none;
+            resize: none;
+            tab-size: 2
+        }
+
+        .editor-area::placeholder {
+            color: var(--muted)
+        }
+
+        .char-limit-bar {
+            height: 3px;
+            background: rgba(255, 255, 255, .04);
+            border-top: 1px solid var(--border)
+        }
+
+        .char-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #06b6d4, #7c3aed);
+            transition: width .3s ease;
+            border-radius: 0
+        }
+
+        /* STATS PANEL */
+        .stats-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            animation: fIn .5s ease-out
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 18px
+        }
+
+        .sc-head {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: .8rem;
+            font-weight: 700;
+            color: var(--muted);
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            margin-bottom: 14px
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px
+        }
+
+        .sg-item {
+            text-align: center;
+            padding: 12px 8px;
+            background: rgba(255, 255, 255, .03);
+            border-radius: 12px;
+            border: 1px solid var(--border)
+        }
+
+        .sg-num {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 2px
+        }
+
+        .sg-lbl {
+            font-size: .65rem;
+            font-weight: 700;
+            color: var(--muted);
+            letter-spacing: .06em;
+            text-transform: uppercase
+        }
+
+        .read-stat {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, .03);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            margin-bottom: 8px
+        }
+
+        .rs-label {
+            font-size: .78rem;
+            color: var(--subtle)
+        }
+
+        .rs-val {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: .88rem;
+            font-weight: 700
+        }
+
+        /* TOP WORDS */
+        .word-cloud {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 4px
+        }
+
+        .wc-item {
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .wc-word {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .8rem;
+            font-weight: 600;
+            color: var(--text);
+            min-width: 80px
+        }
+
+        .wc-bar-w {
+            flex: 1;
+            height: 8px;
+            background: rgba(255, 255, 255, .04);
+            border-radius: 4px;
+            overflow: hidden
+        }
+
+        .wc-bar {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #7c3aed, #06b6d4);
+            transition: width .5s ease
+        }
+
+        .wc-count {
+            font-size: .7rem;
+            color: var(--muted);
+            font-weight: 700;
+            min-width: 24px;
+            text-align: right
+        }
+
+        /* ACTIONS */
+        .action-row {
+            display: flex;
+            flex-direction: column;
+            gap: 8px
+        }
+
+        .act-btn {
+            width: 100%;
+            padding: 11px;
+            border-radius: 12px;
+            font-family: 'Inter', sans-serif;
+            font-size: .85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all .25s;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text)
+        }
+
+        .act-btn:hover {
+            border-color: rgba(255, 255, 255, .18)
+        }
+
+        .act-btn.primary {
+            background: linear-gradient(135deg, #06b6d4, #0891b2);
+            border-color: transparent;
+            color: #fff
+        }
+
+        .act-btn.primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(6, 182, 212, .4)
+        }
+
+        .act-btn.danger {
+            background: rgba(244, 63, 94, .08);
+            border-color: rgba(244, 63, 94, .2);
+            color: #fca5a5
+        }
+
+        .act-btn.danger:hover {
+            background: rgba(244, 63, 94, .15)
+        }
+
+        /* HIGHLIGHT */
+        .found-highlight {
+            background: rgba(245, 158, 11, .25);
+            border-radius: 3px;
+            padding: 0 2px
+        }
+
+        @media(max-width:700px) {
+            .layout {
+                grid-template-columns: 1fr
+            }
+
+            nav {
+                padding: 0 16px
+            }
+
+            .nav-tabs {
+                display: none
+            }
+
+            .stat-grid {
+                grid-template-columns: 1fr 1fr 1fr
+            }
+        }
+    </style>
+    <script type="module">import { checkAuth, logout } from "./auth.js"; checkAuth(); window.handleLogout = logout;</script>
+</head>
+
+<body>
+    <div id="orb-bg">
+        <div class="orb orb1"></div>
+        <div class="orb orb2"></div>
+    </div>
+    <nav>
+        <a href="index.html" class="nav-logo">Taso<span>.</span></a>
+        <div class="nav-tabs">
+            <a href="index.html" class="nav-tab">🏠 Home</a>
+            <a href="tools.html" class="nav-tab act">⚡ Tools</a>
+            <a href="community.html" class="nav-tab com">🔥 Community</a>
+        </div>
+        <a href="tools.html" class="back-link">← Tools</a>
+    </nav>
+    <main>
+        <h1>🔤 Text Analyzer</h1>
+        <div class="sub">Paste or type any text — instant word count, readability score, top words, and more.</div>
+
+        <div class="layout">
+            <div>
+                <div class="editor-card">
+                    <div class="editor-toolbar">
+                        <button class="tool-btn" onclick="transform('upper')">AA</button>
+                        <button class="tool-btn" onclick="transform('lower')">aa</button>
+                        <button class="tool-btn" onclick="transform('title')">Aa</button>
+                        <button class="tool-btn" onclick="transform('sentence')">A.</button>
+                        <div class="sep"></div>
+                        <button class="tool-btn" onclick="transform('trim')">✂ Trim</button>
+                        <button class="tool-btn" onclick="transform('remove_extra')">🧹 Clean</button>
+                        <div class="sep"></div>
+                        <button class="tool-btn" onclick="copyText()">📋 Copy</button>
+                    </div>
+                    <textarea class="editor-area" id="editor" placeholder="Start typing or paste your text here…"
+                        oninput="analyze()"></textarea>
+                    <div class="char-limit-bar">
+                        <div class="char-fill" id="charFill" style="width:0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-panel">
+                <div class="stat-card">
+                    <div class="sc-head">📊 Stats</div>
+                    <div class="stat-grid">
+                        <div class="sg-item">
+                            <div class="sg-num" id="sWords" style="color:#06b6d4">0</div>
+                            <div class="sg-lbl">Words</div>
+                        </div>
+                        <div class="sg-item">
+                            <div class="sg-num" id="sChars" style="color:#7c3aed">0</div>
+                            <div class="sg-lbl">Chars</div>
+                        </div>
+                        <div class="sg-item">
+                            <div class="sg-num" id="sSents" style="color:#f59e0b">0</div>
+                            <div class="sg-lbl">Sentences</div>
+                        </div>
+                        <div class="sg-item">
+                            <div class="sg-num" id="sParas" style="color:#10b981">0</div>
+                            <div class="sg-lbl">Paragraphs</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="sc-head">⏱ Reading</div>
+                    <div class="read-stat"><span class="rs-label">Read time</span><span class="rs-val" id="sReadTime">0
+                            sec</span></div>
+                    <div class="read-stat"><span class="rs-label">Speak time</span><span class="rs-val"
+                            id="sSpeakTime">0 sec</span></div>
+                    <div class="read-stat"><span class="rs-label">Unique words</span><span class="rs-val"
+                            id="sUnique">0</span></div>
+                    <div class="read-stat"><span class="rs-label">Avg word length</span><span class="rs-val"
+                            id="sAvgWord">0</span></div>
+                    <div class="read-stat" style="margin-bottom:0"><span class="rs-label">Readability</span><span
+                            class="rs-val" id="sReadability">—</span></div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="sc-head">🔝 Top Words</div>
+                    <div class="word-cloud" id="wordCloud">
+                        <div style="color:var(--muted);font-size:.8rem">Type something…</div>
+                    </div>
+                </div>
+
+                <div class="action-row">
+                    <button class="act-btn primary" onclick="copyText()">📋 Copy All</button>
+                    <button class="act-btn" onclick="downloadText()">⬇ Download .txt</button>
+                    <button class="act-btn danger" onclick="clearAll()">🗑 Clear</button>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+        const STOPWORDS = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from', 'is', 'was', 'are', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'me', 'him', 'her', 'us', 'them', 'my', 'your', 'his', 'its', 'our', 'their', 'this', 'that', 'these', 'those', 'not', 'no', 'so', 'if', 'as', 'up', 'out', 'about', 'into', 'than', 'then', 'when', 'where', 'who', 'what', 'how', 'all', 'some', 'any', 'each', 'there']);
+
+        function analyze() {
+            const txt = document.getElementById('editor').value;
+            const words = txt.match(/\b\w+\b/g) || [];
+            const chars = txt.length;
+            const sents = (txt.match(/[.!?]+/g) || []).length;
+            const paras = txt.split(/\n\s*\n/).filter(p => p.trim()).length;
+            const unique = new Set(words.map(w => w.toLowerCase())).size;
+            const avgW = words.length ? +(words.reduce((s, w) => s + w.length, 0) / words.length).toFixed(1) : 0;
+            const readSec = Math.ceil(words.length / 200 * 60);
+            const speakSec = Math.ceil(words.length / 130 * 60);
+            const fkGrade = words.length && sents ? Math.max(0, Math.round(0.39 * (words.length / Math.max(1, sents)) + 11.8 * (words.reduce((s, w) => s + w.length, 0) / Math.max(1, words.length)) - 15.59)) : null;
+
+            document.getElementById('sWords').textContent = words.length;
+            document.getElementById('sChars').textContent = chars;
+            document.getElementById('sSents').textContent = sents;
+            document.getElementById('sParas').textContent = paras || 0;
+            document.getElementById('sUnique').textContent = unique;
+            document.getElementById('sAvgWord').textContent = avgW + ' chr';
+            document.getElementById('sReadTime').textContent = fmtTime(readSec);
+            document.getElementById('sSpeakTime').textContent = fmtTime(speakSec);
+            document.getElementById('sReadability').textContent = fkGrade !== null ? 'Grade ' + fkGrade : '—';
+            document.getElementById('charFill').style.width = Math.min(100, chars / 50 * 100) + '%';
+
+            // Top words
+            const freq = {};
+            words.forEach(w => { const lw = w.toLowerCase(); if (!STOPWORDS.has(lw) && lw.length > 2) freq[lw] = (freq[lw] || 0) + 1; });
+            const top = Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 8);
+            const wc = document.getElementById('wordCloud');
+            if (!top.length) { wc.innerHTML = '<div style="color:var(--muted);font-size:.8rem">Type something…</div>'; return; }
+            const max = top[0]?.[1] || 1;
+            wc.innerHTML = top.map(([w, c]) => `<div class="wc-item"><div class="wc-word">${w}</div><div class="wc-bar-w"><div class="wc-bar" style="width:${Math.round(c / max * 100)}%"></div></div><div class="wc-count">${c}</div></div>`).join('');
+        }
+
+        function fmtTime(s) { if (s < 60) return s + 's'; return Math.floor(s / 60) + 'm ' + (s % 60) + 's'; }
+
+        function transform(type) {
+            const ta = document.getElementById('editor'); let t = ta.value;
+            if (type === 'upper') t = t.toUpperCase();
+            else if (type === 'lower') t = t.toLowerCase();
+            else if (type === 'title') t = t.replace(/\b\w/g, c => c.toUpperCase());
+            else if (type === 'sentence') t = t.toLowerCase().replace(/(^|[.!?]\s+)([a-z])/g, (_, p, c) => p + c.toUpperCase());
+            else if (type === 'trim') t = t.split('\n').map(l => l.trim()).join('\n');
+            else if (type === 'remove_extra') t = t.replace(/\s+/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
+            ta.value = t; analyze();
+        }
+
+        function copyText() {
+            const t = document.getElementById('editor').value;
+            if (!t) return;
+            navigator.clipboard.writeText(t).then(() => { showFlash('Copied! 📋'); }).catch(() => { });
+        }
+
+        function downloadText() {
+            const t = document.getElementById('editor').value; if (!t) return;
+            const a = document.createElement('a'); a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(t); a.download = 'taso-text.txt'; a.click();
+        }
+
+        function clearAll() { if (!document.getElementById('editor').value) return; if (confirm('Clear all text?')) { document.getElementById('editor').value = ''; analyze(); } }
+
+        function showFlash(msg) {
+            let f = document.getElementById('flash');
+            if (!f) { f = document.createElement('div'); f.id = 'flash'; f.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:rgba(6,182,212,.15);border:1px solid rgba(6,182,212,.3);backdrop-filter:blur(12px);border-radius:14px;padding:12px 24px;color:#67e8f9;font-size:.88rem;font-weight:600;z-index:9999;transition:transform .35s cubic-bezier(.16,1,.3,1)'; document.body.appendChild(f); }
+            f.textContent = msg; setTimeout(() => f.style.transform = 'translateX(-50%) translateY(0)', 10); setTimeout(() => f.style.transform = 'translateX(-50%) translateY(80px)', 2400);
+        }
+    </script>
+</body>
+
+</html>

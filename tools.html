@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Taso — Tools</title>
     <meta name="description"
-        content="Browse all Taso productivity tools: scientific calculator, pomodoro timer, notes, spin wheel, team divider, and more.">
+        content="Browse all Taso tools: scientic calculator, pomodoro timer, notes, flashcards, habit tracker, quiz builder, mood journal, text analyzer, spin wheel, team divider, and community chat.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -709,30 +709,15 @@
             <button class="filter-btn" onclick="setFilter('study', this)" id="fStudy">📚 Study</button>
             <button class="filter-btn" onclick="setFilter('productivity', this)" id="fProd">⏱ Productivity</button>
             <button class="filter-btn" onclick="setFilter('fun', this)" id="fFun">🎉 Fun</button>
+            <button class="filter-btn" onclick="setFilter('wellness', this)" id="fWell">🌱 Wellness</button>
             <button class="filter-btn" onclick="setFilter('collaboration', this)" id="fCollab">🤝 Collab</button>
         </div>
 
         <div class="tools-container">
 
             <!-- STUDY TOOLS -->
-            <div class="category-label" id="cat-study">📚 Study & Learning</div>
+            <div class="category-label" id="cat-study">📚 Study &amp; Learning</div>
             <div class="tools-grid" id="grid-study">
-
-                <a href="calculator.html" class="tool-card" data-categories="study productivity"
-                    style="--card-grd:linear-gradient(135deg,rgba(6,182,212,0.1),transparent 60%);">
-                    <div class="card-top">
-                        <div class="tool-icon-wrap"
-                            style="background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.25);">🔬</div>
-                        <span class="tool-badge badge-new">New</span>
-                    </div>
-                    <div class="tool-title">Scientific Calculator</div>
-                    <div class="tool-desc">Full scientific calculator with trig functions, logarithms, exponents, and
-                        complete calculation history.</div>
-                    <div class="tool-meta">
-                        <div class="tool-tags"><span class="tag">Math</span><span class="tag">Science</span></div>
-                        <span class="tool-arrow">→</span>
-                    </div>
-                </a>
 
                 <a href="flash.html" class="tool-card" data-categories="study"
                     style="--card-grd:linear-gradient(135deg,rgba(245,158,11,0.1),transparent 60%);">
@@ -742,26 +727,58 @@
                         <span class="tool-badge badge-hot">Popular</span>
                     </div>
                     <div class="tool-title">Flashcards</div>
-                    <div class="tool-desc">AI-powered spaced repetition system. Create, study, and master any subject
-                        with smart flashcards.</div>
+                    <div class="tool-desc">Spaced repetition system. Create, flip and master any subject with smart
+                        flashcards.</div>
                     <div class="tool-meta">
-                        <div class="tool-tags"><span class="tag">AI</span><span class="tag">Memory</span></div>
+                        <div class="tool-tags"><span class="tag">Memory</span><span class="tag">Study</span></div>
                         <span class="tool-arrow">→</span>
                     </div>
                 </a>
 
-                <a href="notes.html" class="tool-card" data-categories="study productivity"
-                    style="--card-grd:linear-gradient(135deg,rgba(16,185,129,0.1),transparent 60%);">
+                <a href="calculator.html" class="tool-card" data-categories="study"
+                    style="--card-grd:linear-gradient(135deg,rgba(6,182,212,0.1),transparent 60%);">
                     <div class="card-top">
                         <div class="tool-icon-wrap"
-                            style="background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.25);">📝</div>
+                            style="background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.25);">🔬</div>
                         <span class="tool-badge badge-new">New</span>
                     </div>
-                    <div class="tool-title">Smart Notes</div>
-                    <div class="tool-desc">Rich note-taking with tags, search, pinning and auto-save. Never lose a
-                        thought again.</div>
+                    <div class="tool-title">Scientific Calculator</div>
+                    <div class="tool-desc">Full scientific calculator with trig, logarithms, exponents, and calculation
+                        history.</div>
                     <div class="tool-meta">
-                        <div class="tool-tags"><span class="tag">Notes</span><span class="tag">Markdown</span></div>
+                        <div class="tool-tags"><span class="tag">Math</span><span class="tag">Science</span></div>
+                        <span class="tool-arrow">→</span>
+                    </div>
+                </a>
+
+                <a href="quiz.html" class="tool-card" data-categories="study fun"
+                    style="--card-grd:linear-gradient(135deg,rgba(245,158,11,0.12),transparent 60%);">
+                    <div class="card-top">
+                        <div class="tool-icon-wrap"
+                            style="background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.25);">🧩</div>
+                        <span class="tool-badge badge-new">New</span>
+                    </div>
+                    <div class="tool-title">Quiz Builder</div>
+                    <div class="tool-desc">Build custom timed quizzes in seconds. Score tracking, confetti on perfect
+                        score, and instant feedback.</div>
+                    <div class="tool-meta">
+                        <div class="tool-tags"><span class="tag">Quiz</span><span class="tag">Timed</span></div>
+                        <span class="tool-arrow">→</span>
+                    </div>
+                </a>
+
+                <a href="textanalyzer.html" class="tool-card" data-categories="study productivity"
+                    style="--card-grd:linear-gradient(135deg,rgba(6,182,212,0.1),transparent 60%);">
+                    <div class="card-top">
+                        <div class="tool-icon-wrap"
+                            style="background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.25);">🔤</div>
+                        <span class="tool-badge badge-new">New</span>
+                    </div>
+                    <div class="tool-title">Text Analyzer</div>
+                    <div class="tool-desc">Instant word count, readability score, top-word frequency chart and text
+                        transformation tools.</div>
+                    <div class="tool-meta">
+                        <div class="tool-tags"><span class="tag">Writing</span><span class="tag">Analysis</span></div>
                         <span class="tool-arrow">→</span>
                     </div>
                 </a>
@@ -779,15 +796,15 @@
                         <span class="tool-badge badge-hot">Popular</span>
                     </div>
                     <div class="tool-title">Pomodoro Timer</div>
-                    <div class="tool-desc">Classic 25/5 technique with customizable intervals, cycle tracking, and
-                        ambient sound alerts.</div>
+                    <div class="tool-desc">Classic 25/5 focus technique with customizable intervals, cycle tracking, and
+                        alert sounds.</div>
                     <div class="tool-meta">
                         <div class="tool-tags"><span class="tag">Focus</span><span class="tag">Timer</span></div>
                         <span class="tool-arrow">→</span>
                     </div>
                 </a>
 
-                <a href="notes.html" class="tool-card" data-categories="productivity"
+                <a href="notes.html" class="tool-card" data-categories="productivity study"
                     style="--card-grd:linear-gradient(135deg,rgba(16,185,129,0.1),transparent 60%);">
                     <div class="card-top">
                         <div class="tool-icon-wrap"
@@ -795,17 +812,54 @@
                         <span class="tool-badge badge-new">New</span>
                     </div>
                     <div class="tool-title">Smart Notes</div>
-                    <div class="tool-desc">Instantly capture ideas with rich text editing. Auto-save keeps everything
-                        safe.</div>
+                    <div class="tool-desc">Rich note-taking with tags, search, color-coding, pinning and auto-save.
+                        Never lose a thought.</div>
                     <div class="tool-meta">
-                        <div class="tool-tags"><span class="tag">Notes</span><span class="tag">Organized</span></div>
+                        <div class="tool-tags"><span class="tag">Notes</span><span class="tag">Tags</span></div>
+                        <span class="tool-arrow">→</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- WELLNESS -->
+            <div class="category-label" id="cat-wellness">🌱 Wellness</div>
+            <div class="tools-grid" id="grid-wellness">
+
+                <a href="habit.html" class="tool-card" data-categories="wellness productivity"
+                    style="--card-grd:linear-gradient(135deg,rgba(16,185,129,0.12),transparent 60%);">
+                    <div class="card-top">
+                        <div class="tool-icon-wrap"
+                            style="background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.25);">🌱</div>
+                        <span class="tool-badge badge-new">New</span>
+                    </div>
+                    <div class="tool-title">Habit Tracker</div>
+                    <div class="tool-desc">Build daily streaks, earn XP, and visualize your progress with a beautiful
+                        7-day heatmap.</div>
+                    <div class="tool-meta">
+                        <div class="tool-tags"><span class="tag">Habits</span><span class="tag">Streaks</span></div>
+                        <span class="tool-arrow">→</span>
+                    </div>
+                </a>
+
+                <a href="mood.html" class="tool-card" data-categories="wellness"
+                    style="--card-grd:linear-gradient(135deg,rgba(244,63,94,0.1),transparent 60%);">
+                    <div class="card-top">
+                        <div class="tool-icon-wrap"
+                            style="background:rgba(244,63,94,0.12);border:1px solid rgba(244,63,94,0.25);">💭</div>
+                        <span class="tool-badge badge-new">New</span>
+                    </div>
+                    <div class="tool-title">Mood Journal</div>
+                    <div class="tool-desc">Log daily moods with emoji, write notes, tag activities, and see your weekly
+                        emotional trend chart.</div>
+                    <div class="tool-meta">
+                        <div class="tool-tags"><span class="tag">Mood</span><span class="tag">Journal</span></div>
                         <span class="tool-arrow">→</span>
                     </div>
                 </a>
             </div>
 
             <!-- FUN TOOLS -->
-            <div class="category-label" id="cat-fun">🎉 Fun & Random</div>
+            <div class="category-label" id="cat-fun">🎉 Fun &amp; Random</div>
             <div class="tools-grid" id="grid-fun">
 
                 <a href="wheel_app.html" class="tool-card" data-categories="fun"
@@ -817,7 +871,7 @@
                     </div>
                     <div class="tool-title">Spin The Wheel</div>
                     <div class="tool-desc">Random picker with custom weights, beautiful animations and winner reveal
-                        celebration. Make decisions fun.</div>
+                        celebration.</div>
                     <div class="tool-meta">
                         <div class="tool-tags"><span class="tag">Random</span><span class="tag">Fun</span></div>
                         <span class="tool-arrow">→</span>
@@ -831,7 +885,7 @@
                             style="background:rgba(244,63,94,0.12);border:1px solid rgba(244,63,94,0.25);">⚖️</div>
                     </div>
                     <div class="tool-title">Team Divider</div>
-                    <div class="tool-desc">Split any group into balanced teams instantly. Choose random or skill-based
+                    <div class="tool-desc">Split any group into balanced teams instantly. Random or skill-based
                         allocation modes.</div>
                     <div class="tool-meta">
                         <div class="tool-tags"><span class="tag">Teams</span><span class="tag">Fair</span></div>
@@ -851,25 +905,10 @@
                         <span class="tool-badge badge-hot">Live</span>
                     </div>
                     <div class="tool-title">Community Chat</div>
-                    <div class="tool-desc">Real-time group chat. Connect with all Taso users, share ideas and get help
-                        from the community.</div>
+                    <div class="tool-desc">Real-time group chat with separate channels. Connect with all Taso users,
+                        share ideas and get help.</div>
                     <div class="tool-meta">
                         <div class="tool-tags"><span class="tag">Real-Time</span><span class="tag">Firebase</span></div>
-                        <span class="tool-arrow">→</span>
-                    </div>
-                </a>
-
-                <a href="team_divider.html" class="tool-card" data-categories="collaboration"
-                    style="--card-grd:linear-gradient(135deg,rgba(6,182,212,0.1),transparent 60%);">
-                    <div class="card-top">
-                        <div class="tool-icon-wrap"
-                            style="background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.25);">⚖️</div>
-                    </div>
-                    <div class="tool-title">Team Divider</div>
-                    <div class="tool-desc">Perfect for group work and sports. Creates fair, balanced teams with just a
-                        few clicks.</div>
-                    <div class="tool-meta">
-                        <div class="tool-tags"><span class="tag">Groups</span><span class="tag">Balanced</span></div>
                         <span class="tool-arrow">→</span>
                     </div>
                 </a>
@@ -898,23 +937,21 @@
         function applyFilter() {
             const q = document.getElementById('searchInput').value.toLowerCase();
             const cards = document.querySelectorAll('.tool-card');
-            let visible = 0;
             cards.forEach(card => {
                 const cats = card.getAttribute('data-categories') || '';
                 const title = card.querySelector('.tool-title')?.textContent.toLowerCase() || '';
                 const desc = card.querySelector('.tool-desc')?.textContent.toLowerCase() || '';
                 const matchFilter = currentFilter === 'all' || cats.includes(currentFilter);
                 const matchSearch = !q || title.includes(q) || desc.includes(q) || cats.includes(q);
-                if (matchFilter && matchSearch) { card.style.display = ''; visible++; }
-                else card.style.display = 'none';
+                card.style.display = (matchFilter && matchSearch) ? '' : 'none';
             });
-            // hide empty category labels
-            ['study', 'prod', 'fun', 'collab'].forEach(cat => {
+            // hide empty category sections
+            ['study', 'prod', 'wellness', 'fun', 'collab'].forEach(cat => {
                 const grid = document.getElementById('grid-' + cat);
-                const label = document.getElementById('cat-' + (cat === 'prod' ? 'prod' : cat));
+                const label = document.getElementById('cat-' + cat);
                 if (!grid) return;
                 const anyVisible = Array.from(grid.querySelectorAll('.tool-card')).some(c => c.style.display !== 'none');
-                if (grid) grid.style.display = anyVisible ? '' : 'none';
+                grid.style.display = anyVisible ? '' : 'none';
                 if (label) label.style.display = anyVisible ? '' : 'none';
             });
         }
