@@ -1551,22 +1551,30 @@
 
                 const delBtn = (isAdminMode || isMe) ?
                     `<button class="msg-action-btn" onclick="deleteMsg('${msg.id}')" title="Delete message">🗑</button>` : '';
-                const profileCall = `openProfileById('${msg.senderId}','${esc(msg.senderName || '')}','${esc(msg.senderEmail || '')}')`;
 
                 const group = document.createElement('div');
                 group.className = `msg-group ${isMe ? 'me' : ''} ${consec ? 'consecutive' : ''}`;
                 group.innerHTML = `
-            <div class="msg-avatar-wrap" onclick="${profileCall}">
+            <div class="msg-avatar-wrap" style="cursor:pointer">
                 <div class="msg-avatar" style="background:linear-gradient(135deg,${color},${color}88)">${initial}</div>
             </div>
             <div class="msg-content">
                 ${!consec ? `<div class="msg-meta">
-                    <span class="msg-author" style="color:${color}" onclick="${profileCall}">${esc(displayName)}</span>
+                    <span class="msg-author" style="color:${color};cursor:pointer">${escHtml(displayName)}</span>
                     <span class="msg-time">${timeStr}</span>
                     <div class="msg-actions">${delBtn}</div>
                 </div>` : `<div class="msg-actions" style="margin-bottom:4px">${delBtn}</div>`}
                 <span class="msg-text">${escHtml(msg.text)}</span>
             </div>`;
+
+                // Attach profile clicks via addEventListener — safe regardless of special chars in names/emails
+                const uid = msg.senderId;
+                const sName = msg.senderName || '';
+                const sEmail = msg.senderEmail || '';
+                group.querySelector('.msg-avatar-wrap').addEventListener('click', () => openProfileById(uid, sName, sEmail));
+                const authorEl = group.querySelector('.msg-author');
+                if (authorEl) authorEl.addEventListener('click', () => openProfileById(uid, sName, sEmail));
+
                 box.appendChild(group);
             });
 
