@@ -230,9 +230,9 @@
     /* Wheel View */
     .wheel-wrapper {
       position: relative;
-      width: 320px;
-      height: 320px;
-      margin: 20px auto;
+      width: min(480px, calc(100vw - 80px));
+      height: min(480px, calc(100vw - 80px));
+      margin: 10px auto;
     }
 
     canvas {
@@ -798,11 +798,11 @@
         let delta = (targetBase - currentRotation);
         while (delta <= 0) delta += 2 * Math.PI;
 
-        // Add extra spins (5 full rotations + alignment)
-        delta += 5 * 2 * Math.PI;
-        // Add random variance to duration, not distance, to keep precision
+        // Add extra spins (7-9 full rotations + alignment) for more drama
+        delta += (7 + Math.floor(Math.random() * 3)) * 2 * Math.PI;
         const finalAngle = currentRotation + delta;
-        const duration = 4000 + Math.random() * 500;
+        // Longer, smoother spin (5-6 seconds)
+        const duration = 5000 + Math.random() * 1000;
 
         // 3. ANIMATION LOOP
         const start = performance.now();
@@ -812,8 +812,8 @@
         function animate(now) {
           const elapsed = now - start;
           const pct = Math.min(1, elapsed / duration);
-          // Ease out cubic
-          const ease = 1 - Math.pow(1 - pct, 3);
+          // Ease out quintic for ultra-smooth deceleration
+          const ease = 1 - Math.pow(1 - pct, 5);
 
           currentRotation = startAngle + (delta * ease);
           drawWheel(currentRotation);

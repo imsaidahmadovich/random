@@ -640,8 +640,8 @@
 
             .wheel-container {
                 position: relative;
-                width: 320px;
-                height: 320px;
+                width: min(420px, 80vw);
+                height: min(420px, 80vw);
                 margin-bottom: 2rem;
             }
 
@@ -1200,37 +1200,34 @@
 
             initDecoyWheel();
 
-            // Spin Animation Physics
-            let velocity = 0.5; // rads per frame
-            let friction = 0.99;
-            let duration = 3000;
-            const startTime = Date.now();
+            // Spin Animation — smoother quintic easing
+            const totalDuration = 5500; // ms
+            const totalSpins = 6 + Math.random() * 3; // 6-9 spins
+            const totalRadians = totalSpins * 2 * Math.PI;
+            const startTime = performance.now();
+            const startRotation = wheelRotation;
 
-            function animate() {
+            function animate(now) {
                 if (!isWheelSpinning) return;
 
-                wheelRotation += velocity;
+                const elapsed = now - startTime;
+                const pct = Math.min(1, elapsed / totalDuration);
+                // Quintic ease-out for ultra-smooth deceleration
+                const ease = 1 - Math.pow(1 - pct, 5);
+
+                wheelRotation = startRotation + totalRadians * ease;
                 drawDecoyWheel();
 
-                const elapsed = Date.now() - startTime;
-
                 // Fake status text updates
-                if (elapsed % 500 < 50) {
-                    const statuses = ["SHUFFLING...", "ANALYZING...", "DIVIDING...", "PICKING..."];
+                if (Math.floor(elapsed / 400) !== Math.floor((elapsed - 16) / 400)) {
+                    const statuses = ["SHUFFLING...", "ANALYZING...", "DIVIDING...", "PICKING...", "COMPUTING..."];
                     document.getElementById('decoyStatusText').innerText = statuses[Math.floor(Math.random() * statuses.length)];
                 }
 
-                if (elapsed < 2000) {
-                    // Accelerate/Maintain
-                } else {
-                    // Decelerate
-                    velocity *= 0.96;
-                }
-
-                if (elapsed > 4000 && velocity < 0.01) {
-                    finishSpin();
-                } else {
+                if (pct < 1) {
                     requestAnimationFrame(animate);
+                } else {
+                    finishSpin();
                 }
             }
             requestAnimationFrame(animate);
