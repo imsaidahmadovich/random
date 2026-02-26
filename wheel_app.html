@@ -55,11 +55,11 @@
       transition: background-color 0.4s, color 0.4s;
     }
 
-    /* Iframe / Compact Mode */
     body.in-iframe {
       padding: 0;
       min-height: 100vh;
-      overflow: hidden;
+      overflow-y: auto;
+      overflow-x: hidden;
       background: transparent;
     }
 
@@ -70,8 +70,8 @@
     body.in-iframe .app-container {
       max-width: 100%;
       width: 100%;
-      height: 100vh;
-      min-height: 0;
+      min-height: 100vh;
+      height: auto;
       border-radius: 0;
       box-shadow: none;
       border: none;
@@ -551,11 +551,10 @@
         ctx.fillText("Empty Wheel", center, center); return;
       }
 
-      const totalWeight = items.reduce((a, b) => a + b.weight, 0);
+      const itemArc = (2 * Math.PI) / items.length;
       let cumulativeArc = 0;
 
       items.forEach((it, i) => {
-        const itemArc = (it.weight / totalWeight) * (2 * Math.PI);
         const start = cumulativeArc + rotation;
         const end = start + itemArc;
 
@@ -603,20 +602,19 @@
       }
       winnerIdx = winIdx;
 
-      // Calculate target angle based on weighted arcs
-      let targetCumulativeArc = 0;
-      for (let i = 0; i < winIdx; i++) {
-        targetCumulativeArc += (items[i].weight / totalWeight) * (2 * Math.PI);
-      }
-      const winnerArc = (items[winIdx].weight / totalWeight) * (2 * Math.PI);
-
+      // Calculate target angle based on equal visual arcs
+      const itemArc = (2 * Math.PI) / items.length;
+      const targetCumulativeArc = winIdx * itemArc;
+      
       // The pointer is at 1.5 * Math.PI (top). To land the center of winnerArc at top:
-      // (rotation + targetCumulativeArc + winnerArc/2) % 2PI should be 1.5 * PI
-      // But let's simplify: targetAngle is where the slice center should be relative to rotation 0.
-      const targetAngle = 1.5 * Math.PI - (targetCumulativeArc + winnerArc / 2);
+      const targetAngle = 1.5 * Math.PI - (targetCumulativeArc + itemArc / 2);
 
-      const spins = 5 + Math.random() * 5;
-      const finalRotation = rotation + (spins * 2 * Math.PI) + (targetAngle - (rotation % (2 * Math.PI)));
+      const spins = 5 + Math.floor(Math.random() * 5);
+      // Ensure offset is strictly positive so we always spin forward
+      let offset = targetAngle - (rotation % (2 * Math.PI));
+      if (offset < 0) offset += 2 * Math.PI;
+      
+      const finalRotation = rotation + (spins * 2 * Math.PI) + offset;
 
       const start = performance.now();
       const dur = 5000;
@@ -625,7 +623,7 @@
       function animate(now) {
         let elapsed = now - start;
         let p = Math.min(1, elapsed / dur);
-        let ease = 1 - Math.pow(1 - p, 4); // Quartic ease-out
+        let ease = 1 - Math.pow(1 - p, 5); // Quintic ease-out
         rotation = startRot + (finalRotation - startRot) * ease;
         draw();
         if (p < 1) requestAnimationFrame(animate);

@@ -16,7 +16,13 @@
             --secondary: #a855f7;
             --bg: #0f172a;
             --card-bg: #1e293b;
-            --text: #f8fafc;
+        }
+
+        body[data-theme="light"] {
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --text: #0f172a;
         }
 
         body {
@@ -324,6 +330,12 @@
 </head>
 
 <body>
+    <script>
+        (function() {
+            const theme = localStorage.getItem('taso-theme');
+            if (theme) document.body.setAttribute('data-theme', theme);
+        })();
+    </script>
     <nav class="nexus-nav">
         <a href="index.html" class="nexus-logo">Taso<span>.</span></a>
         <div class="nexus-tabs">
@@ -491,6 +503,9 @@
         }
 
         updateCard();
+        window.addEventListener('message', e => {
+            if (e.data.type === 'taso-theme') document.body.setAttribute('data-theme', e.data.theme);
+        });
     </script>
 </body>
 

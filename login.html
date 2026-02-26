@@ -568,7 +568,7 @@
         import {
             auth, db, provider, signInWithPopup, onAuthStateChanged,
             createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile,
-            doc, getDoc, setDoc
+            doc, getDoc, setDoc, collection, query, where, getDocs
         } from "./auth.js";
 
         // Redirect if already logged in
@@ -649,6 +649,15 @@
             btn.disabled = true; btn.textContent = '⏳ Creating...';
 
             try {
+                const q = query(collection(db, 'profiles'), where('username', '==', username));
+                const snap = await getDocs(q);
+                if (!snap.empty) {
+                    showError('Username already taken. Please choose another.');
+                    btn.disabled = false;
+                    btn.textContent = 'Create Account';
+                    return;
+                }
+
                 let user = auth.currentUser;
                 if (!user) {
                     const cred = await createUserWithEmailAndPassword(auth, email, pass);

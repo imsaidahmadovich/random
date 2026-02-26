@@ -55,11 +55,11 @@
             transition: background-color 0.4s, color 0.4s;
         }
 
-        /* Iframe / Compact Mode */
         body.in-iframe {
             padding: 0;
             min-height: 100vh;
-            overflow: hidden;
+            overflow-y: auto;
+            overflow-x: hidden;
             background: transparent;
         }
 
@@ -70,8 +70,8 @@
         body.in-iframe .app-container {
             max-width: 100%;
             width: 100%;
-            height: 100vh;
-            min-height: 0;
+            min-height: 100vh;
+            height: auto;
             border-radius: 0;
             box-shadow: none;
             border: none;
@@ -492,7 +492,7 @@
                             <span class="set-label">Team Count</span>
                             <div class="range-wrap">
                                 <input type="range" id="teamRange" min="2" max="10" value="2"
-                                    oninput="document.getElementById('teamVal').textContent=this.value">
+                                    oninput="document.getElementById('teamVal').textContent=this.value; if(mode==='precise') preparePredefinedSetup()">
                                 <span class="range-val" id="teamVal">2</span>
                             </div>
                         </div>
@@ -511,33 +511,39 @@
                         </button>
                     </div>
                 </div>
+                
+                <!-- Pool Section (for Pre-defined, moved from view-teams) -->
+                <div id="poolSection" class="pool-section" style="display:none; margin-top:30px;">
+                    <div class="panel-title" style="font-size:12px; margin-bottom:12px;">Members Pool (Drag to teams)</div>
+                    <div class="pool-grid" id="poolGrid" ondrop="dropToPool(event)" ondragover="allowDrop(event)"></div>
+                </div>
+                <!-- Predefined Teams Grid (Setup phase) -->
+                <div class="teams-grid" id="predefinedTeamsCont" style="display:none; margin-top:20px;"></div>
             </div>
 
             <!-- TEAMS -->
             <div class="view" id="view-teams">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                    <div class="panel-title" style="margin:0;">Manage Teams</div>
+                    <div class="panel-title" style="margin:0;">Final Teams</div>
                     <div style="display:flex; gap:10px;">
-                        <button class="m-btn m-btn-sec" onclick="resetTeams()" id="btnResetTeams">Reset All</button>
                         <button class="m-btn m-btn-sec" onclick="switchView('setup')">Back to Setup</button>
                     </div>
                 </div>
 
-                <!-- Pool Section (for Pre-defined) -->
-                <div id="poolSection" class="pool-section" style="display:none;">
-                    <div class="panel-title" style="font-size:10px; margin-bottom:10px;">Members Pool (Drag to teams)
-                    </div>
-                    <div class="pool-grid" id="poolGrid" ondrop="dropToPool(event)" ondragover="allowDrop(event)"></div>
-                </div>
-
-                <!-- Random Gen Plate -->
+                <!-- Random Gen Plate OR Reveal Plate -->
                 <div id="randomGenPlate" class="gen-btn-container" style="display:none;">
                     <div style="text-align:center;">
                         <div style="font-size:40px; margin-bottom:15px;">🎲</div>
-                        <button class="divide-btn" onclick="startDividing()"
+                        <button class="divide-btn" onclick="startDividing()" id="btnStartDividing"
                             style="padding:15px 40px; border-radius:15px; border:none; background:var(--primary); color:white; font-weight:800; font-size:18px; cursor:pointer; font-family:'Space Grotesk';">GENERATE
-                            RANDOM TEAMS</button>
+                            TEAMS</button>
                     </div>
+                </div>
+                
+                <!-- The Wheel used for generation -->
+                <div id="wheelContainer" style="display:none; text-align:center; margin-bottom:40px;">
+                    <canvas id="teamWheel" width="400" height="400" style="max-width:100%; max-height: 400px; display:inline-block; border-radius:50%; box-shadow:0 10px 40px rgba(0,0,0,0.5);"></canvas>
+                    <div id="wheelPointer" style="position:relative; width:0; height:0; border-left:15px solid transparent; border-right:15px solid transparent; border-top:30px solid var(--rose); margin: -25px auto 0; z-index:10;"></div>
                 </div>
 
                 <div class="teams-grid" id="teamsCont"></div>
@@ -574,9 +580,10 @@
             cont.innerHTML = names.map(n => `
                 <div class="item-chip">
                     <span>${n.name}</span>
-                    <button class="del-item" onclick="names=names.filter(x=>x.id!==${n.id});renderNames()">✕</button>
+                    <button class="del-item" onclick="names=names.filter(x=>x.id!==${n.id});renderNames();if(mode==='precise')preparePredefinedSetup();">✕</button>
                 </div>
             `).join('');
+            if(mode==='precise') preparePredefinedSetup();
         }
 
         function setMode(m) {
@@ -584,9 +591,14 @@
             document.getElementById('btnRand').classList.toggle('active', m === 'random');
             document.getElementById('btnPrec').classList.toggle('active', m === 'precise');
             document.getElementById('modeHint').textContent = m === 'random' ? 'True mathematical randomness.' : 'Manually assign members by dragging.';
+            
+            document.getElementById('poolSection').style.display = m === 'precise' ? 'block' : 'none';
+            document.getElementById('predefinedTeamsCont').style.display = m === 'precise' ? 'grid' : 'none';
+            
+            if (m === 'precise') preparePredefinedSetup();
         }
 
-        let assignedTeams = []; // { name: '', members: [] }
+        let assignedTeams = []; // { id: 0, members: [] }
 
         function switchView(v) {
             document.querySelectorAll('.tab').forEach(el => el.classList.toggle('active', el.dataset.tab === v));
@@ -596,26 +608,28 @@
                 prepareTeamsView();
             }
         }
-
-        function prepareTeamsView() {
+        
+        function preparePredefinedSetup() {
             const teamCount = parseInt(document.getElementById('teamRange').value);
-            const poolSection = document.getElementById('poolSection');
-            const genPlate = document.getElementById('randomGenPlate');
-            const cont = document.getElementById('teamsCont');
-
-            // Initialize teams if count changed or empty
             if (assignedTeams.length !== teamCount) {
                 assignedTeams = Array.from({ length: teamCount }, (_, i) => ({ id: i, members: [] }));
             }
+            renderPredefined();
+        }
+
+        function prepareTeamsView() {
+            const genPlate = document.getElementById('randomGenPlate');
+            const cont = document.getElementById('teamsCont');
+            const wheelCont = document.getElementById('wheelContainer');
+
+            genPlate.style.display = 'flex';
+            cont.innerHTML = '';
+            wheelCont.style.display = 'none';
 
             if (mode === 'random') {
-                poolSection.style.display = 'none';
-                genPlate.style.display = 'flex';
-                cont.innerHTML = '';
+                document.getElementById('btnStartDividing').textContent = 'GENERATE TEAMS';
             } else {
-                poolSection.style.display = 'block';
-                genPlate.style.display = 'none';
-                renderPredefined();
+                document.getElementById('btnStartDividing').textContent = 'REVEAL TEAMS';
             }
         }
 
@@ -628,7 +642,7 @@
                 <div class="pool-chip" draggable="true" ondragstart="drag(event)" id="node-${n.id}" data-name="${n.name}">${n.name}</div>
             `).join('');
 
-            const cont = document.getElementById('teamsCont');
+            const cont = document.getElementById('predefinedTeamsCont');
             cont.innerHTML = assignedTeams.map((team, i) => `
                 <div class="team-card" ondrop="dropToTeam(event, ${i})" ondragover="allowDrop(event)">
                     <div class="team-header">
@@ -646,7 +660,8 @@
 
         function resetTeams() {
             assignedTeams.forEach(t => t.members = []);
-            renderPredefined();
+            if(mode==='precise') renderPredefined();
+            else prepareTeamsView();
         }
 
         // Drag & Drop
@@ -688,44 +703,151 @@
             renderPredefined();
         }
 
+        let wheelNames = [];
+        let finalAssignments = [];
+        let wheelRot = 0;
+        const COLORS = ["#f43f5e", "#f59e0b", "#10b981", "#06b6d4", "#3b82f6", "#8b5cf6", "#d946ef"];
+
         function startDividing() {
             if (names.length < 2) { alert('Add at least 2 names!'); return; }
-            const overlay = document.getElementById('decoy');
-            overlay.classList.add('active');
-
-            let rot = 0;
-            const start = performance.now();
-            function animateDecoy(now) {
-                const elapsed = now - start;
-                rot += (Math.max(5, 40 * (1 - elapsed / 3000)));
-                document.getElementById('decoyWheel').style.transform = `rotate(${rot}deg)`;
-                if (elapsed < 3000) requestAnimationFrame(animateDecoy);
-                else finishDividing();
-            }
-            requestAnimationFrame(animateDecoy);
-        }
-
-        function finishDividing() {
-            document.getElementById('decoy').classList.remove('active');
             document.getElementById('randomGenPlate').style.display = 'none';
+            document.getElementById('wheelContainer').style.display = 'block';
+            
             const teamCount = parseInt(document.getElementById('teamRange').value);
-            const shuffled = [...names].sort(() => Math.random() - 0.5);
-            const teams = Array.from({ length: teamCount }, () => []);
-
-            shuffled.forEach((n, i) => teams[i % teamCount].push(n.name));
-
+            finalAssignments = [];
+            
+            if (mode === 'random') {
+                const shuffled = [...names].sort(() => Math.random() - 0.5);
+                shuffled.forEach((n, i) => {
+                    finalAssignments.push({ name: n.name, teamIdx: i % teamCount });
+                });
+            } else {
+                assignedTeams.forEach((t, i) => {
+                    t.members.forEach(m => finalAssignments.push({ name: m, teamIdx: i }));
+                });
+            }
+            
+            if (finalAssignments.length === 0) {
+                alert('No assignments to reveal! Assign members first.');
+                switchView('setup');
+                return;
+            }
+            
+            finalAssignments.sort(() => Math.random() - 0.5);
+            wheelNames = finalAssignments.map(a => a.name);
+            
             const cont = document.getElementById('teamsCont');
-            cont.innerHTML = teams.map((team, i) => `
-                <div class="team-card">
+            cont.innerHTML = Array.from({length: teamCount}).map((_, i) => `
+                <div class="team-card" id="final-team-${i}">
                     <div class="team-header">
                         <span class="team-name">Team ${i + 1}</span>
-                        <span class="team-count">${team.length}</span>
+                        <span class="team-count" id="final-count-${i}">0</span>
                     </div>
-                    <div class="member-list">
-                        ${team.map(m => `<div class="member">${m}</div>`).join('')}
-                    </div>
+                    <div class="member-list" id="final-list-${i}"></div>
                 </div>
             `).join('');
+            
+            drawTeamWheel();
+            setTimeout(spinNextName, 500);
+        }
+        
+        function drawTeamWheel() {
+            const canvas = document.getElementById('teamWheel');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const center = 200;
+            const radius = 190;
+            ctx.clearRect(0, 0, 400, 400);
+            
+            if(wheelNames.length === 0) return;
+            
+            const arc = (2 * Math.PI) / wheelNames.length;
+            wheelNames.forEach((n, i) => {
+                const start = i * arc + wheelRot;
+                const end = start + arc;
+                ctx.beginPath();
+                ctx.moveTo(center, center);
+                ctx.arc(center, center, radius, start, end);
+                ctx.fillStyle = COLORS[i % COLORS.length];
+                ctx.fill();
+                
+                ctx.save();
+                ctx.translate(center, center);
+                ctx.rotate(start + arc/2);
+                ctx.textAlign = "right";
+                ctx.fillStyle = "white";
+                ctx.font = "bold 18px Space Grotesk";
+                ctx.fillText(n.length > 15 ? n.substring(0, 12) + "..." : n, radius - 20, 6);
+                ctx.restore();
+            });
+            
+            ctx.beginPath(); ctx.arc(center, center, 30, 0, 2 * Math.PI);
+            ctx.fillStyle = "#0a0e1a"; ctx.strokeStyle = "white"; ctx.lineWidth = 4;
+            ctx.fill(); ctx.stroke();
+        }
+        
+        function spinNextName() {
+            if (finalAssignments.length === 0) {
+                setTimeout(() => {
+                    document.getElementById('wheelContainer').style.display = 'none';
+                }, 1000);
+                return;
+            }
+            
+            const nextAssig = finalAssignments.shift();
+            const winIdx = wheelNames.indexOf(nextAssig.name);
+            
+            const arc = (2 * Math.PI) / wheelNames.length;
+            const targetCumulativeArc = winIdx * arc;
+            const targetAngle = 1.5 * Math.PI - (targetCumulativeArc + arc / 2);
+            
+            const spins = 3 + Math.floor(Math.random() * 3);
+            let offset = targetAngle - (wheelRot % (2 * Math.PI));
+            if (offset < 0) offset += 2 * Math.PI;
+            
+            const finalRot = wheelRot + (spins * 2 * Math.PI) + offset;
+            const start = performance.now();
+            const dur = 1500;
+            const startRot = wheelRot;
+            
+            function animateWheel(now) {
+                let p = Math.min(1, (now - start) / dur);
+                let ease = 1 - Math.pow(1 - p, 5);
+                wheelRot = startRot + (finalRot - startRot) * ease;
+                drawTeamWheel();
+                
+                if (p < 1) requestAnimationFrame(animateWheel);
+                else {
+                    addNameWithAnimation(nextAssig.name, nextAssig.teamIdx, () => {
+                        wheelNames.splice(winIdx, 1);
+                        drawTeamWheel();
+                        setTimeout(spinNextName, 400);
+                    });
+                }
+            }
+            requestAnimationFrame(animateWheel);
+        }
+        function addNameWithAnimation(name, teamIdx, callback) {
+            const list = document.getElementById(`final-list-${teamIdx}`);
+            const count = document.getElementById(`final-count-${teamIdx}`);
+            if (!list || !count) return callback();
+            
+            const div = document.createElement('div');
+            div.className = 'member';
+            div.style.opacity = '0';
+            div.style.transform = 'translateY(10px)';
+            div.style.transition = 'all 0.4s ease';
+            div.textContent = name;
+            
+            list.appendChild(div);
+            
+            // Trigger animation
+            setTimeout(() => {
+                div.style.opacity = '1';
+                div.style.transform = 'translateY(0)';
+                count.textContent = list.children.length;
+                callback();
+            }, 50);
         }
     </script>
 </body>

@@ -932,8 +932,16 @@
     <script type="module">
         import {
             auth, db, checkAuth, logout, onAuthStateChanged,
-            doc, getDoc, setDoc
+            doc, getDoc, setDoc, collection, query, where, getDocs
         } from "./auth.js";
+        
+        window.db = db;
+        window.firestoreDoc = doc;
+        window.firestoreSetDoc = setDoc;
+        window.firestoreCollection = collection;
+        window.firestoreQuery = query;
+        window.firestoreWhere = where;
+        window.firestoreGetDocs = getDocs;
 
         checkAuth();
         window.handleLogout = logout;
@@ -1256,8 +1264,17 @@
         function openTool(tool, el) {
             clearActive();
             if (el) el.classList.add('active');
-            document.getElementById('toolFrame').src = tool;
-            document.getElementById('toolFrame').classList.add('active');
+            const frame = document.getElementById('toolFrame');
+            frame.src = tool;
+            frame.classList.add('active');
+            
+            frame.onload = () => {
+                const theme = localStorage.getItem('taso-theme') || 'dark';
+                try {
+                    frame.contentWindow.postMessage({ type: 'taso-theme', theme }, '*');
+                } catch(e) {}
+            };
+
             if (window.innerWidth <= 768 && sidebarOpen) toggleSidebar();
         }
 
@@ -1330,6 +1347,31 @@
             if (!window.currentUserId || !window.db) { alert('Not logged in'); return; }
             const btn = document.querySelector('.save-btn');
             btn.disabled = true; btn.textContent = '⏳ Saving...';
+
+            const newUsername = document.getElementById('profUsername').value.trim();
+            if (!/^[a-zA-Z0-9_]+$/.test(newUsername)) {
+                alert('Username: letters, numbers, underscore only.');
+                btn.disabled = false; btn.textContent = '💾 Save Profile';
+                return;
+            }
+
+            try {
+                // Check duplicate username
+                const q = window.firestoreQuery(window.firestoreCollection(window.db, 'profiles'), window.firestoreWhere('username', '==', newUsername));
+                const snap = await window.firestoreGetDocs(q);
+                let isTaken = false;
+                snap.forEach(d => {
+                    if (d.id !== window.currentUserId) isTaken = true;
+                });
+                
+                if (isTaken) {
+                    alert('Username already taken. Please choose another.');
+                    btn.disabled = false; btn.textContent = '💾 Save Profile';
+                    return;
+                }
+            } catch (e) {
+                console.error('Error checking duplicate username:', e);
+            }
 
             const data = {
                 email: window.currentUserEmail || '',

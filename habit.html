@@ -28,6 +28,16 @@
             --amber: #f59e0b
         }
 
+        body[data-theme="light"] {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --surface2: #f1f5f9;
+            --border: #e2e8f0;
+            --text: #0f172a;
+            --text-muted: #475569;
+            --text-subtle: #64748b;
+        }
+
         *,
         *::before,
         *::after {
@@ -616,6 +626,12 @@
 </head>
 
 <body>
+    <script>
+        (function() {
+            const theme = localStorage.getItem('taso-theme');
+            if (theme) document.body.setAttribute('data-theme', theme);
+        })();
+    </script>
     <div id="orb-bg">
         <div class="orb orb1"></div>
         <div class="orb orb2"></div>
@@ -804,6 +820,11 @@
         }
 
         buildDateStrip(); renderHabits(); updateStats(); updateXP();
+    </script>
+    <script>
+        window.addEventListener('message', e => {
+            if (e.data.type === 'taso-theme') document.body.setAttribute('data-theme', e.data.theme);
+        });
     </script>
 </body>
 
