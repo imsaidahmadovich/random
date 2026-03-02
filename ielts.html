@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taso — IELTS Preparation</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #10b981;
+            --primary-light: #34d399;
+            --secondary: #0ea5e9;
+            --amber: #f59e0b;
+            --violet: #8b5cf6;
+            --rose: #f43f5e;
+            --bg: #05070f;
+            --surface: rgba(255, 255, 255, 0.04);
+            --surface2: rgba(255, 255, 255, 0.08);
+            --border: rgba(255, 255, 255, 0.08);
+            --text: #f1f5f9;
+            --text-muted: #64748b;
+            --text-subtle: #94a3b8;
+        }
+
+        body[data-theme="light"] {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --surface2: #f1f5f9;
+            --border: #e2e8f0;
+            --text: #0f172a;
+            --text-muted: #475569;
+            --text-subtle: #64748b;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: transparent;
+            color: var(--text);
+            padding: 24px;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        /* Header */
+        .page-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .header-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .header-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .header-desc {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        /* Grid Layouts */
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+        }
+
+        @media(max-width: 768px) {
+
+            .grid-2,
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        /* Stat Card */
+        .stat-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-val {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .bg-primary-light {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--primary);
+        }
+
+        .bg-blue-light {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+
+        .bg-amber-light {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--amber);
+        }
+
+        .bg-violet-light {
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--violet);
+        }
+
+        /* Section Header */
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-title-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .section-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .prog-circle {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: conic-gradient(var(--border) 100%, transparent 0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            position: relative;
+        }
+
+        .prog-circle::before {
+            content: '';
+            position: absolute;
+            inset: 4px;
+            background: var(--surface);
+            border-radius: 50%;
+        }
+
+        .prog-circle span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .tips-list {
+            list-style: none;
+            margin-top: 12px;
+            margin-bottom: 16px;
+        }
+
+        .tips-list li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        .tips-list li::before {
+            content: '✓';
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            width: 100%;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background: var(--surface2);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--primary), #059669);
+            color: white;
+            border: none;
+        }
+
+        .btn-success:hover {
+            opacity: 0.9;
+        }
+
+        /* Mock Test Item */
+        .mock-test {
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .mock-test.available {
+            border-color: var(--primary);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .mock-test.available:hover {
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .mock-test.locked {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .mt-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-success {
+            background: var(--primary);
+            color: white;
+        }
+
+        .badge-secondary {
+            background: var(--surface2);
+            color: var(--text-subtle);
+        }
+
+        .mt-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .mt-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Call to Action */
+        .cta-card {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), transparent);
+            border-color: rgba(16, 185, 129, 0.3);
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .cta-icon {
+            font-size: 2rem;
+            background: linear-gradient(135deg, var(--primary), #059669);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .cta-content {
+            flex: 1;
+        }
+
+        .cta-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .cta-desc {
+            font-size: 0.9rem;
+            color: var(--text-subtle);
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .cta-btns {
+            display: flex;
+            gap: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        window.addEventListener('message', (e) => {
+            if (e.data && e.data.type === 'taso-theme') {
+                document.body.setAttribute('data-theme', e.data.theme);
+            }
+        });
+        const theme = localStorage.getItem('taso-theme');
+        if (theme) document.body.setAttribute('data-theme', theme);
+    </script>
+
+    <div class="fade-in" style="animation-delay: 0.1s;">
+        <div class="page-header">
+            <div class="header-icon">🌍</div>
+            <div>
+                <h1 class="header-title">IELTS Preparation</h1>
+                <p class="header-desc">Master all 4 skills with AI-powered practice and feedback</p>
+            </div>
+        </div>
+
+        <div class="grid-4">
+            <div class="card stat-card">
+                <div class="stat-icon bg-primary-light">🎯</div>
+                <div>
+                    <div class="stat-val">7.5</div>
+                    <div class="stat-label">Target Band</div>
+                </div>
+            </div>
+            <div class="card stat-card">
+                <div class="stat-icon bg-blue-light">📈</div>
+                <div>
+                    <div class="stat-val">0/3</div>
+                    <div class="stat-label">Mock Tests</div>
+                </div>
+            </div>
+            <div class="card stat-card">
+                <div class="stat-icon bg-amber-light">⏱️</div>
+                <div>
+                    <div class="stat-val">2h 45m</div>
+                    <div class="stat-label">Test Duration</div>
+                </div>
+            </div>
+            <div class="card stat-card">
+                <div class="stat-icon bg-violet-light">📄</div>
+                <div>
+                    <div class="stat-val">Academic</div>
+                    <div class="stat-label">Test Type</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-2 fade-in" style="animation-delay: 0.2s;">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title-row">
+                        <div class="section-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed)">🎧</div>
+                        <div>
+                            <div>Listening</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">30 minutes</div>
+                        </div>
+                    </div>
+                    <div class="prog-circle"><span>0%</span></div>
+                </div>
+                <div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Quick Tips:</div>
+                    <ul class="tips-list">
+                        <li>Read questions before audio</li>
+                        <li>Mark key words</li>
+                        <li>Watch for distractors</li>
+                    </ul>
+                </div>
+                <button class="btn">Practice Listening ➔</button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title-row">
+                        <div class="section-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb)">📖</div>
+                        <div>
+                            <div>Reading</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">60 minutes</div>
+                        </div>
+                    </div>
+                    <div class="prog-circle"><span>0%</span></div>
+                </div>
+                <div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Quick Tips:</div>
+                    <ul class="tips-list">
+                        <li>Skim passages first</li>
+                        <li>Use keywords from questions</li>
+                        <li>Time management is key</li>
+                    </ul>
+                </div>
+                <button class="btn">Practice Reading ➔</button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title-row">
+                        <div class="section-icon" style="background: linear-gradient(135deg, #10b981, #059669)">✍️</div>
+                        <div>
+                            <div>Writing</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">60 minutes</div>
+                        </div>
+                    </div>
+                    <div class="prog-circle"><span>0%</span></div>
+                </div>
+                <div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Quick Tips:</div>
+                    <ul class="tips-list">
+                        <li>Plan before writing</li>
+                        <li>Use varied vocabulary</li>
+                        <li>Check grammar and spelling</li>
+                    </ul>
+                </div>
+                <button class="btn">Practice Writing ➔</button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title-row">
+                        <div class="section-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706)">🗣️
+                        </div>
+                        <div>
+                            <div>Speaking</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">15 minutes</div>
+                        </div>
+                    </div>
+                    <div class="prog-circle"><span>0%</span></div>
+                </div>
+                <div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Quick Tips:</div>
+                    <ul class="tips-list">
+                        <li>Practice with stories</li>
+                        <li>Use linking words</li>
+                        <li>Stay calm and confident</li>
+                    </ul>
+                </div>
+                <button class="btn">Practice Speaking ➔</button>
+            </div>
+        </div>
+
+        <div class="card fade-in" style="animation-delay: 0.3s; margin-bottom: 32px;">
+            <div
+                style="font-family: 'Space Grotesk', sans-serif; font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                <span style="color: var(--primary)">📄</span> Full Mock Tests
+            </div>
+            <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px;">
+                Complete practice tests with all 4 sections - AI evaluates your responses
+            </div>
+            <div class="grid-3">
+                <div class="mock-test available">
+                    <div class="mt-header">
+                        <span class="badge badge-success">Start</span>
+                    </div>
+                    <div class="mt-title">Full Mock Test 1</div>
+                    <div class="mt-desc">2h 45m • All skills</div>
+                </div>
+                <div class="mock-test locked">
+                    <div class="mt-header">
+                        <span class="badge badge-secondary">Locked</span>
+                    </div>
+                    <div class="mt-title">Full Mock Test 2</div>
+                    <div class="mt-desc">2h 45m • All skills</div>
+                </div>
+                <div class="mock-test locked">
+                    <div class="mt-header">
+                        <span class="badge badge-secondary">Locked</span>
+                    </div>
+                    <div class="mt-title">Full Mock Test 3</div>
+                    <div class="mt-desc">2h 45m • All skills</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card cta-card fade-in" style="animation-delay: 0.4s;">
+            <div class="cta-icon">✨</div>
+            <div class="cta-content">
+                <div class="cta-title">AI Study Plan</div>
+                <div class="cta-desc">Start with a full mock test to identify your weak areas. The AI will analyze your
+                    performance across all 4 skills and create a personalized improvement plan.</div>
+                <div class="cta-btns">
+                    <button class="btn btn-success" style="width: auto;">Take Full Mock Test ➔</button>
+                    <button class="btn" style="width: auto;">Practice by Section</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth, db, doc, getDoc, setDoc, onAuthStateChanged } from './auth.js';
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    const docRef = doc(db, 'prepData', user.uid);
+                    const docSnap = await getDoc(docRef);
+                    if (!docSnap.exists()) {
+                        await setDoc(docRef, { sat: {}, ielts: {}, olympiad: {} }, { merge: true });
+                    }
+                } catch (e) {
+                    console.error("Error fetching IELTS data", e);
+                }
+            } else {
+                if (window.top === window.self) {
+                    window.location.href = 'login.html';
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

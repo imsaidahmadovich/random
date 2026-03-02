@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taso — Admin Panel</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #7c3aed;
+            --primary-light: #a78bfa;
+            --secondary: #06b6d4;
+            --emerald: #10b981;
+            --amber: #f59e0b;
+            --blue: #3b82f6;
+            --rose: #f43f5e;
+            --bg: #05070f;
+            --surface: rgba(255, 255, 255, 0.04);
+            --surface2: rgba(255, 255, 255, 0.08);
+            --border: rgba(255, 255, 255, 0.08);
+            --text: #f1f5f9;
+            --text-muted: #64748b;
+            --text-subtle: #94a3b8;
+        }
+
+        body[data-theme="light"] {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --surface2: #f1f5f9;
+            --border: #e2e8f0;
+            --text: #0f172a;
+            --text-muted: #475569;
+            --text-subtle: #64748b;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: transparent;
+            color: var(--text);
+            padding: 24px;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        /* Header */
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+        }
+
+        .header-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .header-desc {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        .btn-outline {
+            padding: 8px 16px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-outline:hover {
+            background: var(--surface2);
+            color: var(--rose);
+            border-color: var(--rose);
+        }
+
+        /* Tabs */
+        .tabs-list {
+            display: flex;
+            background: var(--surface);
+            padding: 6px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px 16px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab-btn.active {
+            color: var(--text);
+            background: var(--surface2);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .card-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .card-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        /* Grid Layouts */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        @media(max-width: 768px) {
+
+            .grid-2,
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* AI Models Selection */
+        .ai-model {
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .ai-model:hover {
+            border-color: rgba(124, 58, 237, 0.5);
+        }
+
+        .ai-model.selected {
+            border-color: var(--primary);
+            background: rgba(124, 58, 237, 0.05);
+        }
+
+        .ai-title {
+            font-weight: 600;
+            font-size: 1.05rem;
+            margin-bottom: 4px;
+        }
+
+        .ai-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .ai-rec {
+            font-size: 0.75rem;
+            color: var(--primary);
+            margin-top: 8px;
+            font-weight: 600;
+        }
+
+        /* Stats */
+        .stat-box {
+            background: var(--surface2);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .stat-val {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .text-primary {
+            color: var(--primary);
+        }
+
+        .text-emerald {
+            color: var(--emerald);
+        }
+
+        .text-amber {
+            color: var(--amber);
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        window.addEventListener('message', (e) => {
+            if (e.data && e.data.type === 'taso-theme') {
+                document.body.setAttribute('data-theme', e.data.theme);
+            }
+        });
+        const theme = localStorage.getItem('taso-theme');
+        if (theme) document.body.setAttribute('data-theme', theme);
+    </script>
+
+    <div class="fade-in" style="animation-delay: 0.1s;">
+        <div class="page-header">
+            <div>
+                <h1 class="header-title">Admin Panel</h1>
+                <p class="header-desc">Manage your exam prep platform</p>
+            </div>
+            <button class="btn-outline">
+                <span style="font-size: 1.2rem;">🚪</span> Sign Out
+            </button>
+        </div>
+
+        <div class="tabs-list">
+            <button class="tab-btn active" onclick="switchTab('questions')">📝 Questions</button>
+            <button class="tab-btn" onclick="switchTab('tests')">📋 Mock Tests</button>
+            <button class="tab-btn" onclick="switchTab('ai')">🧠 AI Settings</button>
+            <button class="tab-btn" onclick="switchTab('settings')">⚙️ Settings</button>
+        </div>
+
+        <!-- Questions Tab -->
+        <div id="tab-questions" class="tab-content active">
+            <div class="card">
+                <div class="card-header">
+                    <span style="font-size: 1.5rem;">📝</span>
+                    <h2 class="card-title">Question Bank Manager</h2>
+                </div>
+                <div class="card-desc">Add and manage questions for SAT, IELTS, and Olympiad.</div>
+                <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                    Question Bank management interface coming soon.
+                </div>
+            </div>
+        </div>
+
+        <!-- Mock Tests Tab -->
+        <div id="tab-tests" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <span style="font-size: 1.5rem;">📋</span>
+                    <h2 class="card-title">Mock Test Manager</h2>
+                </div>
+                <div class="card-desc">Create and manage mock tests for all exam types.</div>
+                <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                    Mock test creation interface coming soon. You can currently add questions to the question bank.
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Settings Tab -->
+        <div id="tab-ai" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <span style="font-size: 1.5rem;">🧠</span>
+                    <h2 class="card-title">AI Configuration</h2>
+                </div>
+                <div class="card-desc">Configure which AI model analyzes student results and generates feedback.</div>
+                <div class="grid-2">
+                    <div class="ai-model selected" onclick="selectAI(this)">
+                        <div class="ai-title">Google Gemini 3 Flash</div>
+                        <div class="ai-desc">Fast and efficient for most tasks</div>
+                        <div class="ai-rec">Recommended</div>
+                    </div>
+                    <div class="ai-model" onclick="selectAI(this)">
+                        <div class="ai-title">Google Gemini 2.5 Pro</div>
+                        <div class="ai-desc">Best for complex reasoning</div>
+                    </div>
+                    <div class="ai-model" onclick="selectAI(this)">
+                        <div class="ai-title">OpenAI GPT-5</div>
+                        <div class="ai-desc">Powerful all-rounder</div>
+                    </div>
+                    <div class="ai-model" onclick="selectAI(this)">
+                        <div class="ai-title">OpenAI GPT-5 Mini</div>
+                        <div class="ai-desc">Cost-effective option</div>
+                    </div>
+                </div>
+                <p style="margin-top: 16px; font-size: 0.85rem; color: var(--text-muted);">
+                    The selected AI model will be used for analyzing student test results and generating personalized
+                    feedback.
+                </p>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="tab-settings" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <span style="font-size: 1.5rem;">📊</span>
+                    <h2 class="card-title">Database Statistics</h2>
+                </div>
+                <div class="grid-3">
+                    <div class="stat-box" style="background: rgba(124, 58, 237, 0.05);">
+                        <div class="stat-val text-primary">0</div>
+                        <div class="stat-label">Total Questions</div>
+                    </div>
+                    <div class="stat-box" style="background: rgba(16, 185, 129, 0.05);">
+                        <div class="stat-val text-emerald">0</div>
+                        <div class="stat-label">Mock Tests</div>
+                    </div>
+                    <div class="stat-box" style="background: rgba(245, 158, 11, 0.05);">
+                        <div class="stat-val text-amber">0</div>
+                        <div class="stat-label">Total Users</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span style="font-size: 1.5rem;">👥</span>
+                    <h2 class="card-title">User Management</h2>
+                </div>
+                <div class="card-desc">Manage user roles and permissions</div>
+                <div style="text-align: center; padding: 20px; color: var(--text-muted);">
+                    User management interface coming soon.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            event.currentTarget.classList.add('active');
+            document.getElementById('tab-' + tabId).classList.add('active');
+        }
+
+        function selectAI(element) {
+            document.querySelectorAll('.ai-model').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+        }
+    </script>
+    <script type="module">
+        import { auth, db, doc, getDoc, setDoc, onAuthStateChanged, collection, getDocs } from './auth.js';
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    // Very simple admin verification logic. Modify as needed.
+                    const adminRef = doc(db, 'admins', user.uid);
+                    const adminSnap = await getDoc(adminRef);
+                    if (!adminSnap.exists()) {
+                        // User is not admin
+                        document.body.innerHTML = `
+                            <div style="text-align: center; padding: 60px;">
+                                <h1 style="font-family: 'Space Grotesk', sans-serif; margin-bottom: 12px;">Access Denied</h1>
+                                <p style="color: var(--text-muted);">You do not have permission to access the admin panel.</p>
+                            </div>
+                        `;
+                    } else {
+                        // Load admin stats
+                        // const usersSnap = await getDocs(collection(db, 'users'));
+                        // const questionsSnap = await getDocs(collection(db, 'questions'));
+                    }
+                } catch (e) {
+                    console.error("Error verifying admin", e);
+                }
+            } else {
+                if (window.top === window.self) {
+                    window.location.href = 'login.html';
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

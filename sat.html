@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taso — SAT Preparation</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #7c3aed;
+            --primary-light: #a78bfa;
+            --secondary: #06b6d4;
+            --emerald: #10b981;
+            --amber: #f59e0b;
+            --violet: #8b5cf6;
+            --bg: #05070f;
+            --surface: rgba(255, 255, 255, 0.04);
+            --surface2: rgba(255, 255, 255, 0.08);
+            --border: rgba(255, 255, 255, 0.08);
+            --text: #f1f5f9;
+            --text-muted: #64748b;
+            --text-subtle: #94a3b8;
+        }
+
+        body[data-theme="light"] {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --surface2: #f1f5f9;
+            --border: #e2e8f0;
+            --text: #0f172a;
+            --text-muted: #475569;
+            --text-subtle: #64748b;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: transparent;
+            color: var(--text);
+            padding: 24px;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        /* Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 32px;
+        }
+
+        .header-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header-desc {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        .weeks-left {
+            text-align: right;
+        }
+
+        .weeks-num {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .weeks-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Grid Layouts */
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+        }
+
+        @media(max-width: 768px) {
+
+            .grid-2,
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        /* Stat Card */
+        .stat-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-val {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .bg-primary-light {
+            background: rgba(124, 58, 237, 0.1);
+            color: var(--primary);
+        }
+
+        .bg-emerald-light {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--emerald);
+        }
+
+        .bg-amber-light {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--amber);
+        }
+
+        .bg-violet-light {
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--violet);
+        }
+
+        /* Section Header */
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .card-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        /* Mock Test Item */
+        .mock-test {
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .mock-test.available {
+            border-color: var(--primary);
+            background: rgba(124, 58, 237, 0.05);
+        }
+
+        .mock-test.available:hover {
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .mock-test.locked {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .mt-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .badge-secondary {
+            background: var(--surface2);
+            color: var(--text-subtle);
+        }
+
+        .mt-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .mt-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Skills Lists */
+        .skill-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 12px;
+            border-radius: 12px;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+
+        .skill-item:hover {
+            background: var(--surface2);
+        }
+
+        .progress-ring {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            position: relative;
+            background: conic-gradient(var(--emerald) calc(var(--p) * 1%), var(--surface2) 0);
+        }
+
+        .progress-ring::before {
+            content: '';
+            position: absolute;
+            inset: 4px;
+            background: var(--bg);
+            border-radius: 50%;
+        }
+
+        .progress-ring span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .skill-info {
+            flex: 1;
+        }
+
+        .skill-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .skill-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* Call to Action */
+        .cta-card {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), transparent);
+            border-color: rgba(124, 58, 237, 0.3);
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .cta-icon {
+            font-size: 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .cta-content {
+            flex: 1;
+        }
+
+        .cta-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .cta-desc {
+            font-size: 0.9rem;
+            color: var(--text-subtle);
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), #4f46e5);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        window.addEventListener('message', (e) => {
+            if (e.data && e.data.type === 'taso-theme') {
+                document.body.setAttribute('data-theme', e.data.theme);
+            }
+        });
+        const theme = localStorage.getItem('taso-theme');
+        if (theme) document.body.setAttribute('data-theme', theme);
+    </script>
+
+    <div class="fade-in" style="animation-delay: 0.1s;">
+        <div class="page-header">
+            <div>
+                <h1 class="header-title">SAT Preparation</h1>
+                <p class="header-desc">Your personalized study plan to reach 1500+</p>
+            </div>
+            <div class="weeks-left">
+                <div class="weeks-num">4</div>
+                <div class="weeks-label">weeks left</div>
+            </div>
+        </div>
+
+        <div class="grid-4">
+            <div class="card stat-card">
+                <div class="stat-icon bg-primary-light">🎯</div>
+                <div>
+                    <div class="stat-val">1500</div>
+                    <div class="stat-label">Target Score</div>
+                </div>
+            </div>
+            <div class="card stat-card">
+                <div class="stat-icon bg-emerald-light">📈</div>
+                <div>
+                    <div class="stat-val">1/4</div>
+                    <div class="stat-label">Mock Tests</div>
+                </div>
+            </div>
+            <div class="card stat-card">
+                <div class="stat-icon bg-amber-light">⏱️</div>
+                <div>
+                    <div class="stat-val">60m</div>
+                    <div class="stat-label">Daily Goal</div>
+                </div>
+            </div>
+            <div class="card stat-card">
+                <div class="stat-icon bg-violet-light">📝</div>
+                <div>
+                    <div class="stat-val">342</div>
+                    <div class="stat-label">Questions Done</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card fade-in" style="animation-delay: 0.2s; margin-bottom: 32px;">
+            <div class="card-header">📄 Mock Tests</div>
+            <div class="card-desc">Take full-length practice tests and get AI-powered feedback</div>
+            <div class="grid-3">
+                <div class="mock-test available">
+                    <div class="mt-header">
+                        <span class="badge badge-primary">Start</span>
+                        <span class="mt-desc">134 min</span>
+                    </div>
+                    <div class="mt-title">Diagnostic Test</div>
+                    <div class="mt-desc">Full-length practice test</div>
+                </div>
+                <div class="mock-test locked">
+                    <div class="mt-header">
+                        <span class="badge badge-secondary">Locked</span>
+                        <span class="mt-desc">134 min</span>
+                    </div>
+                    <div class="mt-title">Practice Test 1</div>
+                    <div class="mt-desc">College Board official test</div>
+                </div>
+                <div class="mock-test locked">
+                    <div class="mt-header">
+                        <span class="badge badge-secondary">Locked</span>
+                        <span class="mt-desc">134 min</span>
+                    </div>
+                    <div class="mt-title">Practice Test 2</div>
+                    <div class="mt-desc">College Board official test</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-2 fade-in" style="animation-delay: 0.3s;">
+            <div class="card">
+                <div class="card-header">📖 Reading & Writing</div>
+                <div class="skill-item">
+                    <div class="progress-ring" style="--p: 75;"><span>75%</span></div>
+                    <div class="skill-info">
+                        <div class="skill-name">Craft & Structure</div>
+                        <div class="skill-desc">Analyze word choice, text structure</div>
+                    </div>
+                </div>
+                <div class="skill-item">
+                    <div class="progress-ring" style="--p: 60;"><span>60%</span></div>
+                    <div class="skill-info">
+                        <div class="skill-name">Information & Ideas</div>
+                        <div class="skill-desc">Central ideas, evidence, inferences</div>
+                    </div>
+                </div>
+                <div class="skill-item">
+                    <div class="progress-ring" style="--p: 85;"><span>85%</span></div>
+                    <div class="skill-info">
+                        <div class="skill-name">Standard English</div>
+                        <div class="skill-desc">Grammar, punctuation, syntax</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">🧮 Math</div>
+                <div class="skill-item">
+                    <div class="progress-ring" style="--p: 90;"><span>90%</span></div>
+                    <div class="skill-info">
+                        <div class="skill-name">Algebra</div>
+                        <div class="skill-desc">Linear equations, systems, functions</div>
+                    </div>
+                </div>
+                <div class="skill-item">
+                    <div class="progress-ring" style="--p: 45; --emerald: var(--amber);"><span>45%</span></div>
+                    <div class="skill-info">
+                        <div class="skill-name">Advanced Math</div>
+                        <div class="skill-desc">Quadratics, polynomials, exponentials</div>
+                    </div>
+                </div>
+                <div class="skill-item">
+                    <div class="progress-ring" style="--p: 70;"><span>70%</span></div>
+                    <div class="skill-info">
+                        <div class="skill-name">Geometry & Trig</div>
+                        <div class="skill-desc">Shapes, angles, trigonometry</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card cta-card fade-in" style="animation-delay: 0.4s;">
+            <div class="cta-icon">✨</div>
+            <div class="cta-content">
+                <div class="cta-title">AI Study Recommendation</div>
+                <div class="cta-desc">Your Advanced Math performance is currently 45%. We recommend spending 30 minutes
+                    today reviewing Quadratic Equations and Polynomials to boost your score.</div>
+                <button class="btn btn-primary">Start Review Session</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth, db, doc, getDoc, setDoc, onAuthStateChanged } from './auth.js';
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    const docRef = doc(db, 'prepData', user.uid);
+                    const docSnap = await getDoc(docRef);
+                    if (!docSnap.exists()) {
+                        await setDoc(docRef, { sat: {}, ielts: {}, olympiad: {} }, { merge: true });
+                    }
+                    // Data initialization code here. UI is updated based on prepData.
+                } catch (e) {
+                    console.error("Error fetching SAT data", e);
+                }
+            } else {
+                // If not accessed through iframe context with parent handling, redirect
+                if (window.top === window.self) {
+                    window.location.href = 'login.html';
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

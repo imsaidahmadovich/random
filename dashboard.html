@@ -934,7 +934,7 @@
             auth, db, checkAuth, logout, onAuthStateChanged,
             doc, getDoc, setDoc, collection, query, where, getDocs
         } from "./auth.js";
-        
+
         window.db = db;
         window.firestoreDoc = doc;
         window.firestoreSetDoc = setDoc;
@@ -1065,6 +1065,19 @@
             </div>
 
             <div class="sidebar-divider"></div>
+            <div class="sidebar-section-title">Preparation</div>
+            <div class="sidebar-item" data-tool="sat.html" onclick="openTool('sat.html', this)">
+                <span class="sidebar-icon">🎯</span> SAT Prep
+            </div>
+            <div class="sidebar-item" data-tool="ielts.html" onclick="openTool('ielts.html', this)">
+                <span class="sidebar-icon">🌍</span> IELTS Prep
+            </div>
+            <div class="sidebar-item" data-tool="olympiad.html" onclick="openTool('olympiad.html', this)">
+                <span class="sidebar-icon">🏆</span> Olympiad
+
+            </div>
+            <div class="sidebar-divider"></div>
+
             <div class="sidebar-section-title">Fun</div>
             <div class="sidebar-item" data-tool="wheel_app.html" onclick="openTool('wheel_app.html', this)">
                 <span class="sidebar-icon">🎡</span> Spin the Wheel
@@ -1267,12 +1280,12 @@
             const frame = document.getElementById('toolFrame');
             frame.src = tool;
             frame.classList.add('active');
-            
+
             frame.onload = () => {
                 const theme = localStorage.getItem('taso-theme') || 'dark';
                 try {
                     frame.contentWindow.postMessage({ type: 'taso-theme', theme }, '*');
-                } catch(e) {}
+                } catch (e) { }
             };
 
             if (window.innerWidth <= 768 && sidebarOpen) toggleSidebar();
@@ -1363,7 +1376,7 @@
                 snap.forEach(d => {
                     if (d.id !== window.currentUserId) isTaken = true;
                 });
-                
+
                 if (isTaken) {
                     alert('Username already taken. Please choose another.');
                     btn.disabled = false; btn.textContent = '💾 Save Profile';

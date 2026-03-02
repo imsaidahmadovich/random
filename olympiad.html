@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taso — Olympiad Preparation</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #f59e0b;
+            --primary-light: #fbbf24;
+            --secondary: #ea580c;
+            --emerald: #10b981;
+            --blue: #3b82f6;
+            --violet: #8b5cf6;
+            --bg: #05070f;
+            --surface: rgba(255, 255, 255, 0.04);
+            --surface2: rgba(255, 255, 255, 0.08);
+            --border: rgba(255, 255, 255, 0.08);
+            --text: #f1f5f9;
+            --text-muted: #64748b;
+            --text-subtle: #94a3b8;
+        }
+
+        body[data-theme="light"] {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --surface2: #f1f5f9;
+            --border: #e2e8f0;
+            --text: #0f172a;
+            --text-muted: #475569;
+            --text-subtle: #64748b;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: transparent;
+            color: var(--text);
+            padding: 24px;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        /* Header */
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--blue), #4f46e5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .header-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .header-desc {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        .btn-outline {
+            padding: 8px 16px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .btn-outline:hover {
+            background: var(--surface2);
+        }
+
+        /* Grid Layouts */
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        /* Stat Card */
+        .stat-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-val {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .bg-amber-light {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--amber);
+        }
+
+        .bg-blue-light {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--blue);
+        }
+
+        .bg-emerald-light {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--emerald);
+        }
+
+        .bg-violet-light {
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--violet);
+        }
+
+        /* Section Header */
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .card-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .btn-amber {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-amber:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        /* Upload Section */
+        .upload-section {
+            border: 2px dashed rgba(245, 158, 11, 0.3);
+            text-align: center;
+            padding: 40px 24px;
+        }
+
+        .upload-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--amber);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin: 0 auto 16px;
+        }
+
+        .upload-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .upload-desc {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            max-width: 400px;
+            margin: 0 auto 24px;
+        }
+
+        /* AI Analysis Call to Action */
+        .cta-card {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), transparent);
+            border-color: rgba(245, 158, 11, 0.3);
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .cta-icon {
+            font-size: 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .cta-content {
+            flex: 1;
+        }
+
+        .cta-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .cta-desc {
+            font-size: 0.9rem;
+            color: var(--text-subtle);
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .cta-list {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+
+        .cta-list li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .cta-list li::before {
+            content: '✓';
+            color: var(--amber);
+            font-weight: bold;
+        }
+
+        /* Test Box */
+        .test-box {
+            background: rgba(245, 158, 11, 0.05);
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .test-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            background: var(--primary);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        window.addEventListener('message', (e) => {
+            if (e.data && e.data.type === 'taso-theme') {
+                document.body.setAttribute('data-theme', e.data.theme);
+            }
+        });
+        const theme = localStorage.getItem('taso-theme');
+        if (theme) document.body.setAttribute('data-theme', theme);
+    </script>
+
+    <div class="fade-in" style="animation-delay: 0.1s;">
+        <div class="page-header">
+            <div class="header-left">
+                <div class="header-icon">🧮</div>
+                <div>
+                    <h1 class="header-title">Mathematics Olympiad</h1>
+                    <p class="header-desc">Grade 11 / Year 12 • United States • AI-analyzed problem sets</p>
+                </div>
+            </div>
+            <button class="btn-outline">Change Settings</button>
+        </div>
+
+        <div class="grid-4">
+            <div class="card stat-card">
+                <div class="stat-icon bg-amber-light">🎯</div>
+                <div>
+                    <div class="stat-val">0</div>
+                    <div class="stat-label">Topics Mastered</div>
+                </div>
+            </div>
+            <div class="card stat-card">
+                <div class="stat-icon bg-blue-light">📈</div>
+                <div>
+                    <div class="stat-val">0</div>
+                    <div class="stat-label">Problems Solved</div>
+                </div>
+            </div>
+            <div class="card stat-card">
+                <div class="stat-icon bg-emerald-light">✓</div>
+                <div>
+                    <div class="stat-val">0/1</div>
+                    <div class="stat-label">Tests Completed</div>
+                </div>
+            </div>
+            <div class="card stat-card">
+                <div class="stat-icon bg-violet-light">📄</div>
+                <div>
+                    <div class="stat-val">0</div>
+                    <div class="stat-label">Questions Uploaded</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-2 fade-in" style="animation-delay: 0.2s;">
+            <div class="card upload-section">
+                <div class="upload-icon">↑</div>
+                <div class="upload-title">Upload Past Olympiad Questions</div>
+                <div class="upload-desc">Upload past papers from your country's olympiad. The AI will analyze question
+                    types and create a personalized practice plan.</div>
+                <button class="btn btn-amber">Upload Questions</button>
+            </div>
+
+            <div class="card cta-card">
+                <div class="cta-icon">✨</div>
+                <div class="cta-content">
+                    <div class="cta-title">AI Question Analysis</div>
+                    <div class="cta-desc">Upload olympiad questions and the AI will:</div>
+                    <ul class="cta-list">
+                        <li>Analyze question types and difficulty levels</li>
+                        <li>Identify knowledge areas required for each problem</li>
+                        <li>Generate similar practice problems for weak areas</li>
+                        <li>Provide step-by-step explanations and pro tips</li>
+                    </ul>
+                    <button class="btn-outline">Learn More ➔</button>
+                </div>
+            </div>
+
+            <div class="card fade-in" style="animation-delay: 0.3s; margin-bottom: 32px;">
+                <div class="card-header">📄 Practice Tests</div>
+                <div class="card-desc">Complete full olympiad-style tests to prepare for the competition</div>
+                <div class="test-box">
+                    <span class="test-badge">Available</span>
+                    <h4 style="font-weight: 600; font-size: 1.05rem; margin-bottom: 8px;">First Practice Test</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">Complete at least one
+                        full test with no doubts before your olympiad</p>
+                    <button class="btn btn-amber">Start Test ➔</button>
+                </div>
+                <div
+                    style="font-size: 0.85rem; color: var(--text-muted); margin-top: 16px; display: flex; align-items: center; gap: 8px;">
+                    <span style="color: var(--amber);">💡</span> Upload past questions first for AI to analyze and
+                    create relevant practice
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth, db, doc, getDoc, setDoc, onAuthStateChanged } from './auth.js';
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    const docRef = doc(db, 'prepData', user.uid);
+                    const docSnap = await getDoc(docRef);
+                    if (!docSnap.exists()) {
+                        await setDoc(docRef, { sat: {}, ielts: {}, olympiad: {} }, { merge: true });
+                    }
+                } catch (e) {
+                    console.error("Error fetching Olympiad data", e);
+                }
+            } else {
+                if (window.top === window.self) {
+                    window.location.href = 'login.html';
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
