@@ -237,6 +237,11 @@
             cursor: not-allowed;
         }
 
+        .mock-test.completed {
+            border-color: var(--emerald);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
         .mt-header {
             display: flex;
             justify-content: space-between;
@@ -260,6 +265,11 @@
         .badge-secondary {
             background: var(--surface2);
             color: var(--text-subtle);
+        }
+
+        .badge-completed {
+            background: var(--emerald);
+            color: white;
         }
 
         .mt-title {
@@ -306,6 +316,10 @@
             inset: 4px;
             background: var(--bg);
             border-radius: 50%;
+        }
+
+        body[data-theme="light"] .progress-ring::before {
+            background: #ffffff;
         }
 
         .progress-ring span {
@@ -381,6 +395,89 @@
             opacity: 0.9;
             transform: translateY(-1px);
         }
+
+        /* Modal Styles */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .modal {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: rgba(5, 7, 15, 0.95);
+            z-index: 10;
+        }
+
+        body[data-theme="light"] .modal-header {
+            background: rgba(248, 250, 252, 0.95);
+        }
+
+        .close-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .close-btn:hover {
+            color: var(--rose);
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .mcq-option {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .mcq-option:hover {
+            border-color: var(--primary);
+        }
+
+        .mcq-option.selected {
+            background: rgba(124, 58, 237, 0.1);
+            border-color: var(--primary);
+        }
     </style>
 </head>
 
@@ -396,13 +493,19 @@
     </script>
 
     <div class="fade-in" style="animation-delay: 0.1s;">
+        <nav class="nav-bar" style="display:flex;gap:12px;margin-bottom:16px;">
+            <button class="nav-btn" data-target="ielts">IELTS</button>
+            <button class="nav-btn" data-target="sat">SAT</button>
+            <button class="nav-btn" data-target="olympiad">Olympiad</button>
+            <button class="nav-btn" data-target="admin">Admin</button>
+        </nav>
         <div class="page-header">
             <div>
                 <h1 class="header-title">SAT Preparation</h1>
-                <p class="header-desc">Your personalized study plan to reach 1500+</p>
+                <p class="header-desc">Your personalized study plan to reach <span id="targetLabel">1500</span>+</p>
             </div>
             <div class="weeks-left">
-                <div class="weeks-num">4</div>
+                <div class="weeks-num" id="weeksNum">4</div>
                 <div class="weeks-label">weeks left</div>
             </div>
         </div>
@@ -411,28 +514,28 @@
             <div class="card stat-card">
                 <div class="stat-icon bg-primary-light">🎯</div>
                 <div>
-                    <div class="stat-val">1500</div>
+                    <div class="stat-val" id="statTarget">1500</div>
                     <div class="stat-label">Target Score</div>
                 </div>
             </div>
             <div class="card stat-card">
                 <div class="stat-icon bg-emerald-light">📈</div>
                 <div>
-                    <div class="stat-val">1/4</div>
+                    <div class="stat-val" id="statMocks">0/4</div>
                     <div class="stat-label">Mock Tests</div>
                 </div>
             </div>
             <div class="card stat-card">
                 <div class="stat-icon bg-amber-light">⏱️</div>
                 <div>
-                    <div class="stat-val">60m</div>
+                    <div class="stat-val" id="statGoal">60m</div>
                     <div class="stat-label">Daily Goal</div>
                 </div>
             </div>
             <div class="card stat-card">
                 <div class="stat-icon bg-violet-light">📝</div>
                 <div>
-                    <div class="stat-val">342</div>
+                    <div class="stat-val" id="statQuestions">0</div>
                     <div class="stat-label">Questions Done</div>
                 </div>
             </div>
@@ -441,26 +544,26 @@
         <div class="card fade-in" style="animation-delay: 0.2s; margin-bottom: 32px;">
             <div class="card-header">📄 Mock Tests</div>
             <div class="card-desc">Take full-length practice tests and get AI-powered feedback</div>
-            <div class="grid-3">
-                <div class="mock-test available">
+            <div class="grid-3" id="mockTestsGrid">
+                <div class="mock-test available" id="mockTest0">
                     <div class="mt-header">
-                        <span class="badge badge-primary">Start</span>
+                        <span class="badge badge-primary" id="mockBadge0">Start</span>
                         <span class="mt-desc">134 min</span>
                     </div>
                     <div class="mt-title">Diagnostic Test</div>
                     <div class="mt-desc">Full-length practice test</div>
                 </div>
-                <div class="mock-test locked">
+                <div class="mock-test locked" id="mockTest1">
                     <div class="mt-header">
-                        <span class="badge badge-secondary">Locked</span>
+                        <span class="badge badge-secondary" id="mockBadge1">Locked</span>
                         <span class="mt-desc">134 min</span>
                     </div>
                     <div class="mt-title">Practice Test 1</div>
                     <div class="mt-desc">College Board official test</div>
                 </div>
-                <div class="mock-test locked">
+                <div class="mock-test locked" id="mockTest2">
                     <div class="mt-header">
-                        <span class="badge badge-secondary">Locked</span>
+                        <span class="badge badge-secondary" id="mockBadge2">Locked</span>
                         <span class="mt-desc">134 min</span>
                     </div>
                     <div class="mt-title">Practice Test 2</div>
@@ -473,21 +576,21 @@
             <div class="card">
                 <div class="card-header">📖 Reading & Writing</div>
                 <div class="skill-item">
-                    <div class="progress-ring" style="--p: 75;"><span>75%</span></div>
+                    <div class="progress-ring" id="ringCraft" style="--p: 0;"><span id="pctCraft">0%</span></div>
                     <div class="skill-info">
                         <div class="skill-name">Craft & Structure</div>
                         <div class="skill-desc">Analyze word choice, text structure</div>
                     </div>
                 </div>
                 <div class="skill-item">
-                    <div class="progress-ring" style="--p: 60;"><span>60%</span></div>
+                    <div class="progress-ring" id="ringInfo" style="--p: 0;"><span id="pctInfo">0%</span></div>
                     <div class="skill-info">
                         <div class="skill-name">Information & Ideas</div>
                         <div class="skill-desc">Central ideas, evidence, inferences</div>
                     </div>
                 </div>
                 <div class="skill-item">
-                    <div class="progress-ring" style="--p: 85;"><span>85%</span></div>
+                    <div class="progress-ring" id="ringEnglish" style="--p: 0;"><span id="pctEnglish">0%</span></div>
                     <div class="skill-info">
                         <div class="skill-name">Standard English</div>
                         <div class="skill-desc">Grammar, punctuation, syntax</div>
@@ -498,21 +601,21 @@
             <div class="card">
                 <div class="card-header">🧮 Math</div>
                 <div class="skill-item">
-                    <div class="progress-ring" style="--p: 90;"><span>90%</span></div>
+                    <div class="progress-ring" id="ringAlgebra" style="--p: 0;"><span id="pctAlgebra">0%</span></div>
                     <div class="skill-info">
                         <div class="skill-name">Algebra</div>
                         <div class="skill-desc">Linear equations, systems, functions</div>
                     </div>
                 </div>
                 <div class="skill-item">
-                    <div class="progress-ring" style="--p: 45; --emerald: var(--amber);"><span>45%</span></div>
+                    <div class="progress-ring" id="ringAdvMath" style="--p: 0;"><span id="pctAdvMath">0%</span></div>
                     <div class="skill-info">
                         <div class="skill-name">Advanced Math</div>
                         <div class="skill-desc">Quadratics, polynomials, exponentials</div>
                     </div>
                 </div>
                 <div class="skill-item">
-                    <div class="progress-ring" style="--p: 70;"><span>70%</span></div>
+                    <div class="progress-ring" id="ringGeom" style="--p: 0;"><span id="pctGeom">0%</span></div>
                     <div class="skill-info">
                         <div class="skill-name">Geometry & Trig</div>
                         <div class="skill-desc">Shapes, angles, trigonometry</div>
@@ -524,10 +627,51 @@
         <div class="card cta-card fade-in" style="animation-delay: 0.4s;">
             <div class="cta-icon">✨</div>
             <div class="cta-content">
-                <div class="cta-title">AI Study Recommendation</div>
-                <div class="cta-desc">Your Advanced Math performance is currently 45%. We recommend spending 30 minutes
-                    today reviewing Quadratic Equations and Polynomials to boost your score.</div>
-                <button class="btn btn-primary">Start Review Session</button>
+                <div class="cta-title" id="ctaTitle">AI Study Recommendation</div>
+                <div class="cta-desc" id="ctaDesc">Complete a diagnostic test to get personalized AI study
+                    recommendations based on your skill levels.</div>
+                <button class="btn btn-primary" id="ctaBtn" onclick="openSatPractice()">Start Review Session</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SAT Practice Modal -->
+    <div class="modal-backdrop" id="satPracticeModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div>
+                    <h2 style="font-family:'Space Grotesk',sans-serif; margin-bottom:4px;" id="satPracticeTitle">SAT
+                        Math Base</h2>
+                    <p style="color:var(--text-muted); font-size:0.9rem;">Topic: Advanced Math</p>
+                </div>
+                <button class="close-btn" onclick="closeModal('satPracticeModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div style="font-size:1.1rem; line-height:1.6; margin-bottom:24px;">
+                    Which of the following equations represents a line that is parallel to the line with equation \( y =
+                    -3x + 4 \)?
+                </div>
+
+                <div class="mcq-option" onclick="selectSatOption(this)"><span
+                        style="font-weight:600; color:var(--text-muted);">A</span> 6x + 2y = 15</div>
+                <div class="mcq-option" onclick="selectSatOption(this)"><span
+                        style="font-weight:600; color:var(--text-muted);">B</span> 3x - y = 7</div>
+                <div class="mcq-option" onclick="selectSatOption(this)"><span
+                        style="font-weight:600; color:var(--text-muted);">C</span> 2x - 3y = 6</div>
+                <div class="mcq-option" onclick="selectSatOption(this)"><span
+                        style="font-weight:600; color:var(--text-muted);">D</span> x + 3y = 1</div>
+
+                <div style="margin-top:24px; display:flex; justify-content:flex-end;">
+                    <button class="btn btn-primary" onclick="submitSatAnswer(this)">Submit Answer</button>
+                </div>
+
+                <div id="satFeedbackBox"
+                    style="display:none; margin-top:24px; padding:16px; border-radius:12px; border-left:4px solid var(--primary); background:var(--surface2);">
+                    <div style="font-weight:700; color:var(--primary); margin-bottom:8px;">AI Explanation</div>
+                    <p style="font-size:0.9rem; line-height:1.5;">Correct! Parallel lines have the same slope. The given
+                        line has a slope of -3. Let's rewrite option A in slope-intercept form: 2y = -6x + 15 ➔ y = -3x
+                        + 7.5. Since the slope is -3, it is parallel.</p>
+                </div>
             </div>
         </div>
     </div>
@@ -535,25 +679,185 @@
     <script type="module">
         import { auth, db, doc, getDoc, setDoc, onAuthStateChanged } from './auth.js';
 
+        const DEFAULT_SAT = {
+            targetScore: 1500,
+            mockTestsDone: 0,
+            totalMockTests: 4,
+            dailyGoal: 60,
+            questionsDone: 0,
+            weeksLeft: 4,
+            completedTests: [],
+            skills: {
+                craft: 0,
+                info: 0,
+                english: 0,
+                algebra: 0,
+                advMath: 0,
+                geom: 0
+            }
+        };
+
+        function updateSkillRing(ringId, pctId, value) {
+            const ring = document.getElementById(ringId);
+            const pct = document.getElementById(pctId);
+            if (ring) ring.style.setProperty('--p', value);
+            if (pct) pct.textContent = value + '%';
+
+            // Amber color for skills below 50%
+            if (ring && value < 50) {
+                ring.style.background = `conic-gradient(var(--amber) calc(${value} * 1%), var(--surface2) 0)`;
+            }
+        }
+
+        function updateMockTests(completedTests) {
+            const tests = [
+                { id: 'mockTest0', badgeId: 'mockBadge0' },
+                { id: 'mockTest1', badgeId: 'mockBadge1' },
+                { id: 'mockTest2', badgeId: 'mockBadge2' }
+            ];
+
+            tests.forEach((test, i) => {
+                const el = document.getElementById(test.id);
+                const badge = document.getElementById(test.badgeId);
+                if (!el || !badge) return;
+
+                if (completedTests.includes(i)) {
+                    // Completed
+                    el.className = 'mock-test completed';
+                    badge.className = 'badge badge-completed';
+                    badge.textContent = 'Done';
+                } else if (i === 0 || completedTests.includes(i - 1)) {
+                    // Available (first test or previous completed)
+                    el.className = 'mock-test available';
+                    badge.className = 'badge badge-primary';
+                    badge.textContent = 'Start';
+                } else {
+                    // Locked
+                    el.className = 'mock-test locked';
+                    badge.className = 'badge badge-secondary';
+                    badge.textContent = 'Locked';
+                }
+            });
+        }
+
+        function updateUI(data) {
+            // Stats
+            document.getElementById('statTarget').textContent = data.targetScore || 1500;
+            document.getElementById('targetLabel').textContent = data.targetScore || 1500;
+            const done = data.mockTestsDone || 0;
+            const total = data.totalMockTests || 4;
+            document.getElementById('statMocks').textContent = `${done}/${total}`;
+            document.getElementById('statGoal').textContent = `${data.dailyGoal || 60}m`;
+            document.getElementById('statQuestions').textContent = data.questionsDone || 0;
+            document.getElementById('weeksNum').textContent = data.weeksLeft || 4;
+
+            // Skills
+            const s = data.skills || {};
+            updateSkillRing('ringCraft', 'pctCraft', s.craft || 0);
+            updateSkillRing('ringInfo', 'pctInfo', s.info || 0);
+            updateSkillRing('ringEnglish', 'pctEnglish', s.english || 0);
+            updateSkillRing('ringAlgebra', 'pctAlgebra', s.algebra || 0);
+            updateSkillRing('ringAdvMath', 'pctAdvMath', s.advMath || 0);
+            updateSkillRing('ringGeom', 'pctGeom', s.geom || 0);
+
+            // Mock tests
+            updateMockTests(data.completedTests || []);
+
+            // AI recommendation — find weakest skill
+            const skillEntries = Object.entries(s).filter(([k, v]) => typeof v === 'number');
+            if (skillEntries.length > 0) {
+                const weakest = skillEntries.reduce((a, b) => a[1] < b[1] ? a : b);
+                const skillNames = {
+                    craft: 'Craft & Structure', info: 'Information & Ideas', english: 'Standard English',
+                    algebra: 'Algebra', advMath: 'Advanced Math', geom: 'Geometry & Trig'
+                };
+                if (weakest[1] > 0) {
+                    document.getElementById('ctaDesc').textContent =
+                        `Your ${skillNames[weakest[0]]} performance is currently ${weakest[1]}%. We recommend spending 30 minutes today reviewing this area to boost your score.`;
+                }
+            }
+        }
+
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 try {
                     const docRef = doc(db, 'prepData', user.uid);
                     const docSnap = await getDoc(docRef);
                     if (!docSnap.exists()) {
-                        await setDoc(docRef, { sat: {}, ielts: {}, olympiad: {} }, { merge: true });
+                        const initData = {
+                            sat: { ...DEFAULT_SAT },
+                            ielts: {},
+                            olympiad: {}
+                        };
+                        await setDoc(docRef, initData, { merge: true });
+                        updateUI(DEFAULT_SAT);
+                    } else {
+                        const prepData = docSnap.data();
+                        const satData = prepData.sat || {};
+                        const merged = { ...DEFAULT_SAT, ...satData, skills: { ...DEFAULT_SAT.skills, ...(satData.skills || {}) } };
+                        updateUI(merged);
                     }
-                    // Data initialization code here. UI is updated based on prepData.
                 } catch (e) {
                     console.error("Error fetching SAT data", e);
+                    updateUI(DEFAULT_SAT);
                 }
             } else {
-                // If not accessed through iframe context with parent handling, redirect
                 if (window.top === window.self) {
                     window.location.href = 'login.html';
                 }
             }
         });
+
+        // UI Interactions
+        window.closeModal = function (id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        window.openSatPractice = function () {
+            document.getElementById('satPracticeModal').style.display = 'flex';
+            document.getElementById('satFeedbackBox').style.display = 'none';
+            document.querySelectorAll('.mcq-option').forEach(el => el.classList.remove('selected'));
+        }
+
+        window.selectSatOption = function (el) {
+            document.querySelectorAll('.mcq-option').forEach(e => e.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        window.submitSatAnswer = function (btn) {
+            const selected = document.querySelector('.mcq-option.selected');
+            if (!selected) return alert("Please select an answer.");
+
+            btn.textContent = '⏳ Checking...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                document.getElementById('satFeedbackBox').style.display = 'block';
+                btn.textContent = 'Next Question ➔';
+                btn.disabled = false;
+                btn.onclick = function () {
+                    openSatPractice(); // refresh fake state
+                    btn.textContent = 'Submit Answer';
+                    btn.onclick = function () { submitSatAnswer(this) };
+                };
+            }, 1000);
+        }
+
+        // Add clicks to mock tests
+        document.querySelectorAll('.mock-test.available').forEach(el => {
+            el.addEventListener('click', () => {
+                const title = el.querySelector('.mt-title').textContent;
+                document.getElementById('satPracticeTitle').textContent = `Mock Exam: ${title}`;
+                openSatPractice();
+            });
+        });
+    </script>
+    <script type="module">
+        import { initNav } from './navigation.js';
+        import { loadUserProgress, aiProgressCheck } from './progress.js';
+        initNav();
+        loadUserProgress();
+        aiProgressCheck();
     </script>
 </body>
 

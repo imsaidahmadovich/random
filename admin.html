@@ -275,6 +275,24 @@
         .text-amber {
             color: var(--amber);
         }
+
+        /* Loading indicator */
+        .loading-dot {
+            display: inline-block;
+            animation: pulse 1.2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 0.4;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 
@@ -289,48 +307,178 @@
         if (theme) document.body.setAttribute('data-theme', theme);
     </script>
 
-    <div class="fade-in" style="animation-delay: 0.1s;">
+    <div id="adminLogin" class="fade-in"
+        style="display: flex; align-items: center; justify-content: center; min-height: 80vh;">
+        <div class="card" style="width: 100%; max-width: 400px; padding: 40px;">
+            <div style="text-align: center; margin-bottom: 24px;">
+                <span style="font-size: 3rem;">🔐</span>
+                <h2 style="font-family: 'Space Grotesk', sans-serif; margin-top: 12px; margin-bottom: 8px;">Admin Access
+                </h2>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Sign in to manage TasoPrep</p>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px;">Email</label>
+                <input type="email" id="adminEmail" placeholder="admin@taso.com"
+                    style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; color: var(--text); outline: none;">
+            </div>
+            <div style="margin-bottom: 24px;">
+                <label
+                    style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px;">Password</label>
+                <input type="password" id="adminPass" placeholder="••••••••"
+                    style="width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; color: var(--text); outline: none;">
+            </div>
+            <div id="adminErrorMsg"
+                style="color: var(--rose); font-size: 0.85rem; text-align: center; margin-bottom: 16px; display: none;">
+            </div>
+            <button id="adminLoginBtn"
+                style="width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.2s;">Sign
+                In</button>
+            <div style="text-align: center; margin-top: 16px; font-size: 0.8rem; color: var(--text-muted);">
+                New admin? Contact superadmin to create an account.
+            </div>
+        </div>
+    </div>
+
+    <div id="adminPanel" class="fade-in" style="animation-delay: 0.1s; display: none;">
+        <nav class="nav-bar" style="display:flex;gap:12px;margin-bottom:16px;">
+            <button class="nav-btn" data-target="ielts">IELTS</button>
+            <button class="nav-btn" data-target="sat">SAT</button>
+            <button class="nav-btn" data-target="olympiad">Olympiad</button>
+            <button class="nav-btn" data-target="admin">Admin</button>
+        </nav>
         <div class="page-header">
             <div>
                 <h1 class="header-title">Admin Panel</h1>
                 <p class="header-desc">Manage your exam prep platform</p>
             </div>
-            <button class="btn-outline">
+            <button class="btn-outline" id="signOutBtn">
                 <span style="font-size: 1.2rem;">🚪</span> Sign Out
             </button>
         </div>
 
         <div class="tabs-list">
-            <button class="tab-btn active" onclick="switchTab('questions')">📝 Questions</button>
-            <button class="tab-btn" onclick="switchTab('tests')">📋 Mock Tests</button>
-            <button class="tab-btn" onclick="switchTab('ai')">🧠 AI Settings</button>
-            <button class="tab-btn" onclick="switchTab('settings')">⚙️ Settings</button>
+            <button class="tab-btn active" data-tab="questions" onclick="switchTab('questions', this)">📝
+                Questions</button>
+            <button class="tab-btn" data-tab="tests" onclick="switchTab('tests', this)">📋 Mock Tests</button>
+            <button class="tab-btn" data-tab="ai" onclick="switchTab('ai', this)">🧠 AI Settings</button>
+            <button class="tab-btn" data-tab="settings" onclick="switchTab('settings', this)">⚙️ Settings</button>
         </div>
 
         <!-- Questions Tab -->
         <div id="tab-questions" class="tab-content active">
-            <div class="card">
-                <div class="card-header">
+            <div class="card" style="margin-bottom:24px;">
+                <div class="card-header pb-4 border-b border-border">
                     <span style="font-size: 1.5rem;">📝</span>
-                    <h2 class="card-title">Question Bank Manager</h2>
+                    <h2 class="card-title">Add New Question</h2>
                 </div>
-                <div class="card-desc">Add and manage questions for SAT, IELTS, and Olympiad.</div>
-                <div style="text-align: center; padding: 40px; color: var(--text-muted);">
-                    Question Bank management interface coming soon.
+                <div class="card-desc" style="margin-top:16px;">Add questions for SAT Math/Reading, IELTS, or Olympiad.
+                </div>
+
+                <div class="grid-2" style="margin-top:20px;">
+                    <div>
+                        <label
+                            style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:8px;">Platform</label>
+                        <select id="qPlatform"
+                            style="width:100%; padding:12px; background:var(--surface2); border:1px solid var(--border); border-radius:8px; color:var(--text); outline:none;">
+                            <option value="sat_math">SAT Math</option>
+                            <option value="sat_reading">SAT Reading & Writing</option>
+                            <option value="ielts_reading">IELTS Reading</option>
+                            <option value="ielts_listening">IELTS Listening</option>
+                            <option value="olympiad">Olympiad</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:8px;">Tags /
+                            Topic</label>
+                        <input type="text" id="qTags" placeholder="e.g. Algebra, Geometry, Inference"
+                            style="width:100%; padding:12px; background:var(--surface2); border:1px solid var(--border); border-radius:8px; color:var(--text); outline:none;">
+                    </div>
+                </div>
+
+                <div style="margin-top:16px;">
+                    <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:8px;">Question Text /
+                        Prompt</label>
+                    <textarea id="qText" rows="4"
+                        style="width:100%; padding:12px; background:var(--surface2); border:1px solid var(--border); border-radius:8px; color:var(--text); outline:none; resize:vertical;"
+                        placeholder="Enter the question text here..."></textarea>
+                </div>
+
+                <div style="margin-top:16px;">
+                    <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:8px;">Correct Answer
+                        & Options (JSON format)</label>
+                    <textarea id="qOptionsJson" rows="4"
+                        style="width:100%; padding:12px; background:var(--surface2); border:1px solid var(--border); border-radius:8px; color:var(--text); outline:none; font-family:monospace; resize:vertical;"
+                        placeholder='{"type": "mcq", "options": ["A", "B", "C", "D"], "correct": "A", "explanation": "..."}'></textarea>
+                </div>
+
+                <div style="margin-top:24px; display:flex; justify-content:flex-end;">
+                    <button class="btn btn-outline"
+                        style="background:var(--primary); color:white; border:none; padding:10px 24px;"
+                        onclick="alert('Question saved to database (Mock)')">Save Question</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header border-b border-border pb-4">
+                    <span style="font-size: 1.5rem;">📚</span>
+                    <h2 class="card-title">Recent Questions</h2>
+                </div>
+                <div style="padding:20px; color:var(--text-muted); text-align:center;">
+                    No questions added yet.
                 </div>
             </div>
         </div>
 
         <!-- Mock Tests Tab -->
         <div id="tab-tests" class="tab-content">
-            <div class="card">
-                <div class="card-header">
+            <div class="card" style="margin-bottom:24px;">
+                <div class="card-header pb-4 border-b border-border">
                     <span style="font-size: 1.5rem;">📋</span>
-                    <h2 class="card-title">Mock Test Manager</h2>
+                    <h2 class="card-title">Create Mock Test</h2>
                 </div>
-                <div class="card-desc">Create and manage mock tests for all exam types.</div>
-                <div style="text-align: center; padding: 40px; color: var(--text-muted);">
-                    Mock test creation interface coming soon. You can currently add questions to the question bank.
+                <div class="card-desc" style="margin-top:16px;">Bundle questions into a full mock test.</div>
+
+                <div class="grid-2" style="margin-top:20px;">
+                    <div>
+                        <label
+                            style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:8px;">Platform</label>
+                        <select id="mtPlatform"
+                            style="width:100%; padding:12px; background:var(--surface2); border:1px solid var(--border); border-radius:8px; color:var(--text); outline:none;">
+                            <option value="sat">SAT Mock Exam</option>
+                            <option value="ielts">IELTS Full Mock</option>
+                            <option value="olympiad">Olympiad Past Paper</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:8px;">Test
+                            Name</label>
+                        <input type="text" id="mtName" placeholder="e.g. SAT Practice Test 3"
+                            style="width:100%; padding:12px; background:var(--surface2); border:1px solid var(--border); border-radius:8px; color:var(--text); outline:none;">
+                    </div>
+                </div>
+
+                <div style="margin-top:16px;">
+                    <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:8px;">Question IDs
+                        (comma separated)</label>
+                    <input type="text" id="mtQuestions" placeholder="q_101, q_102, q_103..."
+                        style="width:100%; padding:12px; background:var(--surface2); border:1px solid var(--border); border-radius:8px; color:var(--text); outline:none;">
+                </div>
+
+                <div style="margin-top:24px; display:flex; justify-content:flex-end;">
+                    <button class="btn btn-outline"
+                        style="background:var(--primary); color:white; border:none; padding:10px 24px;"
+                        onclick="alert('Mock Test generated (Mock)')">Create Mock Test</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header border-b border-border pb-4">
+                    <span style="font-size: 1.5rem;">🏷️</span>
+                    <h2 class="card-title">Published Mock Tests</h2>
+                </div>
+                <div style="padding:20px; color:var(--text-muted); text-align:center;">
+                    No tests published yet.
                 </div>
             </div>
         </div>
@@ -343,21 +491,21 @@
                     <h2 class="card-title">AI Configuration</h2>
                 </div>
                 <div class="card-desc">Configure which AI model analyzes student results and generates feedback.</div>
-                <div class="grid-2">
-                    <div class="ai-model selected" onclick="selectAI(this)">
+                <div class="grid-2" id="aiModelsGrid">
+                    <div class="ai-model selected" data-model="gemini-3-flash" onclick="selectAI(this)">
                         <div class="ai-title">Google Gemini 3 Flash</div>
                         <div class="ai-desc">Fast and efficient for most tasks</div>
                         <div class="ai-rec">Recommended</div>
                     </div>
-                    <div class="ai-model" onclick="selectAI(this)">
+                    <div class="ai-model" data-model="gemini-2.5-pro" onclick="selectAI(this)">
                         <div class="ai-title">Google Gemini 2.5 Pro</div>
                         <div class="ai-desc">Best for complex reasoning</div>
                     </div>
-                    <div class="ai-model" onclick="selectAI(this)">
+                    <div class="ai-model" data-model="gpt-5" onclick="selectAI(this)">
                         <div class="ai-title">OpenAI GPT-5</div>
                         <div class="ai-desc">Powerful all-rounder</div>
                     </div>
-                    <div class="ai-model" onclick="selectAI(this)">
+                    <div class="ai-model" data-model="gpt-5-mini" onclick="selectAI(this)">
                         <div class="ai-title">OpenAI GPT-5 Mini</div>
                         <div class="ai-desc">Cost-effective option</div>
                     </div>
@@ -378,15 +526,15 @@
                 </div>
                 <div class="grid-3">
                     <div class="stat-box" style="background: rgba(124, 58, 237, 0.05);">
-                        <div class="stat-val text-primary">0</div>
+                        <div class="stat-val text-primary" id="statQuestions"><span class="loading-dot">…</span></div>
                         <div class="stat-label">Total Questions</div>
                     </div>
                     <div class="stat-box" style="background: rgba(16, 185, 129, 0.05);">
-                        <div class="stat-val text-emerald">0</div>
+                        <div class="stat-val text-emerald" id="statTests"><span class="loading-dot">…</span></div>
                         <div class="stat-label">Mock Tests</div>
                     </div>
                     <div class="stat-box" style="background: rgba(245, 158, 11, 0.05);">
-                        <div class="stat-val text-amber">0</div>
+                        <div class="stat-val text-amber" id="statUsers"><span class="loading-dot">…</span></div>
                         <div class="stat-label">Total Users</div>
                     </div>
                 </div>
@@ -406,48 +554,150 @@
     </div>
 
     <script>
-        function switchTab(tabId) {
+        // Tab switching — fixed: uses explicit button element instead of implicit event
+        function switchTab(tabId, btnEl) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
 
-            event.currentTarget.classList.add('active');
+            btnEl.classList.add('active');
             document.getElementById('tab-' + tabId).classList.add('active');
         }
 
+        // AI model selection — persists to Firestore
         function selectAI(element) {
             document.querySelectorAll('.ai-model').forEach(el => el.classList.remove('selected'));
             element.classList.add('selected');
+
+            const modelId = element.getAttribute('data-model');
+            // Persist to Firestore if admin is logged in
+            if (window._adminSaveSettings) {
+                window._adminSaveSettings(modelId);
+            }
         }
     </script>
+
     <script type="module">
-        import { auth, db, doc, getDoc, setDoc, onAuthStateChanged, collection, getDocs } from './auth.js';
+        import { auth, db, doc, getDoc, setDoc, onAuthStateChanged, collection, getDocs, signOut } from './auth.js';
+        import { adminSignIn } from './adminPassword.js';
+        import { initNav } from './navigation.js';
+
+        initNav();
+
+        // Wire Login button
+        document.getElementById('adminLoginBtn').addEventListener('click', async () => {
+            const email = document.getElementById('adminEmail').value.trim();
+            const pass = document.getElementById('adminPass').value;
+            const errEl = document.getElementById('adminErrorMsg');
+            const btn = document.getElementById('adminLoginBtn');
+
+            if (!email || !pass) {
+                errEl.textContent = 'Enter email and password.';
+                errEl.style.display = 'block';
+                return;
+            }
+
+            errEl.style.display = 'none';
+            btn.textContent = 'Signing in...';
+            btn.disabled = true;
+
+            try {
+                await adminSignIn(email, pass);
+                // auth listener will handle UI swap
+            } catch (e) {
+                errEl.textContent = 'Invalid credentials. ' + e.message;
+                errEl.style.display = 'block';
+                btn.textContent = 'Sign In';
+                btn.disabled = false;
+            }
+        });
+
+        // Wire Sign Out button
+        document.getElementById('signOutBtn').addEventListener('click', () => {
+            signOut(auth).then(() => {
+                window.location.href = 'login.html';
+            }).catch(e => console.error('Sign out error:', e));
+        });
+
+        // Expose settings save function for AI model persistence
+        window._adminSaveSettings = async function (modelId) {
+            const user = auth.currentUser;
+            if (!user) return;
+            try {
+                await setDoc(doc(db, 'adminSettings', 'global'), { aiModel: modelId }, { merge: true });
+            } catch (e) {
+                console.error('Error saving AI settings:', e);
+            }
+        };
+
+        // Load admin stats from Firestore
+        async function loadAdminStats() {
+            try {
+                // Count questions
+                const questionsSnap = await getDocs(collection(db, 'questions'));
+                document.getElementById('statQuestions').textContent = questionsSnap.size;
+
+                // Count mock tests
+                const testsSnap = await getDocs(collection(db, 'mockTests'));
+                document.getElementById('statTests').textContent = testsSnap.size;
+
+                // Count users (from prepData collection — users who have used prep tools)
+                const usersSnap = await getDocs(collection(db, 'prepData'));
+                document.getElementById('statUsers').textContent = usersSnap.size;
+            } catch (e) {
+                console.error('Error loading admin stats:', e);
+                document.getElementById('statQuestions').textContent = '0';
+                document.getElementById('statTests').textContent = '0';
+                document.getElementById('statUsers').textContent = '0';
+            }
+        }
+
+        // Load saved AI model selection
+        async function loadAISettings() {
+            try {
+                const snap = await getDoc(doc(db, 'adminSettings', 'global'));
+                if (snap.exists() && snap.data().aiModel) {
+                    const modelId = snap.data().aiModel;
+                    const modelEl = document.querySelector(`.ai-model[data-model="${modelId}"]`);
+                    if (modelEl) {
+                        document.querySelectorAll('.ai-model').forEach(el => el.classList.remove('selected'));
+                        modelEl.classList.add('selected');
+                    }
+                }
+            } catch (e) {
+                console.error('Error loading AI settings:', e);
+            }
+        }
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 try {
-                    // Very simple admin verification logic. Modify as needed.
+                    // Admin verification
                     const adminRef = doc(db, 'admins', user.uid);
                     const adminSnap = await getDoc(adminRef);
                     if (!adminSnap.exists()) {
                         // User is not admin
-                        document.body.innerHTML = `
-                            <div style="text-align: center; padding: 60px;">
-                                <h1 style="font-family: 'Space Grotesk', sans-serif; margin-bottom: 12px;">Access Denied</h1>
-                                <p style="color: var(--text-muted);">You do not have permission to access the admin panel.</p>
-                            </div>
-                        `;
+                        document.getElementById('adminPanel').style.display = 'none';
+                        document.getElementById('adminLogin').style.display = 'flex';
+                        const errEl = document.getElementById('adminErrorMsg');
+                        errEl.textContent = 'Access Denied: You are not an admin.';
+                        errEl.style.display = 'block';
+                        await signOut(auth); // force sign out if not admin
                     } else {
-                        // Load admin stats
-                        // const usersSnap = await getDocs(collection(db, 'users'));
-                        // const questionsSnap = await getDocs(collection(db, 'questions'));
+                        // User is admin — load stats and settings
+                        document.getElementById('adminLogin').style.display = 'none';
+                        document.getElementById('adminPanel').style.display = 'block';
+                        loadAdminStats();
+                        loadAISettings();
                     }
                 } catch (e) {
                     console.error("Error verifying admin", e);
                 }
             } else {
-                if (window.top === window.self) {
-                    window.location.href = 'login.html';
-                }
+                // Not signed in
+                document.getElementById('adminPanel').style.display = 'none';
+                document.getElementById('adminLogin').style.display = 'flex';
+                document.getElementById('adminLoginBtn').textContent = 'Sign In';
+                document.getElementById('adminLoginBtn').disabled = false;
             }
         });
     </script>

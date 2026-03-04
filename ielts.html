@@ -225,7 +225,6 @@
             width: 48px;
             height: 48px;
             border-radius: 50%;
-            background: conic-gradient(var(--border) 100%, transparent 0);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -240,6 +239,10 @@
             inset: 4px;
             background: var(--surface);
             border-radius: 50%;
+        }
+
+        body[data-theme="light"] .prog-circle::before {
+            background: #ffffff;
         }
 
         .prog-circle span {
@@ -320,6 +323,11 @@
             cursor: not-allowed;
         }
 
+        .mock-test.completed {
+            border-color: var(--primary);
+            background: rgba(16, 185, 129, 0.08);
+        }
+
         .mt-header {
             display: flex;
             justify-content: space-between;
@@ -343,6 +351,11 @@
         .badge-secondary {
             background: var(--surface2);
             color: var(--text-subtle);
+        }
+
+        .badge-completed {
+            background: #059669;
+            color: white;
         }
 
         .mt-title {
@@ -393,10 +406,106 @@
             display: flex;
             gap: 12px;
         }
+
+        /* Modal Styles */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .modal {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: rgba(5, 7, 15, 0.95);
+            z-index: 10;
+        }
+
+        body[data-theme="light"] .modal-header {
+            background: rgba(248, 250, 252, 0.95);
+        }
+
+        .close-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .close-btn:hover {
+            color: var(--rose);
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .textarea-custom {
+            width: 100%;
+            height: 300px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text);
+            padding: 16px;
+            font-family: inherit;
+            font-size: 1rem;
+            resize: vertical;
+            margin-bottom: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .textarea-custom:focus {
+            border-color: var(--primary);
+        }
+
+        .ai-feedback-box {
+            background: rgba(16, 185, 129, 0.05);
+            border: 1px solid var(--primary);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 24px;
+            display: none;
+        }
     </style>
 </head>
 
 <body>
+    <nav class="nav-bar" style="display:flex;gap:12px;margin-bottom:16px;">
+        <button class="nav-btn" data-target="ielts">IELTS</button>
+        <button class="nav-btn" data-target="sat">SAT</button>
+        <button class="nav-btn" data-target="olympiad">Olympiad</button>
+        <button class="nav-btn" data-target="admin">Admin</button>
+    </nav>
     <script>
         window.addEventListener('message', (e) => {
             if (e.data && e.data.type === 'taso-theme') {
@@ -420,28 +529,28 @@
             <div class="card stat-card">
                 <div class="stat-icon bg-primary-light">🎯</div>
                 <div>
-                    <div class="stat-val">7.5</div>
+                    <div class="stat-val" id="statBand">7.5</div>
                     <div class="stat-label">Target Band</div>
                 </div>
             </div>
             <div class="card stat-card">
                 <div class="stat-icon bg-blue-light">📈</div>
                 <div>
-                    <div class="stat-val">0/3</div>
+                    <div class="stat-val" id="statMocks">0/3</div>
                     <div class="stat-label">Mock Tests</div>
                 </div>
             </div>
             <div class="card stat-card">
                 <div class="stat-icon bg-amber-light">⏱️</div>
                 <div>
-                    <div class="stat-val">2h 45m</div>
+                    <div class="stat-val" id="statDuration">2h 45m</div>
                     <div class="stat-label">Test Duration</div>
                 </div>
             </div>
             <div class="card stat-card">
                 <div class="stat-icon bg-violet-light">📄</div>
                 <div>
-                    <div class="stat-val">Academic</div>
+                    <div class="stat-val" id="statType">Academic</div>
                     <div class="stat-label">Test Type</div>
                 </div>
             </div>
@@ -457,7 +566,9 @@
                             <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">30 minutes</div>
                         </div>
                     </div>
-                    <div class="prog-circle"><span>0%</span></div>
+                    <div class="prog-circle" id="progListening"
+                        style="background: conic-gradient(var(--border) 100%, transparent 0)"><span
+                            id="pctListening">0%</span></div>
                 </div>
                 <div>
                     <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Quick Tips:</div>
@@ -479,7 +590,9 @@
                             <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">60 minutes</div>
                         </div>
                     </div>
-                    <div class="prog-circle"><span>0%</span></div>
+                    <div class="prog-circle" id="progReading"
+                        style="background: conic-gradient(var(--border) 100%, transparent 0)"><span
+                            id="pctReading">0%</span></div>
                 </div>
                 <div>
                     <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Quick Tips:</div>
@@ -501,7 +614,9 @@
                             <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">60 minutes</div>
                         </div>
                     </div>
-                    <div class="prog-circle"><span>0%</span></div>
+                    <div class="prog-circle" id="progWriting"
+                        style="background: conic-gradient(var(--border) 100%, transparent 0)"><span
+                            id="pctWriting">0%</span></div>
                 </div>
                 <div>
                     <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Quick Tips:</div>
@@ -524,7 +639,9 @@
                             <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">15 minutes</div>
                         </div>
                     </div>
-                    <div class="prog-circle"><span>0%</span></div>
+                    <div class="prog-circle" id="progSpeaking"
+                        style="background: conic-gradient(var(--border) 100%, transparent 0)"><span
+                            id="pctSpeaking">0%</span></div>
                 </div>
                 <div>
                     <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Quick Tips:</div>
@@ -546,24 +663,24 @@
             <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px;">
                 Complete practice tests with all 4 sections - AI evaluates your responses
             </div>
-            <div class="grid-3">
-                <div class="mock-test available">
+            <div class="grid-3" id="mockTestsGrid">
+                <div class="mock-test available" id="mockTest0">
                     <div class="mt-header">
-                        <span class="badge badge-success">Start</span>
+                        <span class="badge badge-success" id="mockBadge0">Start</span>
                     </div>
                     <div class="mt-title">Full Mock Test 1</div>
                     <div class="mt-desc">2h 45m • All skills</div>
                 </div>
-                <div class="mock-test locked">
+                <div class="mock-test locked" id="mockTest1">
                     <div class="mt-header">
-                        <span class="badge badge-secondary">Locked</span>
+                        <span class="badge badge-secondary" id="mockBadge1">Locked</span>
                     </div>
                     <div class="mt-title">Full Mock Test 2</div>
                     <div class="mt-desc">2h 45m • All skills</div>
                 </div>
-                <div class="mock-test locked">
+                <div class="mock-test locked" id="mockTest2">
                     <div class="mt-header">
-                        <span class="badge badge-secondary">Locked</span>
+                        <span class="badge badge-secondary" id="mockBadge2">Locked</span>
                     </div>
                     <div class="mt-title">Full Mock Test 3</div>
                     <div class="mt-desc">2h 45m • All skills</div>
@@ -575,7 +692,8 @@
             <div class="cta-icon">✨</div>
             <div class="cta-content">
                 <div class="cta-title">AI Study Plan</div>
-                <div class="cta-desc">Start with a full mock test to identify your weak areas. The AI will analyze your
+                <div class="cta-desc" id="ctaDesc">Start with a full mock test to identify your weak areas. The AI will
+                    analyze your
                     performance across all 4 skills and create a personalized improvement plan.</div>
                 <div class="cta-btns">
                     <button class="btn btn-success" style="width: auto;">Take Full Mock Test ➔</button>
@@ -585,8 +703,131 @@
         </div>
     </div>
 
+    <!-- Writing Practice Modal -->
+    <div class="modal-backdrop" id="writingModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div>
+                    <h2 style="font-family:'Space Grotesk',sans-serif; margin-bottom:4px;">Writing Practice: Task 2</h2>
+                    <p style="color:var(--text-muted); font-size:0.9rem;">Write at least 250 words.</p>
+                </div>
+                <button class="close-btn" onclick="closeModal('writingModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div
+                    style="background:var(--surface2); padding:16px; border-radius:12px; margin-bottom:20px; border-left:4px solid var(--primary);">
+                    <strong>Prompt:</strong> Some people think that in the modern world we are more dependent on each
+                    other, while others think that people have become more independent. Discuss both views and give your
+                    own opinion.
+                </div>
+
+                <textarea id="writingInput" class="textarea-custom"
+                    placeholder="Start typing your essay here..."></textarea>
+
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="color:var(--text-muted); font-size:0.9rem;">Word Count: <span
+                            id="wordCount">0</span></span>
+                    <button class="btn btn-success" id="submitWritingBtn"
+                        style="padding:10px 24px; border-radius:8px;">Submit to AI Evaluation</button>
+                </div>
+
+                <div class="ai-feedback-box" id="writingFeedback">
+                    <h3 style="color:var(--primary); margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+                        <span>🧠</span> AI Evaluation Complete
+                    </h3>
+                    <div style="font-size:1.5rem; font-weight:700; margin-bottom:16px;">Estimated Band: <span
+                            id="writingBandResult">--</span></div>
+                    <div id="writingFeedbackText" style="color:var(--text-subtle); line-height:1.6; font-size:0.95rem;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { auth, db, doc, getDoc, setDoc, onAuthStateChanged } from './auth.js';
+
+        const DEFAULT_IELTS = {
+            targetBand: 7.5,
+            mockTestsDone: 0,
+            totalMockTests: 3,
+            testDuration: '2h 45m',
+            testType: 'Academic',
+            completedTests: [],
+            skills: {
+                listening: 0,
+                reading: 0,
+                writing: 0,
+                speaking: 0
+            }
+        };
+
+        function updateProgressCircle(id, pctId, value) {
+            const el = document.getElementById(id);
+            const pctEl = document.getElementById(pctId);
+            if (el) {
+                const color = value > 0 ? 'var(--primary)' : 'var(--border)';
+                el.style.background = `conic-gradient(${color} ${value}%, var(--border) 0)`;
+            }
+            if (pctEl) pctEl.textContent = value + '%';
+        }
+
+        function updateMockTests(completedTests) {
+            const tests = [
+                { id: 'mockTest0', badgeId: 'mockBadge0' },
+                { id: 'mockTest1', badgeId: 'mockBadge1' },
+                { id: 'mockTest2', badgeId: 'mockBadge2' }
+            ];
+
+            tests.forEach((test, i) => {
+                const el = document.getElementById(test.id);
+                const badge = document.getElementById(test.badgeId);
+                if (!el || !badge) return;
+
+                if (completedTests.includes(i)) {
+                    el.className = 'mock-test completed';
+                    badge.className = 'badge badge-completed';
+                    badge.textContent = 'Done';
+                } else if (i === 0 || completedTests.includes(i - 1)) {
+                    el.className = 'mock-test available';
+                    badge.className = 'badge badge-success';
+                    badge.textContent = 'Start';
+                } else {
+                    el.className = 'mock-test locked';
+                    badge.className = 'badge badge-secondary';
+                    badge.textContent = 'Locked';
+                }
+            });
+        }
+
+        function updateUI(data) {
+            // Stats
+            document.getElementById('statBand').textContent = data.targetBand || 7.5;
+            const done = data.mockTestsDone || 0;
+            const total = data.totalMockTests || 3;
+            document.getElementById('statMocks').textContent = `${done}/${total}`;
+            document.getElementById('statDuration').textContent = data.testDuration || '2h 45m';
+            document.getElementById('statType').textContent = data.testType || 'Academic';
+
+            // Skill progress circles
+            const s = data.skills || {};
+            updateProgressCircle('progListening', 'pctListening', s.listening || 0);
+            updateProgressCircle('progReading', 'pctReading', s.reading || 0);
+            updateProgressCircle('progWriting', 'pctWriting', s.writing || 0);
+            updateProgressCircle('progSpeaking', 'pctSpeaking', s.speaking || 0);
+
+            // Mock test states
+            updateMockTests(data.completedTests || []);
+
+            // AI recommendation — find weakest skill
+            const skillEntries = Object.entries(s).filter(([k, v]) => typeof v === 'number');
+            if (skillEntries.length > 0 && skillEntries.some(([k, v]) => v > 0)) {
+                const weakest = skillEntries.reduce((a, b) => a[1] < b[1] ? a : b);
+                const skillNames = { listening: 'Listening', reading: 'Reading', writing: 'Writing', speaking: 'Speaking' };
+                document.getElementById('ctaDesc').textContent =
+                    `Your ${skillNames[weakest[0]]} skill is at ${weakest[1]}%. Focus on this area to improve your overall band score. The AI will create targeted practice exercises.`;
+            }
+        }
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -594,10 +835,26 @@
                     const docRef = doc(db, 'prepData', user.uid);
                     const docSnap = await getDoc(docRef);
                     if (!docSnap.exists()) {
-                        await setDoc(docRef, { sat: {}, ielts: {}, olympiad: {} }, { merge: true });
+                        const initData = {
+                            sat: {},
+                            ielts: { ...DEFAULT_IELTS },
+                            olympiad: {}
+                        };
+                        await setDoc(docRef, initData, { merge: true });
+                        updateUI(DEFAULT_IELTS);
+                    } else {
+                        const prepData = docSnap.data();
+                        const ieltsData = prepData.ielts || {};
+                        const merged = {
+                            ...DEFAULT_IELTS,
+                            ...ieltsData,
+                            skills: { ...DEFAULT_IELTS.skills, ...(ieltsData.skills || {}) }
+                        };
+                        updateUI(merged);
                     }
                 } catch (e) {
                     console.error("Error fetching IELTS data", e);
+                    updateUI(DEFAULT_IELTS);
                 }
             } else {
                 if (window.top === window.self) {
@@ -605,6 +862,58 @@
                 }
             }
         });
+
+        // UI Interactions
+        window.closeModal = function (id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        const writingBtn = document.querySelectorAll('.card .btn')[2]; // 'Practice Writing ➔' button is the 3rd one
+        if (writingBtn) {
+            writingBtn.addEventListener('click', () => {
+                document.getElementById('writingModal').style.display = 'flex';
+                document.getElementById('writingFeedback').style.display = 'none';
+                document.getElementById('writingInput').value = '';
+                document.getElementById('wordCount').textContent = '0';
+            });
+        }
+
+        const writingInput = document.getElementById('writingInput');
+        writingInput.addEventListener('input', () => {
+            const text = writingInput.value.trim();
+            const words = text ? text.split(/\s+/).length : 0;
+            document.getElementById('wordCount').textContent = words;
+        });
+
+        document.getElementById('submitWritingBtn').addEventListener('click', async () => {
+            const text = writingInput.value.trim();
+            if (!text) return alert("Please write something first.");
+
+            const btn = document.getElementById('submitWritingBtn');
+            btn.textContent = '⏳ Analyzing...';
+            btn.disabled = true;
+
+            // Placeholder AI logic
+            setTimeout(() => {
+                document.getElementById('writingFeedback').style.display = 'block';
+                document.getElementById('writingBandResult').textContent = '6.5';
+                document.getElementById('writingFeedbackText').innerHTML = `
+                    <strong>Task Response:</strong> Good, but could expand more on the dependent view.<br><br>
+                    <strong>Coherence & Cohesion:</strong> Paragraphs are clear. Use more diverse linking words.<br><br>
+                    <strong>Lexical Resource:</strong> Good vocabulary. Avoid repeating the word "important".<br><br>
+                    <strong>Grammar:</strong> Mostly accurate, watch out for article usage (a/an/the).
+                `;
+                btn.textContent = 'Submit Another';
+                btn.disabled = false;
+            }, 2000);
+        });
+    </script>
+    <script type="module">
+        import { initNav } from './navigation.js';
+        import { loadUserProgress, aiProgressCheck } from './progress.js';
+        initNav();
+        loadUserProgress();
+        aiProgressCheck();
     </script>
 </body>
 

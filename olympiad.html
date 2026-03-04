@@ -16,6 +16,7 @@
             --emerald: #10b981;
             --blue: #3b82f6;
             --violet: #8b5cf6;
+            --amber: #f59e0b;
             --bg: #05070f;
             --surface: rgba(255, 255, 255, 0.04);
             --surface2: rgba(255, 255, 255, 0.08);
@@ -346,6 +347,82 @@
             border-radius: 6px;
             margin-bottom: 12px;
         }
+
+        /* Modal Styles */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .modal {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: rgba(5, 7, 15, 0.95);
+            z-index: 10;
+        }
+
+        body[data-theme="light"] .modal-header {
+            background: rgba(248, 250, 252, 0.95);
+        }
+
+        .close-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .close-btn:hover {
+            color: var(--rose);
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .drag-drop-zone {
+            border: 2px dashed var(--primary);
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            background: rgba(245, 158, 11, 0.05);
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 20px;
+        }
+
+        .drag-drop-zone:hover {
+            background: rgba(245, 158, 11, 0.1);
+        }
     </style>
 </head>
 
@@ -361,6 +438,12 @@
     </script>
 
     <div class="fade-in" style="animation-delay: 0.1s;">
+        <nav class="nav-bar" style="display:flex;gap:12px;margin-bottom:16px;">
+            <button class="nav-btn" data-target="ielts">IELTS</button>
+            <button class="nav-btn" data-target="sat">SAT</button>
+            <button class="nav-btn" data-target="olympiad">Olympiad</button>
+            <button class="nav-btn" data-target="admin">Admin</button>
+        </nav>
         <div class="page-header">
             <div class="header-left">
                 <div class="header-icon">🧮</div>
@@ -376,28 +459,28 @@
             <div class="card stat-card">
                 <div class="stat-icon bg-amber-light">🎯</div>
                 <div>
-                    <div class="stat-val">0</div>
+                    <div class="stat-val" id="statTopics">0</div>
                     <div class="stat-label">Topics Mastered</div>
                 </div>
             </div>
             <div class="card stat-card">
                 <div class="stat-icon bg-blue-light">📈</div>
                 <div>
-                    <div class="stat-val">0</div>
+                    <div class="stat-val" id="statProblems">0</div>
                     <div class="stat-label">Problems Solved</div>
                 </div>
             </div>
             <div class="card stat-card">
                 <div class="stat-icon bg-emerald-light">✓</div>
                 <div>
-                    <div class="stat-val">0/1</div>
+                    <div class="stat-val" id="statTests">0/1</div>
                     <div class="stat-label">Tests Completed</div>
                 </div>
             </div>
             <div class="card stat-card">
                 <div class="stat-icon bg-violet-light">📄</div>
                 <div>
-                    <div class="stat-val">0</div>
+                    <div class="stat-val" id="statUploaded">0</div>
                     <div class="stat-label">Questions Uploaded</div>
                 </div>
             </div>
@@ -409,7 +492,7 @@
                 <div class="upload-title">Upload Past Olympiad Questions</div>
                 <div class="upload-desc">Upload past papers from your country's olympiad. The AI will analyze question
                     types and create a personalized practice plan.</div>
-                <button class="btn btn-amber">Upload Questions</button>
+                <button class="btn btn-amber" id="uploadBtn">Upload Questions</button>
             </div>
 
             <div class="card cta-card">
@@ -430,12 +513,12 @@
             <div class="card fade-in" style="animation-delay: 0.3s; margin-bottom: 32px;">
                 <div class="card-header">📄 Practice Tests</div>
                 <div class="card-desc">Complete full olympiad-style tests to prepare for the competition</div>
-                <div class="test-box">
-                    <span class="test-badge">Available</span>
+                <div class="test-box" id="testBox">
+                    <span class="test-badge" id="testBadge">Available</span>
                     <h4 style="font-weight: 600; font-size: 1.05rem; margin-bottom: 8px;">First Practice Test</h4>
                     <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">Complete at least one
                         full test with no doubts before your olympiad</p>
-                    <button class="btn btn-amber">Start Test ➔</button>
+                    <button class="btn btn-amber" id="startTestBtn">Start Test ➔</button>
                 </div>
                 <div
                     style="font-size: 0.85rem; color: var(--text-muted); margin-top: 16px; display: flex; align-items: center; gap: 8px;">
@@ -446,8 +529,87 @@
         </div>
     </div>
 
+    <!-- Upload Modal -->
+    <div class="modal-backdrop" id="uploadModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div>
+                    <h2 style="font-family:'Space Grotesk',sans-serif; margin-bottom:4px;">Upload Olympiad Questions
+                    </h2>
+                    <p style="color:var(--text-muted); font-size:0.9rem;">Supported formats: PDF, JPG, PNG.</p>
+                </div>
+                <button class="close-btn" onclick="closeModal('uploadModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="drag-drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                    <div style="font-size:2rem; margin-bottom:12px;">📄</div>
+                    <div style="font-weight:600; font-size:1.1rem; margin-bottom:4px;">Click to upload or drag & drop
+                    </div>
+                    <div style="font-size:0.85rem; color:var(--text-muted);">Max file size: 10MB</div>
+                    <input type="file" id="fileInput" style="display:none;" accept=".pdf,image/*">
+                </div>
+
+                <div id="filePreview"
+                    style="display:none; align-items:center; justify-content:space-between; padding:12px 16px; background:var(--surface2); border:1px solid var(--border); border-radius:8px; margin-bottom:20px;">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <span style="font-size:1.5rem;">📎</span>
+                        <div>
+                            <div id="fileName" style="font-weight:600; font-size:0.9rem;">document.pdf</div>
+                            <div id="fileSize" style="font-size:0.8rem; color:var(--text-muted);">2.4 MB</div>
+                        </div>
+                    </div>
+                    <button class="close-btn" style="font-size:1.2rem;" onclick="clearFileSelection()">×</button>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end;">
+                    <button class="btn btn-outline"
+                        style="background:var(--primary); color:white; border:none; padding:12px 24px;" id="analyzeBtn"
+                        disabled>Start AI Analysis</button>
+                </div>
+
+                <div id="aiAnalysisResult"
+                    style="display:none; margin-top:24px; padding:20px; border-radius:12px; border:1px solid var(--primary); background:rgba(245,158,11,0.05);">
+                    <h3 style="color:var(--primary); display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                        <span>🧠</span> AI Analysis Complete
+                    </h3>
+                    <p style="font-size:0.9rem; line-height:1.5; color:var(--text-subtle);">
+                        <strong>Identified Topics:</strong> Combinatorics, Number Theory.<br><br>
+                        This paper appears to be at a high difficulty level. Based on your profile, you should review
+                        the Pigeonhole Principle and Modular Arithmetic before attempting these questions.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { auth, db, doc, getDoc, setDoc, onAuthStateChanged } from './auth.js';
+
+        const DEFAULT_OLYMPIAD = {
+            topicsMastered: 0,
+            problemsSolved: 0,
+            testsCompleted: 0,
+            totalTests: 1,
+            questionsUploaded: 0
+        };
+
+        function updateUI(data) {
+            document.getElementById('statTopics').textContent = data.topicsMastered || 0;
+            document.getElementById('statProblems').textContent = data.problemsSolved || 0;
+            const completed = data.testsCompleted || 0;
+            const total = data.totalTests || 1;
+            document.getElementById('statTests').textContent = `${completed}/${total}`;
+            document.getElementById('statUploaded').textContent = data.questionsUploaded || 0;
+
+            // Update test badge and button based on completion
+            const badge = document.getElementById('testBadge');
+            const btn = document.getElementById('startTestBtn');
+            if (completed >= total) {
+                badge.textContent = 'Completed';
+                badge.style.background = '#10b981';
+                btn.textContent = 'Review Test ➔';
+            }
+        }
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -455,10 +617,24 @@
                     const docRef = doc(db, 'prepData', user.uid);
                     const docSnap = await getDoc(docRef);
                     if (!docSnap.exists()) {
-                        await setDoc(docRef, { sat: {}, ielts: {}, olympiad: {} }, { merge: true });
+                        // Initialize prepData with defaults for all sections
+                        const initData = {
+                            sat: {},
+                            ielts: {},
+                            olympiad: { ...DEFAULT_OLYMPIAD }
+                        };
+                        await setDoc(docRef, initData, { merge: true });
+                        updateUI(DEFAULT_OLYMPIAD);
+                    } else {
+                        const prepData = docSnap.data();
+                        const olympiadData = prepData.olympiad || {};
+                        // Merge defaults with saved data
+                        const merged = { ...DEFAULT_OLYMPIAD, ...olympiadData };
+                        updateUI(merged);
                     }
                 } catch (e) {
                     console.error("Error fetching Olympiad data", e);
+                    updateUI(DEFAULT_OLYMPIAD);
                 }
             } else {
                 if (window.top === window.self) {
@@ -466,6 +642,56 @@
                 }
             }
         });
+
+        // UI Interactions
+        window.closeModal = function (id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        document.getElementById('uploadBtn').addEventListener('click', () => {
+            document.getElementById('uploadModal').style.display = 'flex';
+            clearFileSelection();
+            document.getElementById('aiAnalysisResult').style.display = 'none';
+        });
+
+        const fileInput = document.getElementById('fileInput');
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                const file = e.target.files[0];
+                document.getElementById('dropZone').style.display = 'none';
+                document.getElementById('filePreview').style.display = 'flex';
+                document.getElementById('fileName').textContent = file.name;
+                document.getElementById('fileSize').textContent = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+                document.getElementById('analyzeBtn').disabled = false;
+            }
+        });
+
+        window.clearFileSelection = function () {
+            fileInput.value = '';
+            document.getElementById('dropZone').style.display = 'block';
+            document.getElementById('filePreview').style.display = 'none';
+            document.getElementById('analyzeBtn').disabled = true;
+        }
+
+        document.getElementById('analyzeBtn').addEventListener('click', () => {
+            const btn = document.getElementById('analyzeBtn');
+            btn.textContent = '⏳ Uploading & Analyzing...';
+            btn.disabled = true;
+
+            // Placeholder for real Firebase Storage upload and AI call
+            setTimeout(() => {
+                document.getElementById('aiAnalysisResult').style.display = 'block';
+                btn.textContent = 'Start AI Analysis';
+                btn.style.display = 'none'; // hide button after success
+            }, 2500);
+        });
+    </script>
+    <script type="module">
+        import { initNav } from './navigation.js';
+        import { loadUserProgress, aiProgressCheck } from './progress.js';
+        initNav();
+        loadUserProgress();
+        aiProgressCheck();
     </script>
 </body>
 

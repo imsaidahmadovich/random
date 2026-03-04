@@ -561,6 +561,73 @@
             <div class="switch-link">Already have an account? <a onclick="switchAuthTab('login')">Sign in</a></div>
         </div>
 
+        <!-- SETUP FORM -->
+        <div class="auth-form" id="setupForm">
+            <div style="text-align:center; margin-bottom: 24px;">
+                <h3 style="font-family:'Space Grotesk',sans-serif; font-size:1.5rem; margin-bottom:8px;">Choose Your
+                    Path</h3>
+                <p style="color:var(--text-muted); font-size:0.9rem;">What are you preparing for? (Select all that
+                    apply)</p>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:16px; margin-bottom:24px;">
+                <!-- IELTS -->
+                <label
+                    style="display:flex; align-items:center; gap:12px; background:var(--surface); padding:16px; border-radius:12px; border:1px solid var(--border); cursor:pointer; transition:all 0.2s;">
+                    <input type="checkbox" id="setupIelts"
+                        onchange="document.getElementById('ieltsTargetBox').style.display = this.checked ? 'block' : 'none'"
+                        style="width:18px; height:18px; accent-color:var(--primary);">
+                    <div style="flex:1;">
+                        <div style="font-weight:600;">IELTS</div>
+                        <div style="font-size:0.8rem; color:var(--text-muted);">International English Language Testing
+                        </div>
+                    </div>
+                </label>
+                <div id="ieltsTargetBox" style="display:none; padding-left:42px; margin-top:-8px; margin-bottom:8px;">
+                    <label class="form-label" style="font-size:0.8rem;">Target Band (e.g., 7.5)</label>
+                    <input type="text" class="form-input" id="setupIeltsBand" placeholder="7.5"
+                        style="padding:8px 12px; font-size:0.9rem;">
+                </div>
+
+                <!-- SAT -->
+                <label
+                    style="display:flex; align-items:center; gap:12px; background:var(--surface); padding:16px; border-radius:12px; border:1px solid var(--border); cursor:pointer; transition:all 0.2s;">
+                    <input type="checkbox" id="setupSat"
+                        onchange="document.getElementById('satTargetBox').style.display = this.checked ? 'block' : 'none'"
+                        style="width:18px; height:18px; accent-color:var(--primary);">
+                    <div style="flex:1;">
+                        <div style="font-weight:600;">Digital SAT</div>
+                        <div style="font-size:0.8rem; color:var(--text-muted);">College Admission Test</div>
+                    </div>
+                </label>
+                <div id="satTargetBox" style="display:none; padding-left:42px; margin-top:-8px; margin-bottom:8px;">
+                    <label class="form-label" style="font-size:0.8rem;">Target Score (e.g., 1500)</label>
+                    <input type="text" class="form-input" id="setupSatScore" placeholder="1500"
+                        style="padding:8px 12px; font-size:0.9rem;">
+                </div>
+
+                <!-- Olympiad -->
+                <label
+                    style="display:flex; align-items:center; gap:12px; background:var(--surface); padding:16px; border-radius:12px; border:1px solid var(--border); cursor:pointer; transition:all 0.2s;">
+                    <input type="checkbox" id="setupOlympiad"
+                        onchange="document.getElementById('olympiadTargetBox').style.display = this.checked ? 'block' : 'none'"
+                        style="width:18px; height:18px; accent-color:var(--primary);">
+                    <div style="flex:1;">
+                        <div style="font-weight:600;">Olympiad</div>
+                        <div style="font-size:0.8rem; color:var(--text-muted);">Subject Competitions</div>
+                    </div>
+                </label>
+                <div id="olympiadTargetBox"
+                    style="display:none; padding-left:42px; margin-top:-8px; margin-bottom:8px;">
+                    <label class="form-label" style="font-size:0.8rem;">Subject / Level (e.g., Math Grade 11)</label>
+                    <input type="text" class="form-input" id="setupOlympiadLevel" placeholder="Mathematics"
+                        style="padding:8px 12px; font-size:0.9rem;">
+                </div>
+            </div>
+
+            <button class="auth-btn auth-btn-primary" id="setupBtn" onclick="saveSetup()">Complete Setup</button>
+        </div>
+
         <div class="auth-footer">By continuing, you agree to our terms of service.</div>
     </div>
 
@@ -571,9 +638,16 @@
             doc, getDoc, setDoc, collection, query, where, getDocs
         } from "./auth.js";
 
+        let regPfpBase64 = '';
+
+
         // Redirect if already logged in
         onAuthStateChanged(auth, async (user) => {
             if (user) {
+                // Don't auto-redirect if we are in the middle of setup or profile creation
+                if (document.getElementById('setupForm').classList.contains('active')) return;
+                if (document.getElementById('registerForm').classList.contains('active') && !user.displayName) return;
+
                 // Check profile exists
                 const snap = await getDoc(doc(db, 'profiles', user.uid));
                 if (snap.exists() && snap.data().username) {
@@ -585,7 +659,7 @@
                     document.getElementById('regDisplayName').value = user.displayName || '';
                     if (user.photoURL) {
                         document.getElementById('regPfpPreview').innerHTML = `<img src="${user.photoURL}">`;
-                        regPfpBase64 = user.photoURL;
+                        regPfpBase64 = user.photoURL ? user.photoURL : '';
                     }
                     showSuccess('Welcome! Please complete your profile to continue.');
                 }
@@ -597,6 +671,12 @@
             document.querySelectorAll('.auth-tab').forEach((t, i) => t.classList.toggle('active', i === (tab === 'login' ? 0 : 1)));
             document.getElementById('loginForm').classList.toggle('active', tab === 'login');
             document.getElementById('registerForm').classList.toggle('active', tab === 'register');
+            const setupForm = document.getElementById('setupForm');
+            if (setupForm) setupForm.classList.toggle('active', tab === 'setup');
+
+            const tabsHeader = document.querySelector('.auth-tabs');
+            if (tabsHeader) tabsHeader.style.display = (tab === 'setup') ? 'none' : 'flex';
+
             hideMessages();
         };
 
@@ -678,7 +758,9 @@
                     createdAt: new Date().toISOString()
                 }, { merge: true });
 
-                window.location.href = "dashboard.html";
+                window._currentUserUid = user.uid;
+                switchAuthTab('setup');
+                btn.textContent = 'Account Created';
             } catch (e) {
                 if (e.code === 'auth/email-already-in-use') showError('This email is already registered. Try signing in.');
                 else if (e.code === 'auth/weak-password') showError('Password is too weak. Use at least 6 characters.');
@@ -702,12 +784,48 @@
                     const min = Math.min(img.width, img.height);
                     const sx = (img.width - min) / 2, sy = (img.height - min) / 2;
                     ctx.drawImage(img, sx, sy, min, min, 0, 0, 128, 128);
-                    regPfpBase64 = canvas.toDataURL('image/jpeg', 0.7);
-                    document.getElementById('regPfpPreview').innerHTML = `<img src="${regPfpBase64}">`;
+                    try {
+                        regPfpBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                        document.getElementById('regPfpPreview').innerHTML = `<img src="${regPfpBase64}">`;
+                    } catch (e) {
+                        console.error('Canvas conversion error', e);
+                        regPfpBase64 = '';
+                    }
                 };
                 img.src = ev.target.result;
             };
             reader.readAsDataURL(file);
+        };
+
+        window.saveSetup = async function () {
+            if (!window._currentUserUid) {
+                window.location.href = "dashboard.html";
+                return;
+            }
+            const btn = document.getElementById('setupBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Saving...';
+
+            try {
+                const prepData = {};
+                if (document.getElementById('setupIelts').checked) {
+                    prepData.ielts = { targetBand: document.getElementById('setupIeltsBand').value.trim() || '7.5' };
+                }
+                if (document.getElementById('setupSat').checked) {
+                    prepData.sat = { targetScore: document.getElementById('setupSatScore').value.trim() || '1500' };
+                }
+                if (document.getElementById('setupOlympiad').checked) {
+                    prepData.olympiad = { level: document.getElementById('setupOlympiadLevel').value.trim() || 'General' };
+                }
+
+                await setDoc(doc(db, 'prepData', window._currentUserUid), prepData, { merge: true });
+                window.location.href = "dashboard.html";
+            } catch (e) {
+                console.error("Error saving setup", e);
+                showError("Failed to save setup. " + e.message);
+                btn.disabled = false;
+                btn.textContent = 'Complete Setup';
+            }
         };
 
         function showError(msg) { const el = document.getElementById('errorMsg'); el.textContent = msg; el.style.display = 'block'; document.getElementById('successMsg').style.display = 'none'; }
