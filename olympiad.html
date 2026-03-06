@@ -678,12 +678,38 @@
             btn.textContent = '⏳ Uploading & Analyzing...';
             btn.disabled = true;
 
-            // Placeholder for real Firebase Storage upload and AI call
-            setTimeout(() => {
+            try {
+                const apiKey = "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";
+                const file = fileInput.files[0];
+                const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`,
+                        'HTTP-Referer': window.location.origin,
+                        'X-Title': 'Taso Olympiad Prep'
+                    },
+                    body: JSON.stringify({
+                        model: "openai/gpt-4o-mini",
+                        messages: [
+                            { role: "system", content: "You are an Olympiad Mathematics coach. The user has uploaded a past paper. Give a brief (2-3 sentences) analysis of the likely topics and difficulty based ON THE FILENAME. Be encouraging and specific about math topics like Number Theory, Combinatorics, etc." },
+                            { role: "user", content: `Analyze this uploaded olympiad document: ${file.name}` }
+                        ]
+                    })
+                });
+
+                if (!response.ok) throw new Error("AI analysis failed.");
+                const data = await response.json();
+                const analysis = data.choices[0].message.content;
+
                 document.getElementById('aiAnalysisResult').style.display = 'block';
+                document.getElementById('aiAnalysisResult').querySelector('p').innerHTML = analysis.replace(/\n/g, '<br>');
+            } catch (err) {
+                alert("Error: " + err.message);
+            } finally {
                 btn.textContent = 'Start AI Analysis';
-                btn.style.display = 'none'; // hide button after success
-            }, 2500);
+                btn.style.display = 'none';
+            }
         });
     </script>
     <script type="module">

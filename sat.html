@@ -831,16 +831,43 @@
             btn.textContent = '⏳ Checking...';
             btn.disabled = true;
 
-            setTimeout(() => {
-                document.getElementById('satFeedbackBox').style.display = 'block';
+            try {
+                const apiKey = "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";
+                const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`,
+                        'HTTP-Referer': window.location.origin,
+                        'X-Title': 'Taso SAT Prep'
+                    },
+                    body: JSON.stringify({
+                        model: "openai/gpt-4o-mini",
+                        messages: [
+                            { role: "system", content: "You are an SAT tutor. Explain why the answer to a math question is correct or incorrect. Be concise and use SAT-style terminology." },
+                            { role: "user", content: `Question: Which equation matches a line parallel to y = -3x + 4?\nOptions: A: 6x + 2y = 15, B: 3x - y = 7, C: 2x - 3y = 6, D: x + 3y = 1\nAnswer chosen: ${selected.textContent}` }
+                        ]
+                    })
+                });
+
+                if (!response.ok) throw new Error("AI call failed");
+                const data = await response.json();
+                const explanation = data.choices[0].message.content;
+
+                const feedback = document.getElementById('satFeedbackBox');
+                feedback.style.display = 'block';
+                feedback.querySelector('p').innerHTML = explanation.replace(/\n/g, '<br>');
+            } catch (err) {
+                alert("Error: " + err.message);
+            } finally {
                 btn.textContent = 'Next Question ➔';
                 btn.disabled = false;
                 btn.onclick = function () {
-                    openSatPractice(); // refresh fake state
+                    openSatPractice();
                     btn.textContent = 'Submit Answer';
                     btn.onclick = function () { submitSatAnswer(this) };
                 };
-            }, 1000);
+            }
         }
 
         // Add clicks to mock tests

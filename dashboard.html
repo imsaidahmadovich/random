@@ -1618,6 +1618,109 @@
             btn.disabled = false; btn.textContent = '💾 Save Profile';
         }
 
+        // ─── Taso AI Logic ───
+        window.fillAiPrompt = function (promptText) {
+            const input = document.getElementById('aiInput');
+            input.value = promptText;
+            input.focus();
+        }
+
+        window.handleAiKeyPress = function (e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendAiMessage();
+            }
+        }
+
+        window.sendAiMessage = async function () {
+            const input = document.getElementById('aiInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const list = document.getElementById('aiMessageList');
+
+            // Add User Message
+            const userMsg = document.createElement('div');
+            userMsg.className = 'ai-message user';
+            userMsg.innerHTML = `<div class="msg-bubble">${text}</div>`;
+            list.appendChild(userMsg);
+
+            input.value = '';
+            list.scrollTop = list.scrollHeight;
+
+            // Add Bot Loading State
+            const botLoading = document.createElement('div');
+            botLoading.className = 'ai-message bot';
+            botLoading.id = 'aiLoading';
+            botLoading.innerHTML = `
+                <div class="ai-avatar" style="width:36px; height:36px; font-size:1rem;">🤖</div>
+                <div class="msg-bubble" style="display:flex; gap:4px; align-items:center;">
+                    <span class="loading-dot">·</span><span class="loading-dot" style="animation-delay:0.2s">·</span><span class="loading-dot" style="animation-delay:0.4s">·</span>
+                </div>
+            `;
+            list.appendChild(botLoading);
+            list.scrollTop = list.scrollHeight;
+
+            try {
+                // OpenRouter API Key
+                const apiKey = "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";
+
+                const systemInstruction = "You are Taso AI, an expert, friendly exam prep tutor for IELTS, SAT, and Academic Olympiads on the Taso platform. Do not answer general chat queries unless tied to studying. Be concise, helpful, and use markdown strictly.";
+
+                const response = await fetch(`https://openrouter.ai/api/v1/chat/completions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`,
+                        'HTTP-Referer': window.location.origin,
+                        'X-Title': 'Taso Study Hub'
+                    },
+                    body: JSON.stringify({
+                        model: "google/gemini-2.0-flash-lite-preview-02-05:free", // Using a free model to avoid costs
+                        messages: [
+                            { role: "system", content: systemInstruction },
+                            { role: "user", content: text }
+                        ]
+                    })
+                });
+
+                if (!response.ok) {
+                    const errText = await response.text();
+                    console.error("OpenRouter API Error Response:", errText);
+                    throw new Error(`API Request Failed. Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const botReply = data.choices?.[0]?.message?.content || "I'm sorry, I couldn't generate a response.";
+
+                // Basic markdown to HTML (bolding and line breaks for visual UI)
+                let formattedReply = botReply.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
+
+                const loadingNode = document.getElementById('aiLoading');
+                if (loadingNode) loadingNode.remove();
+
+                const botResponse = document.createElement('div');
+                botResponse.className = 'ai-message bot';
+                botResponse.innerHTML = `
+                    <div class="ai-avatar" style="width:36px; height:36px; font-size:1rem;">🤖</div>
+                    <div class="msg-bubble">${formattedReply}</div>
+                `;
+                list.appendChild(botResponse);
+            } catch (err) {
+                const loadingNode = document.getElementById('aiLoading');
+                if (loadingNode) loadingNode.remove();
+
+                const errResponse = document.createElement('div');
+                errResponse.className = 'ai-message bot';
+                errResponse.innerHTML = `
+                    <div class="ai-avatar" style="width:36px; height:36px; font-size:1rem;">🤖</div>
+                    <div class="msg-bubble" style="color:var(--rose)">Error: ${err.message}</div>
+                `;
+                list.appendChild(errResponse);
+            }
+            list.scrollTop = list.scrollHeight;
+        }
+
         // ─── QUOTES ───
         const QUOTES = [
             { text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
