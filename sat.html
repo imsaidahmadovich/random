@@ -666,9 +666,12 @@
                 </div>
 
                 <div id="satFeedbackBox"
-                    style="display:none; margin-top:24px; padding:16px; border-radius:12px; border-left:4px solid var(--primary); background:var(--surface2);">
-                    <div style="font-weight:700; color:var(--primary); margin-bottom:8px;">AI Explanation</div>
-                    <p style="font-size:0.9rem; line-height:1.5;">Correct! Parallel lines have the same slope. The given
+                    style="display:none; margin-top:24px; padding:24px; border-radius:16px; border-left:4px solid var(--primary); background:rgba(124, 58, 237, 0.03); backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(124, 58, 237, 0.05); animation: fadeIn 0.4s ease-out;">
+                    <div
+                        style="font-weight:700; color:var(--primary); margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+                        <span>🧠</span> AI Explanation</div>
+                    <p style="font-size:0.95rem; line-height:1.6; color:var(--text-subtle);">Correct! Parallel lines
+                        have the same slope. The given
                         line has a slope of -3. Let's rewrite option A in slope-intercept form: 2y = -6x + 15 ➔ y = -3x
                         + 7.5. Since the slope is -3, it is parallel.</p>
                 </div>
@@ -677,7 +680,7 @@
     </div>
 
     <script type="module">
-        import { auth, db, doc, getDoc, setDoc, onAuthStateChanged } from './auth.js';
+        import { auth, db, doc, getDoc, setDoc, onAuthStateChanged, getOpenRouterKey } from './auth.js';
 
         const DEFAULT_SAT = {
             targetScore: 1500,
@@ -824,7 +827,7 @@
             el.classList.add('selected');
         }
 
-        window.submitSatAnswer = function (btn) {
+        window.submitSatAnswer = async function (btn) {
             const selected = document.querySelector('.mcq-option.selected');
             if (!selected) return alert("Please select an answer.");
 
@@ -832,7 +835,7 @@
             btn.disabled = true;
 
             try {
-                const apiKey = "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";
+                const apiKey = await getOpenRouterKey();
                 const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
                     method: 'POST',
                     headers: {

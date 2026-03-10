@@ -44,3 +44,24 @@ export function logout() {
         window.location.href = "login.html";
     });
 }
+
+// OpenRouter API Key DB fetch helper
+let cachedOpenRouterKey = null;
+export async function getOpenRouterKey() {
+    if (cachedOpenRouterKey) return cachedOpenRouterKey;
+    try {
+        const keyRef = doc(db, "config", "openrouter");
+        const keySnap = await getDoc(keyRef);
+        if (keySnap.exists() && keySnap.data().key) {
+            cachedOpenRouterKey = keySnap.data().key;
+            return cachedOpenRouterKey;
+        }
+        const fallback = "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";
+        await setDoc(keyRef, { key: fallback }, { merge: true });
+        cachedOpenRouterKey = fallback;
+        return fallback;
+    } catch (e) {
+        console.error("Error with OpenRouter API key fetch:", e);
+        return "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";
+    }
+}
